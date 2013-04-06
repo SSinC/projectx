@@ -3,6 +3,7 @@
 //  project-x
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 //  added for testing--hello-why does it failed/?
 =======
 //
@@ -10,6 +11,9 @@
 =======
 //  added for testing--hello
 >>>>>>> parent of af58fc5... 33
+=======
+//  added for testing--hello-why does it failed/?---test again/
+>>>>>>> 1
 //  Created by Stream on 4/5/13.
 //  Copyright (c) 2013 StreamStan. All rights reserved.
 //
