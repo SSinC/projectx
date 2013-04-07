@@ -56,8 +56,7 @@ enum {
         CCLOG(@"init");
 		
 		// enable events
-		
-		self.touchEnabled = YES;
+				self.touchEnabled = YES;
 		self.accelerometerEnabled = YES;
 		CGSize s = [CCDirector sharedDirector].winSize;
 		
@@ -168,7 +167,7 @@ enum {
     	//z代表图像层次
     [self addChild: menu z:-1];	
     
-    __block int copy_chooseBodyNumber = chooseBodyNumber;
+    //__block int copy_chooseBodyNumber = chooseBodyNumber;
     CCMenuItem *chooseBody1 = [CCMenuItemFont itemWithString:@"Body1" block:^(id sender){
         copy_chooseBodyNumber = 1;
         
@@ -188,7 +187,7 @@ enum {
 	
 	[menuChooseBody alignItemsHorizontally];
 	
-    [menuChooseBody setPosition:ccp( size.width/6, size.height/2)];
+    [menuChooseBody setPosition:ccp( size.width/6, size.height/2+150)];
     //z代表图像层次
     [self addChild: menuChooseBody z:-1];
     
@@ -314,22 +313,75 @@ enum {
 	
 	//We have a 64x64 sprite sheet with 4 different 32x32 images.  The following code is
 	//just randomly picking one of the images
-	int idx = (CCRANDOM_0_1() > .5 ? 0:1);
-	int idy = (CCRANDOM_0_1() > .5 ? 0:1);
-	CCPhysicsSprite *sprite = [CCPhysicsSprite spriteWithTexture:spriteTexture_ rect:CGRectMake(32 * idx,32 * idy,32,32)];
+	//int idx = (CCRANDOM_0_1() > .5 ? 0:1);
+	//int idy = (CCRANDOM_0_1() > .5 ? 0:1);
+	CCPhysicsSprite *sprite = [CCPhysicsSprite spriteWithTexture:spriteTexture_ rect:CGRectMake(0,0,32,32)];
+    //添加tag用来给碰撞检测时判断物体类型
+    sprite.tag = 1;
    
 	[parentSprite addChild:sprite];
 	
 	[sprite setPTMRatio:PTM_RATIO];
 	[sprite setB2Body:body];
 	[sprite setPosition: ccp( p.x, p.y)];
+    
+    //暂时注释掉setUserData中存入结构体
+//    myUserData *data1 ;
+//    data1->bodyType = 1;
+//    data1->sprite = sprite;
+//    body->SetUserData(data1);
+    
     body->SetUserData(sprite);
     [movableSprites addObject:sprite];
 }
 
 -(void) createBody2:(CGPoint)p
 {
+    CCLOG(@"Add sprite %0.2f x %02.f",p.x,p.y);
+	// Define the dynamic body.
+	//Set up a 1m squared box in the physics world
+	b2BodyDef bodyDef;
+	bodyDef.type = b2_dynamicBody;
+	bodyDef.position.Set(p.x/PTM_RATIO, p.y/PTM_RATIO);
+	b2Body *body = world->CreateBody(&bodyDef);
+	
+	// Define another box shape for our dynamic body.
+	b2PolygonShape dynamicBox;
+	dynamicBox.SetAsBox(.5f, .5f);//These are mid points for our 1m box
+	
+	// Define the dynamic body fixture.
+	b2FixtureDef fixtureDef;
+	fixtureDef.shape = &dynamicBox;
+	fixtureDef.density = 1.5f;
+	fixtureDef.friction = 0.7f;
+    fixtureDef.restitution = 0.7f;
+	body->CreateFixture(&fixtureDef);
+	
     
+	CCNode *parentSprite = [self getChildByTag:kTagParentNode];
+	
+	//We have a 64x64 sprite sheet with 4 different 32x32 images.  The following code is
+	//just randomly picking one of the images
+//	int idx = (CCRANDOM_0_1() > .5 ? 0:1);
+//	int idy = (CCRANDOM_0_1() > .5 ? 0:1);
+	CCPhysicsSprite *sprite = [CCPhysicsSprite spriteWithTexture:spriteTexture_ rect:CGRectMake(32 ,0,32,32)];
+    //添加tag用来给碰撞检测时判断物体类型
+    sprite.tag = 2;
+    
+	[parentSprite addChild:sprite];
+	
+	[sprite setPTMRatio:PTM_RATIO];
+	[sprite setB2Body:body];
+	[sprite setPosition: ccp( p.x, p.y)];
+    
+    //暂时注释掉setUserData中存入结构体
+    //    myUserData *data1 ;
+    //    data1->bodyType = 1;
+    //    data1->sprite = sprite;
+    //    body->SetUserData(data1);
+    
+    body->SetUserData(sprite);
+    [movableSprites addObject:sprite];
 }
 
 -(void) createBody3:(CGPoint)p
@@ -340,7 +392,8 @@ enum {
 -(void) addNewSpriteAtPosition:(CGPoint)p
 {
 	if(!selSprite){
-        switch (chooseBodyNumber) {
+      CCLOG(@"chooseBodyNumber %i",copy_chooseBodyNumber);
+        switch (copy_chooseBodyNumber) {
             case 1:
                 [self createBody1:p];
                 break;
@@ -411,15 +464,18 @@ enum {
               CCPhysicsSprite *spriteA = (CCPhysicsSprite *) bodyA->GetUserData();
               CCPhysicsSprite *spriteB = (CCPhysicsSprite *) bodyB->GetUserData();
             
-              [parent1 removeChild:spriteA];
-              [parent1 removeChild:spriteB];
- //经试验，先销毁图像再在下个循环销毁body，效果最好。如果不先销毁图像，渲染会莫名其妙延迟。
-            toDestroy.push_back(bodyA);
-            
-            toDestroy.push_back(bodyB);
-            // 不能立刻销毁body
-//            world->DestroyBody(bodyA);
-//            world->DestroyBody(bodyB);
+             //只让A和B碰撞后销毁
+            if ((spriteA.tag == 1 && spriteB.tag == 2)|| (spriteA.tag == 2 && spriteB.tag == 1)) {
+                [parent1 removeChild:spriteA];
+                [parent1 removeChild:spriteB];
+                //经试验，先销毁图像再在下个循环销毁body，效果最好。如果不先销毁图像，渲染会莫名其妙延迟。
+                toDestroy.push_back(bodyA);
+                toDestroy.push_back(bodyB);
+                
+                // 不能立刻销毁body
+                //            world->DestroyBody(bodyA);
+                //            world->DestroyBody(bodyB);
+            }
             
           }
         
@@ -450,6 +506,108 @@ enum {
    }
 
 
+///////////////////////一些用于计算分裂效果的基础函数
+
+//计算分裂后各碎片的方向与速度
+-(b2Vec2)  setExplosionVelocity:(b2Body *)b
+{
+    // 参数explosionRadius，分裂中心点explosionX，explosionY
+    explosionRadius = 50;
+    float distX=b->GetWorldCenter().x*PTM_RATIO-explosionX;
+    if (distX<0) {
+        if (distX<-explosionRadius) {
+            distX=0;
+        }
+        else {
+            distX=- explosionRadius-distX;
+        }
+    }
+    else {
+        if (distX>explosionRadius) {
+            distX=0;
+        }
+        else {
+            distX=explosionRadius-distX;
+        }
+    }
+    float distY =b->GetWorldCenter().y*PTM_RATIO-explosionY;
+    if (distY<0) {
+        if (distY<-explosionRadius) {
+            distY=0;
+        }
+        else {
+            distY=- explosionRadius-distY;
+        }
+    }
+    else {
+        if (distY>explosionRadius) {
+            distY=0;
+        }
+        else {
+            distY=explosionRadius-distY;
+        }
+    }
+    distX*=0.25;
+    distY*=0.25;
+    return *new b2Vec2(distX,distY);
+}
+
+//将传入的一系列坐标变为顺时针坐标点排列输出，用于分裂碎片建模
+-(NSArray *)  arrangeClockwise:(NSArray*)vec {
+    // The algorithm is simple:
+    // First, it arranges all given points in ascending order, according to their x-coordinate.
+    // Secondly, it takes the leftmost and rightmost points (lets call them C and D), and creates tempVec, where the points arranged in clockwise order will be stored.
+    // Then, it iterates over the vertices vector, and uses the det() method I talked about earlier. It starts putting the points above CD from the beginning of the vector, and the points below CD from the end of the vector.
+    // That was it!
+    int n=[vec count];
+    float d;
+    int i1t=1,i2=n-1;
+    //var tempVec:Vector.<b2Vec2>=new Vector.<b2Vec2>(n);
+    NSMutableArray *tempVec = [NSMutableArray arrayWithCapacity:10];
+    b2Vec2 C;
+    b2Vec2 D;
+    //vec.sort(comp1);
+//    [vec sortedArrayUsingComparator:^NSComparisonResult(id a ,id b) {
+//        if ((a.x>b.x) {
+//            return 1;
+//        }
+//        else if (a.x<b.x) {
+//            return -1;
+//        }
+//        return 0;
+//    }]
+//    [tempVec objectAtIndex:0]=[vec objectAtIndex:0];
+//    C=[vec objectAtIndex:0];
+//    D=vec[n-1];
+//    for (var i:Number=1; i<n-1; i++) {
+//        d=det(C.x,C.y,D.x,D.y,vec[i].x,vec[i].y);
+//        if (d<0) {
+//            tempVec[i1++]=vec[i];
+//        }
+//        else {
+//            tempVec[i2--]=vec[i];
+//        }
+//    }
+//    tempVec[i1]=vec[n-1];
+    return tempVec;
+}
+-(int)  comp1:(b2Vec2)a comp2:(b2Vec2)b {
+    // This is a compare function, used in the arrangeClockwise() method - a fast way to arrange the points in ascending order, according to their x-coordinate.
+    if (a.x>b.x) {
+        return 1;
+    }
+    else if (a.x<b.x) {
+        return -1;
+    }
+    return 0;
+}
+-(NSInteger)  det:(NSInteger)x1  y1:(NSInteger)y1 x2:(NSInteger)x2 y2:(NSInteger)y2 x3:(NSInteger)x3  y3:(NSInteger)y3{
+    // This is a function which finds the determinant of a 3x3 matrix.
+    // If you studied matrices, you'd know that it returns a positive number if three given points are in clockwise order, negative if they are in anti-clockwise order and zero if they lie on the same line.
+    // Another useful thing about determinants is that their absolute value is two times the face of the triangle, formed by the three given points.
+    return x1*y2+x2*y3+x3*y1-y1*x2-y2*x3-y3*x1;
+}
+
 
 #pragma mark GameKit delegate
 
@@ -464,6 +622,8 @@ enum {
 	AppController *app = (AppController*) [[UIApplication sharedApplication] delegate];
 	[[app navController] dismissModalViewControllerAnimated:YES];
 }
+
+
 
 
 //************************* add touch-control******************************
@@ -560,6 +720,7 @@ enum {
         //self.position = [self boundLayerPos:newPos];
     }
 }
+
 
 
 

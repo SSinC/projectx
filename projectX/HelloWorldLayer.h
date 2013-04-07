@@ -22,6 +22,12 @@
 //to define the ratio so that your most common object type is 1x1 metre.
 #define PTM_RATIO 32
 
+//添加userData 结合贴图和物体编号，方便使用
+typedef struct userdata{
+    int bodyType;
+    CCPhysicsSprite *sprite;
+}myUserData;
+
 // HelloWorldLayer
 @interface HelloWorldLayer : CCLayer <GKAchievementViewControllerDelegate, GKLeaderboardViewControllerDelegate>
 {
@@ -35,7 +41,10 @@
     contactListener *_contactListener;
     CCSpriteBatchNode *parent;
     CGPoint locationBegin;
-    int chooseBodyNumber;
+    __block int copy_chooseBodyNumber;
+    float explosionX;
+    float explosionY;
+    float explosionRadius ;
     
 }
 
