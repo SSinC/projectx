@@ -35,6 +35,7 @@
     contactListener *_contactListener;
     CCSpriteBatchNode *parent;
     CGPoint locationBegin;
+    int chooseBodyNumber;
     
 }
 

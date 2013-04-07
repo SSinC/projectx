@@ -27,6 +27,10 @@ enum {
 -(void) initPhysics;
 -(void) addNewSpriteAtPosition:(CGPoint)p;
 -(void) createMenu;
+-(void) createBody1;
+-(void) createBody2;
+-(void) createBody3;
+
 @end
 
 @implementation HelloWorldLayer
@@ -86,8 +90,12 @@ enum {
 		[self addChild:label z:0];
 		[label setColor:ccc3(0,0,255)];
 		label.position = ccp( s.width/2, s.height-50);
+        
+        //add contactListener
           _contactListener = new contactListener();
 		 world->SetContactListener(_contactListener);
+        
+        //Loop-update
 		[self scheduleUpdate];
 	}
 	return self;
@@ -116,6 +124,10 @@ enum {
 	CCMenuItemLabel *reset = [CCMenuItemFont itemWithString:@"Reset" block:^(id sender){
 		[[CCDirector sharedDirector] replaceScene: [HelloWorldLayer scene]];
 	}];
+    
+    
+    CGSize size = [[CCDirector sharedDirector] winSize];
+
 
 	// to avoid a retain-cycle with the menuitem and blocks
 	__block id copy_self = self;
@@ -152,11 +164,35 @@ enum {
 	
 	[menu alignItemsVertically];
 	
-	CGSize size = [[CCDirector sharedDirector] winSize];
-	[menu setPosition:ccp( size.width/2, size.height/2)];
+    [menu setPosition:ccp( size.width/2, size.height/2)];
+    	//z代表图像层次
+    [self addChild: menu z:-1];	
+    
+    __block int copy_chooseBodyNumber = chooseBodyNumber;
+    CCMenuItem *chooseBody1 = [CCMenuItemFont itemWithString:@"Body1" block:^(id sender){
+        copy_chooseBodyNumber = 1;
+        
+    }];
+    
+    CCMenuItem *chooseBody2 = [CCMenuItemFont itemWithString:@"Body2" block:^(id sender){
+        copy_chooseBodyNumber = 2;
+        
+    }];
+    
+    CCMenuItem *chooseBody3 = [CCMenuItemFont itemWithString:@"Body3" block:^(id sender){
+        copy_chooseBodyNumber = 3;
+        
+    }];
 	
+    CCMenu *menuChooseBody = [CCMenu menuWithItems:chooseBody1, chooseBody2, chooseBody3, nil];
 	
-	[self addChild: menu z:-1];	
+	[menuChooseBody alignItemsHorizontally];
+	
+    [menuChooseBody setPosition:ccp( size.width/6, size.height/2)];
+    //z代表图像层次
+    [self addChild: menuChooseBody z:-1];
+    
+	
 }
 
 -(void) initPhysics
@@ -251,9 +287,8 @@ enum {
 	kmGLPopMatrix();
 }
 
--(void) addNewSpriteAtPosition:(CGPoint)p
+-(void) createBody1:(CGPoint)p
 {
-	if(!selSprite){
     CCLOG(@"Add sprite %0.2f x %02.f",p.x,p.y);
 	// Define the dynamic body.
 	//Set up a 1m squared box in the physics world
@@ -268,13 +303,13 @@ enum {
 	
 	// Define the dynamic body fixture.
 	b2FixtureDef fixtureDef;
-	fixtureDef.shape = &dynamicBox;	
+	fixtureDef.shape = &dynamicBox;
 	fixtureDef.density = 1.5f;
 	fixtureDef.friction = 0.7f;
-        fixtureDef.restitution = 0.7f;
+    fixtureDef.restitution = 0.7f;
 	body->CreateFixture(&fixtureDef);
 	
-
+    
 	CCNode *parentSprite = [self getChildByTag:kTagParentNode];
 	
 	//We have a 64x64 sprite sheet with 4 different 32x32 images.  The following code is
@@ -282,6 +317,7 @@ enum {
 	int idx = (CCRANDOM_0_1() > .5 ? 0:1);
 	int idy = (CCRANDOM_0_1() > .5 ? 0:1);
 	CCPhysicsSprite *sprite = [CCPhysicsSprite spriteWithTexture:spriteTexture_ rect:CGRectMake(32 * idx,32 * idy,32,32)];
+   
 	[parentSprite addChild:sprite];
 	
 	[sprite setPTMRatio:PTM_RATIO];
@@ -289,6 +325,35 @@ enum {
 	[sprite setPosition: ccp( p.x, p.y)];
     body->SetUserData(sprite);
     [movableSprites addObject:sprite];
+}
+
+-(void) createBody2:(CGPoint)p
+{
+    
+}
+
+-(void) createBody3:(CGPoint)p
+{
+    
+}
+
+-(void) addNewSpriteAtPosition:(CGPoint)p
+{
+	if(!selSprite){
+        switch (chooseBodyNumber) {
+            case 1:
+                [self createBody1:p];
+                break;
+            case 2:
+                [self createBody2:p];
+                break;
+            case 3:
+                [self createBody3:p];
+                break;
+                
+            default:
+                break;
+        }
     }
     selSprite = nil;
 }
@@ -345,6 +410,7 @@ enum {
             
               CCPhysicsSprite *spriteA = (CCPhysicsSprite *) bodyA->GetUserData();
               CCPhysicsSprite *spriteB = (CCPhysicsSprite *) bodyB->GetUserData();
+            
               [parent1 removeChild:spriteA];
               [parent1 removeChild:spriteB];
  //经试验，先销毁图像再在下个循环销毁body，效果最好。如果不先销毁图像，渲染会莫名其妙延迟。
@@ -421,7 +487,7 @@ enum {
         CCLOG(@"select");
     }
 }
-
+//用新的touch-api，可以扩展为多点触摸
 - (void)ccTouchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
 {
 	//Add a new body/atlas sprite at the touched location
