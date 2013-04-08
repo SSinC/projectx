@@ -45,6 +45,10 @@ typedef struct userdata{
     float explosionX;
     float explosionY;
     float explosionRadius ;
+    NSMutableDictionary *enterPoints;
+    NSMutableArray *explodingBodies;
+    int32 tagBodyA;
+    int32 tagBodyB;
     
 }
 

@@ -30,6 +30,9 @@ enum {
 -(void) createBody1;
 -(void) createBody2;
 -(void) createBody3;
+-(void) splitObj:(b2Body*)sliceBody A:(b2Vec2*)A B:(b2Vec2*)B;
+-(float)  det:(NSInteger)x1  y1:(NSInteger)y1 x2:(NSInteger)x2 y2:(NSInteger)y2 x3:(NSInteger)x3  y3:(NSInteger)y3;
+-(b2Vec2 *)  setExplosionVelocity:(b2Body *)b;
 
 @end
 
@@ -58,6 +61,10 @@ enum {
 		// enable events
 				self.touchEnabled = YES;
 		self.accelerometerEnabled = YES;
+        
+         tagBodyA = 1;
+         tagBodyB = 500;
+        
 		CGSize s = [CCDirector sharedDirector].winSize;
 		
 		// init physics
@@ -316,8 +323,11 @@ enum {
 	//int idx = (CCRANDOM_0_1() > .5 ? 0:1);
 	//int idy = (CCRANDOM_0_1() > .5 ? 0:1);
 	CCPhysicsSprite *sprite = [CCPhysicsSprite spriteWithTexture:spriteTexture_ rect:CGRectMake(0,0,32,32)];
+    
     //添加tag用来给碰撞检测时判断物体类型
-    sprite.tag = 1;
+    //暂时用tag的值的范围代表物体类型
+    //1-500之内是BodyA
+    sprite.tag = tagBodyA++;
    
 	[parentSprite addChild:sprite];
 	
@@ -365,8 +375,11 @@ enum {
 //	int idx = (CCRANDOM_0_1() > .5 ? 0:1);
 //	int idy = (CCRANDOM_0_1() > .5 ? 0:1);
 	CCPhysicsSprite *sprite = [CCPhysicsSprite spriteWithTexture:spriteTexture_ rect:CGRectMake(32 ,0,32,32)];
+    
     //添加tag用来给碰撞检测时判断物体类型
-    sprite.tag = 2;
+    //暂时用tag的值的范围代表物体类型
+    //500以上是BodyB
+    sprite.tag = tagBodyB++;
     
 	[parentSprite addChild:sprite];
 	
@@ -465,10 +478,28 @@ enum {
               CCPhysicsSprite *spriteB = (CCPhysicsSprite *) bodyB->GetUserData();
             
              //只让A和B碰撞后销毁
-            if ((spriteA.tag == 1 && spriteB.tag == 2)|| (spriteA.tag == 2 && spriteB.tag == 1)) {
+            if (((spriteA.tag < 500 && spriteB.tag >=500)|| (spriteA.tag >=500 && spriteB.tag < 500))){
                 [parent1 removeChild:spriteA];
                 [parent1 removeChild:spriteB];
                 //经试验，先销毁图像再在下个循环销毁body，效果最好。如果不先销毁图像，渲染会莫名其妙延迟。
+                
+                
+                
+                //BOX2D的检测穿透物体的射线函数，
+                //回调函数是interaction，后2个参数是决定射线的的2点
+                explosionX = bodyA->GetWorldCenter().x;
+                explosionY = bodyA->GetWorldCenter().y;
+                
+//                for (int i=1; i<=5; i++) {
+//                    
+//                float cutAngle=Math.random()*Math.PI*2;
+//                    
+//                b2Vec2 * p1=new b2Vec2((explosionX+i/10-2000 * Math.cos(cutAngle))/PTM_RATIO,(explosionY-2000*Math.sin(cutAngle))/PTM_RATIO);
+//                b2Vec2 * p2=new b2Vec2((explosionX+2000*Math.cos(cutAngle))/PTM_RATIO,(explosionY+2000*Math.sin(cutAngle))/PTM_RATIO);
+//                world->RayCast(self.intersection, p1, p2);
+//                world->RayCast(self.intersection, p2, p1);
+//                
+//                }
                 toDestroy.push_back(bodyA);
                 toDestroy.push_back(bodyB);
                 
@@ -508,8 +539,118 @@ enum {
 
 ///////////////////////一些用于计算分裂效果的基础函数
 
+//-(float) intersection:(b2Fixture *)fixture point:(b2Vec2 *)point normal:(b2Vec2 *)normal fraction:(float)fraction {
+//    if ([explodingBodies containsObject:(b2Body *)fixture->GetBody()])
+//        // explodingBodies.indexOf(fixture.GetBody())!=-1)
+//    {
+//        CCPhysicsSprite *spr=(CCPhysicsSprite *)fixture->GetBody()->GetUserData();
+//        // Throughout this whole code I use only one global vector, and that is enterPointsVec. Why do I need it you ask?
+//        // Well, the problem is that the world.RayCast() method calls this function only when it sees that a given line gets into the body - it doesnt see when the line gets out of it.
+//        // I must have 2 intersection points with a body so that it can be sliced, thats why I use world.RayCast() again, but this time from B to A - that way the point, at which BA enters the body is the point at which AB leaves it!
+//        // For that reason, I use a vector enterPointsVec, where I store the points, at which AB enters the body. And later on, if I see that BA enters a body, which has been entered already by AB, I fire the splitObj() function!
+//        // I need a unique ID for each body, in order to know where its corresponding enter point is - I store that id in the userData of each body.
+//        
+//        //if (spr is userData) {
+//        //var userD:userData=spr as userData;
+//        if ([enterPoints objectForKey:spr.tag]) {
+//            // If this body has already had an intersection point, then it now has two intersection points, thus it must be split in two - thats where the splitObj() method comes in.
+//            b2Vec2 *point_copy = point;
+//            splitObj(fixture->GetBody(), [enterPoints objectForKey:spr.tag], point_copy);
+//        }
+//        else {
+//            //enterPoints[spr.tag]=point;
+//            [enterPoints setObject:point forKey:(spr.tag)];
+//            // }
+//        }
+//        return 1;
+//    }
+//    
+//    
+//-(void) splitObj:(b2Body *)sliceBody A:(b2Vec2 *)A B:(b2Vec2 *)B
+//{
+//        b2Fixture * origFixture=sliceBody.GetFixtureList();
+//        b2PolygonShape *poly=(b2PolygonShape *)origFixture->GetShape();
+//        std::vector<b2Vec2 *>verticesVec;
+//        int numVertices=poly.GetVertexCount();
+//        std::vector<b2Vec2 *>shape1Vertices;
+//        std::vector<b2Vec2 *>shape2Vertices;
+//        var origUserData:userData=sliceBody.GetUserData();
+//        int origUserDataId = origUserData.id;
+//        int d;
+//        b2PolygonShape polyShape = new b2PolygonShape();
+//        b2Body body;
+//        // First, I destroy the original body and remove its Sprite representation from the childlist.
+//        world->DestroyBody(sliceBody);
+//        removeChild(origUserData);
+//        // The world.RayCast() method returns points in world coordinates, so I use the b2Body.GetLocalPoint() to convert them to local coordinates.;
+//        
+//        A=sliceBody->GetLocalPoint(A);
+//        B=sliceBody->GetLocalPoint(B);
+//        // I use shape1Vertices and shape2Vertices to store the vertices of the two new shapes that are about to be created.
+//        // Since both point A and B are vertices of the two new shapes, I add them to both vectors.
+//        shape1Vertices.push_back(A, B);
+//        shape2Vertices.push_back(A, B);
+//        // I iterate over all vertices of the original body. ;
+//        // I use the function det() ("det" stands for "determinant") to see on which side of AB each point is standing on. The parameters it needs are the coordinates of 3 points:
+//        // - if it returns a value >0, then the three points are in clockwise order (the point is under AB)
+//        // - if it returns a value =0, then the three points lie on the same line (the point is on AB)
+//        // - if it returns a value <0, then the three points are in counter-clockwise order (the point is above AB).
+//        for (int i=0; i<numVertices; i++) {
+//            d=[self det:A->x y1:A.y x2:B->x y2:B->y x3:verticesVec[i]->x y3:verticesVec[i]->y];
+//            if (d>0) {
+//                shape1Vertices.push_back(verticesVec[i]);
+//            }
+//            else {
+//                shape2Vertices.push_back(verticesVec[i]);
+//            }
+//        }
+//        // In order to be able to create the two new shapes, I need to have the vertices arranged in clockwise order.
+//        // I call my custom method, arrangeClockwise(), which takes as a parameter a vector, representing the coordinates of the shape's vertices and returns a new vector, with the same points arranged clockwise.
+//        shape1Vertices=arrangeClockwise(shape1Vertices);
+//        shape2Vertices=arrangeClockwise(shape2Vertices);
+//        // setting the properties of the two newly created shapes
+//        var bodyDef:b2BodyDef = new b2BodyDef();
+//        bodyDef.type=b2Body.b2_dynamicBody;
+//        bodyDef.position=sliceBody.GetPosition();
+//        var fixtureDef:b2FixtureDef = new b2FixtureDef();
+//        fixtureDef.density=origFixture.GetDensity();
+//        fixtureDef.friction=origFixture.GetFriction();
+//        fixtureDef.restitution=origFixture.GetRestitution();
+//        // creating the first shape, if big enough
+//        if (getArea(shape1Vertices,shape1Vertices.length)>=0.05) {
+//            polyShape.SetAsVector(shape1Vertices);
+//            fixtureDef.shape=polyShape;
+//            bodyDef.userData=new userData(origUserDataId,shape1Vertices,origUserData.texture);
+//            addChild(bodyDef.userData);
+//            enterPointsVec[origUserDataId]=null;
+//            body=world.CreateBody(bodyDef);
+//            body.SetAngle(sliceBody.GetAngle());
+//            body.CreateFixture(fixtureDef);
+//            // setting a velocity for the debris
+//            body.SetLinearVelocity(setExplosionVelocity(body));
+//            // the shape will be also part of the explosion and can explode too
+//            explodingBodies.push(body);
+//        }
+//        // creating the second shape, if big enough
+//        if (getArea(shape2Vertices,shape2Vertices.length)>=0.05) {
+//            polyShape.SetAsVector(shape2Vertices);
+//            fixtureDef.shape=polyShape;
+//            bodyDef.userData=new userData(numEnterPoints,shape2Vertices,origUserData.texture);
+//            addChild(bodyDef.userData);
+//            enterPointsVec.push(null);
+//            numEnterPoints++;
+//            body=world.CreateBody(bodyDef);
+//            body.SetAngle(sliceBody.GetAngle());
+//            body.CreateFixture(fixtureDef);
+//            // setting a velocity for the debris
+//            body.SetLinearVelocity(setExplosionVelocity(body));
+//            // the shape will be also part of the explosion and can explode too
+//            explodingBodies.push(body);
+//        }
+//    }
+
 //计算分裂后各碎片的方向与速度
--(b2Vec2)  setExplosionVelocity:(b2Body *)b
+-(b2Vec2 *)  setExplosionVelocity:(b2Body *)b
 {
     // 参数explosionRadius，分裂中心点explosionX，explosionY
     explosionRadius = 50;
@@ -549,12 +690,9 @@ enum {
     }
     distX*=0.25;
     distY*=0.25;
-    return *new b2Vec2(distX,distY);
+    return new b2Vec2(distX,distY);
 }
-////////////////////////Stream,下面的代码是移植于as代码，有点问题/////////////////////////
-////////////////////////Stream,下面的代码是移植于as代码，有点问题/////////////////////////
-////////////////////////Stream,下面的代码是移植于as代码，有点问题/////////////////////////
-////////////////////////Stream,下面的代码是移植于as代码，有点问题/////////////////////////
+
 //将传入的一系列坐标变为顺时针坐标点排列输出，用于分裂碎片建模
 -(NSMutableArray *)  arrangeClockwise:(NSMutableArray *)  vec {
     // The algorithm is simple:
@@ -567,24 +705,24 @@ enum {
     int i1=1,i2=n-1;
     //var tempVec:Vector.<b2Vec2>=new Vector.<b2Vec2>(n);
     NSMutableArray *tempVec = [NSMutableArray arrayWithCapacity:10];
-    b2Vec2 C;
-    b2Vec2 D;
+    b2Vec2 *C;
+    b2Vec2 *D;
     //vec.sort(comp1);
-    [vec sortedArrayUsingComparator:^NSComparisonResult(b2Vec2 a ,b2Vec2 b) {
-        if (((b2Vec2)a).x>((b2Vec2)b).x) {
+    [vec sortedArrayUsingComparator:^NSComparisonResult(id obj1 ,id obj2) {
+        if (((b2Vec2*)obj1)->x > ((b2Vec2*)obj2)->x) {
             return 1;
         }
-        else if (a.x<b.x) {
+        else if (((b2Vec2*)obj1)->x < ((b2Vec2*)obj2)->x) {
             return -1;
         }
         return 0;
     }];
    // [tempVec objectAtIndex:0]=[vec objectAtIndex:0];
     [tempVec replaceObjectAtIndex:0 withObject:[vec objectAtIndex:0]];
-    C=[vec objectAtIndex:0];
-    D=[vec objectAtIndex:n-1];
+    C=(b2Vec2*)[vec objectAtIndex:0];
+    D=(b2Vec2*)[vec objectAtIndex:n-1];
     for ( int i=1; i<n-1; i++) {
-        d=[self det:C.x y1:C.y x2:D.x y2:D.y x3:[vec objectAtIndex:i].x y3:[vec objectAtIndex:i].y];
+        d=[self det:C->x y1:C->y x2:D->x y2:D->y x3:((b2Vec2*)[vec objectAtIndex:i])->x y3:((b2Vec2*)[vec objectAtIndex:i])->y];
         if (d<0) {
             [tempVec replaceObjectAtIndex:i1++ withObject:[vec objectAtIndex:i]];
             //tempVec[i1++]=vec[i];
@@ -598,23 +736,44 @@ enum {
     return tempVec;
 }
 
+// 计算不规则碎片的面积，忽略非常小的部分以提高性能
+//-(float)  getArea:(NSMutableArray *)vs count:(int)count
+//{
+//    float area=0.0;
+//    float p1X=0.0;
+//    float p1Y=0.0;
+//    float inv3=1.0/3.0;
+//    for (int i = 0; i < count; ++i) {
+//        b2Vec2 *p2=(b2Vec2 *)[vs objectAtIndex:i];
+//        b2Vec2 *p3=(b2Vec2 *)(（i+1)< count ?((b2Vec2 *)[vs objectAtIndex:i+1]):((b2Vec2 *)[vs objectAtIndex:0]));
+//        float e1X=p2->x-p1X;
+//        float e1Y=p2->y-p1Y;
+//        float e2X=p3->x-p1X;
+//        float e2Y=p3->y-p1Y;
+//        float D = (e1X * e2Y - e1Y * e2X);
+//        float triangleArea=0.5*D;
+//        area+=triangleArea;
+//    }
+//    return area;
+//}
 
 
 
 
 
-
--(int)  comp1:(b2Vec2)a comp2:(b2Vec2)b {
-    // This is a compare function, used in the arrangeClockwise() method - a fast way to arrange the points in ascending order, according to their x-coordinate.
-    if (a.x>b.x) {
-        return 1;
-    }
-    else if (a.x<b.x) {
-        return -1;
-    }
-    return 0;
-}
--(float)  det:(NSInteger)x1  y1:(NSInteger)y1 x2:(NSInteger)x2 y2:(NSInteger)y2 x3:(NSInteger)x3  y3:(NSInteger)y3{
+//-(int)  comp1:(b2Vec2 * )a comp2:(b2Vec2*)b {
+//    // This is a compare function, used in the arrangeClockwise() method - a fast way to arrange the points in ascending order, according to their x-coordinate.
+//    if (a->x>b->x) {
+//        return 1;
+//    }
+//    else if (a->x<b->x) {
+//        return -1;
+//    }
+//    return 0;
+//}
+    
+    
+-(float) det:(NSInteger)x1  y1:(NSInteger)y1 x2:(NSInteger)x2 y2:(NSInteger)y2 x3:(NSInteger)x3  y3:(NSInteger)y3{
     // This is a function which finds the determinant of a 3x3 matrix.
     // If you studied matrices, you'd know that it returns a positive number if three given points are in clockwise order, negative if they are in anti-clockwise order and zero if they lie on the same line.
     // Another useful thing about determinants is that their absolute value is two times the face of the triangle, formed by the three given points.
@@ -622,6 +781,8 @@ enum {
 }
 
 
+
+/////////////////////////////////////////////////////////////////////
 #pragma mark GameKit delegate
 
 -(void) achievementViewControllerDidFinish:(GKAchievementViewController *)viewController
