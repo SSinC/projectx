@@ -551,9 +551,12 @@ enum {
     distY*=0.25;
     return *new b2Vec2(distX,distY);
 }
-
+////////////////////////Stream,下面的代码是移植于as代码，有点问题/////////////////////////
+////////////////////////Stream,下面的代码是移植于as代码，有点问题/////////////////////////
+////////////////////////Stream,下面的代码是移植于as代码，有点问题/////////////////////////
+////////////////////////Stream,下面的代码是移植于as代码，有点问题/////////////////////////
 //将传入的一系列坐标变为顺时针坐标点排列输出，用于分裂碎片建模
--(NSArray *)  arrangeClockwise:(NSArray*)vec {
+-(NSMutableArray *)  arrangeClockwise:(NSMutableArray *)  vec {
     // The algorithm is simple:
     // First, it arranges all given points in ascending order, according to their x-coordinate.
     // Secondly, it takes the leftmost and rightmost points (lets call them C and D), and creates tempVec, where the points arranged in clockwise order will be stored.
@@ -561,36 +564,46 @@ enum {
     // That was it!
     int n=[vec count];
     float d;
-    int i1t=1,i2=n-1;
+    int i1=1,i2=n-1;
     //var tempVec:Vector.<b2Vec2>=new Vector.<b2Vec2>(n);
     NSMutableArray *tempVec = [NSMutableArray arrayWithCapacity:10];
     b2Vec2 C;
     b2Vec2 D;
     //vec.sort(comp1);
-//    [vec sortedArrayUsingComparator:^NSComparisonResult(id a ,id b) {
-//        if ((a.x>b.x) {
-//            return 1;
-//        }
-//        else if (a.x<b.x) {
-//            return -1;
-//        }
-//        return 0;
-//    }]
-//    [tempVec objectAtIndex:0]=[vec objectAtIndex:0];
-//    C=[vec objectAtIndex:0];
-//    D=vec[n-1];
-//    for (var i:Number=1; i<n-1; i++) {
-//        d=det(C.x,C.y,D.x,D.y,vec[i].x,vec[i].y);
-//        if (d<0) {
-//            tempVec[i1++]=vec[i];
-//        }
-//        else {
-//            tempVec[i2--]=vec[i];
-//        }
-//    }
-//    tempVec[i1]=vec[n-1];
+    [vec sortedArrayUsingComparator:^NSComparisonResult(b2Vec2 a ,b2Vec2 b) {
+        if (((b2Vec2)a).x>((b2Vec2)b).x) {
+            return 1;
+        }
+        else if (a.x<b.x) {
+            return -1;
+        }
+        return 0;
+    }];
+   // [tempVec objectAtIndex:0]=[vec objectAtIndex:0];
+    [tempVec replaceObjectAtIndex:0 withObject:[vec objectAtIndex:0]];
+    C=[vec objectAtIndex:0];
+    D=[vec objectAtIndex:n-1];
+    for ( int i=1; i<n-1; i++) {
+        d=[self det:C.x y1:C.y x2:D.x y2:D.y x3:[vec objectAtIndex:i].x y3:[vec objectAtIndex:i].y];
+        if (d<0) {
+            [tempVec replaceObjectAtIndex:i1++ withObject:[vec objectAtIndex:i]];
+            //tempVec[i1++]=vec[i];
+        }
+        else {
+            [tempVec replaceObjectAtIndex:i2-- withObject:[vec objectAtIndex:i]];
+            //tempVec[i2--]=vec[i];
+        }
+    }
+    tempVec[i1]=vec[n-1];
     return tempVec;
 }
+
+
+
+
+
+
+
 -(int)  comp1:(b2Vec2)a comp2:(b2Vec2)b {
     // This is a compare function, used in the arrangeClockwise() method - a fast way to arrange the points in ascending order, according to their x-coordinate.
     if (a.x>b.x) {
@@ -601,7 +614,7 @@ enum {
     }
     return 0;
 }
--(NSInteger)  det:(NSInteger)x1  y1:(NSInteger)y1 x2:(NSInteger)x2 y2:(NSInteger)y2 x3:(NSInteger)x3  y3:(NSInteger)y3{
+-(float)  det:(NSInteger)x1  y1:(NSInteger)y1 x2:(NSInteger)x2 y2:(NSInteger)y2 x3:(NSInteger)x3  y3:(NSInteger)y3{
     // This is a function which finds the determinant of a 3x3 matrix.
     // If you studied matrices, you'd know that it returns a positive number if three given points are in clockwise order, negative if they are in anti-clockwise order and zero if they lie on the same line.
     // Another useful thing about determinants is that their absolute value is two times the face of the triangle, formed by the three given points.
