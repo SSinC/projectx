@@ -39,7 +39,21 @@ enum {
 @end
 
 
+
+HelloWorldLayer* instance;
 @implementation HelloWorldLayer
+@synthesize enterPointsVecCPP;
+@synthesize explodingBodiesCPP;
+
+
+
++(HelloWorldLayer*)shareInstance
+{
+    if(!instance)
+		instance = [[HelloWorldLayer alloc] init];
+	return instance;
+}
+
 
 +(CCScene *) scene
 {
@@ -67,6 +81,12 @@ enum {
         
          tagBodyA = 1;
          tagBodyB = 500;
+        
+        //add C++ style Array
+        std::vector<b2Body*> explodingBodiesCPP;
+        std::vector<b2Vec2> enterPointsVecCPP;
+        std::vector<b2Body*> enterPointsVecBodyCPP;
+        std::vector<b2Body*> slicedBodiesCPP;
         
 		CGSize s = [CCDirector sharedDirector].winSize;
 		
@@ -438,27 +458,48 @@ public:
     float32 ReportFixture(    b2Fixture* fixture, const b2Vec2& point,
                           const b2Vec2& normal, float32 fraction)
     {
+        //这里要完成的功能如下：
+        b2Body* body=fixture->GetBody();
+        
+        [HelloWorldLayer shareInstance].explodingBodiesCPP 
+        
+        if (explodingBodiesCPP.find(body) == -1)
+        {
+            return 1;
+        }
+        int idx = enterPointsVecBody.find(body);
+        if (idx==-1)
+        {
+            [HelloWorldLayer shareInstance]  addPoint(body, point);
+        }
+        else
+        {
+            [HelloWorldLayer shareInstance] splitObj:fixture->GetBody() A:enterPointsVec[idx] B:(b2Vec2&)point];
+        }
+        return 1;
+        
+        [HelloWorldLayer shareInstance] splitObj(self, )
         //add what you need to do here. added by stream
         //        [self intersection:fixture point:point normal:point fraction:fraction];
         
         b2Body* body = fixture->GetBody();
         void* userData = body->GetUserData();
-        if (userData)
-        {
-            int32 index = *(int32*)userData;
+      if (userData)
+       {
+           int32 index = *(int32*)userData;
             if (index == 0)
-            {
-                // filter
-                return -1.0f;
-            }
-        }
-        
+           {
+               // filter
+               return -1.0f;
+           }
+       }
+       
         m_hit = true;
-        m_point = point;
-        m_normal = normal;
+       m_point = point;
+       m_normal = normal;
 
         return 0.0f;
-    }    
+    }
     bool m_hit;
     b2Vec2 m_point;
     b2Vec2 m_normal;

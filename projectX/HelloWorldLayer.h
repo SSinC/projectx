@@ -41,18 +41,36 @@ typedef struct userdata{
     contactListener *_contactListener;
     CCSpriteBatchNode *parent;
     CGPoint locationBegin;
+    
+    //added copy_chooseBodyNumber to choose body type
     __block int copy_chooseBodyNumber;
+    
+    //add explodeing center
     float explosionX;
     float explosionY;
     float explosionRadius ;
     NSMutableDictionary *enterPoints;
     NSMutableArray *explodingBodies;
+    
+    //add tagBody to create uniqe Body ID
     int32 tagBodyA;
     int32 tagBodyB;
     
+    //add C++ style Array 
+    std::vector<b2Body*> explodingBodiesCPP_;
+    std::vector<b2Vec2> enterPointsVecCPP_;
+    std::vector<b2Body*> enterPointsVecBodyCPP_;
+    std::vector<b2Body*> slicedBodiesCPP_;
+    
 }
+
+
+@property(nonatomic) std::vector<b2Body*> explodingBodiesCPP;
+@property(nonatomic) std::vector<b2Body*> enterPointsVecCPP;
 
 // returns a CCScene that contains the HelloWorldLayer as the only child
 +(CCScene *) scene;
+
++(HelloWorldLayer*)shareInstance;
 
 @end
