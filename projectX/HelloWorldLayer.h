@@ -58,16 +58,22 @@ typedef struct userdata{
     
     //add C++ style Array 
     std::vector<b2Body*> explodingBodiesCPP_;
-    std::vector<b2Vec2> enterPointsVecCPP_;
+    std::vector<b2Vec2&> enterPointsVecCPP_;
     std::vector<b2Body*> enterPointsVecBodyCPP_;
     std::vector<b2Body*> slicedBodiesCPP_;
+    
+    std::vector<b2Body*>::iterator pos1_;
+    std::vector<b2Vec2&>::iterator pos2_;
+    std::vector<b2Body*>::iterator pos3_;
+    std::vector<b2Body*>::iterator pos4_;
     
 }
 
 
 @property(nonatomic) std::vector<b2Body*> explodingBodiesCPP;
-@property(nonatomic) std::vector<b2Body*> enterPointsVecCPP;
-
+@property(nonatomic) std::vector<b2Vec2&> enterPointsVecCPP;
+@property(nonatomic) std::vector<b2Body*> ::iterator pos1;
+@property(nonatomic) std::vector<b2Vec2&> ::iterator pos2;
 // returns a CCScene that contains the HelloWorldLayer as the only child
 +(CCScene *) scene;
 

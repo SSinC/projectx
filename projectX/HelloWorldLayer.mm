@@ -42,8 +42,10 @@ enum {
 
 HelloWorldLayer* instance;
 @implementation HelloWorldLayer
-@synthesize enterPointsVecCPP;
-@synthesize explodingBodiesCPP;
+@synthesize enterPointsVecCPP = enterPointsVecCPP_;
+@synthesize explodingBodiesCPP = explodingBodiesCPP_;
+@synthesize pos1 = pos1_;
+@synthesize pos2 = pos2_;
 
 
 
@@ -109,8 +111,13 @@ HelloWorldLayer* instance;
 		spriteTexture_ = [[CCTextureCache sharedTextureCache] addImage:@"blocks.png"];
 		CCNode *parent = [CCNode node];
 #endif
-		[self addChild:parent z:0 tag:kTagParentNode];
 		
+		CCLOG(@"parent %@",parent);
+        //在我的mac机上下面这句有问题，要改成parentNode--wk
+        //[self addChild:parent z:0 tag:kTagParentNode];
+		[self addChild:parentNode z:0 tag:kTagParentNode];
+
+        
 		
 		[self addNewSpriteAtPosition:ccp(s.width/2, s.height/2+200)];
         
@@ -461,45 +468,25 @@ public:
         //这里要完成的功能如下：
         b2Body* body=fixture->GetBody();
         
-        [HelloWorldLayer shareInstance].explodingBodiesCPP 
+        //[HelloWorldLayer shareInstance].explodingBodiesCPP;
+        [HelloWorldLayer shareInstance].pos1 = std::find([HelloWorldLayer shareInstance].explodingBodiesCPP.begin(), [HelloWorldLayer shareInstance].explodingBodiesCPP.end(), body);
         
-        if (explodingBodiesCPP.find(body) == -1)
-        {
+        if ( [HelloWorldLayer shareInstance].pos1 ==[HelloWorldLayer shareInstance].explodingBodiesCPP.end() ) {
             return 1;
         }
-        int idx = enterPointsVecBody.find(body);
-        if (idx==-1)
-        {
-            [HelloWorldLayer shareInstance]  addPoint(body, point);
+
+        [HelloWorldLayer shareInstance].pos2 = std::find([HelloWorldLayer shareInstance].enterPointsVecCPP.begin(), [HelloWorldLayer shareInstance].enterPointsVecCPP.end(), body);
+        
+        if ( [HelloWorldLayer shareInstance].pos2 ==[HelloWorldLayer shareInstance].enterPointsVecCPP.end() ) {
+            [HelloWorldLayer shareInstance].enterPointsVecCPP.push_back(point);
         }
         else
         {
-            [HelloWorldLayer shareInstance] splitObj:fixture->GetBody() A:enterPointsVec[idx] B:(b2Vec2&)point];
+            [[HelloWorldLayer shareInstance] splitObj:fixture->GetBody() A:[HelloWorldLayer shareInstance].pos2 B: point];
         }
         return 1;
         
-        [HelloWorldLayer shareInstance] splitObj(self, )
-        //add what you need to do here. added by stream
-        //        [self intersection:fixture point:point normal:point fraction:fraction];
-        
-        b2Body* body = fixture->GetBody();
-        void* userData = body->GetUserData();
-      if (userData)
-       {
-           int32 index = *(int32*)userData;
-            if (index == 0)
-           {
-               // filter
-               return -1.0f;
            }
-       }
-       
-        m_hit = true;
-       m_point = point;
-       m_normal = normal;
-
-        return 0.0f;
-    }
     bool m_hit;
     b2Vec2 m_point;
     b2Vec2 m_normal;
@@ -631,12 +618,6 @@ public:
         // explodingBodies.indexOf(fixture.GetBody())!=-1)
     {
         CCPhysicsSprite *spr=(CCPhysicsSprite *)fixture->GetBody()->GetUserData();
-        // Throughout this whole code I use only one global vector, and that is enterPointsVec. Why do I need it you ask?
-        // Well, the problem is that the world.RayCast() method calls this function only when it sees that a given line gets into the body - it doesnt see when the line gets out of it.
-        // I must have 2 intersection points with a body so that it can be sliced, thats why I use world.RayCast() again, but this time from B to A - that way the point, at which BA enters the body is the point at which AB leaves it!
-        // For that reason, I use a vector enterPointsVec, where I store the points, at which AB enters the body. And later on, if I see that BA enters a body, which has been entered already by AB, I fire the splitObj() function!
-        // I need a unique ID for each body, in order to know where its corresponding enter point is - I store that id in the userData of each body.
-        
         //if (spr is userData) {
         //var userD:userData=spr as userData;
         if ([enterPoints objectForKey:spr.tag]) {
