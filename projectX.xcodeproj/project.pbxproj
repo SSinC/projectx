@@ -187,7 +187,6 @@
 		3D735FD5170FF81E0093EE39 /* GLES-Render.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3D735FCE170FF81E0093EE39 /* GLES-Render.mm */; };
 		3D735FD6170FF81F0093EE39 /* HelloWorldLayer.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3D735FD0170FF81E0093EE39 /* HelloWorldLayer.mm */; };
 		3D735FD7170FF81F0093EE39 /* IntroLayer.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3D735FD2170FF81E0093EE39 /* IntroLayer.mm */; };
-		747941B817157B2300B85384 /* b2bodyArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 747941B617157B1F00B85384 /* b2bodyArray.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -568,8 +567,6 @@
 		3D735FD0170FF81E0093EE39 /* HelloWorldLayer.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = HelloWorldLayer.mm; sourceTree = "<group>"; };
 		3D735FD1170FF81E0093EE39 /* IntroLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IntroLayer.h; sourceTree = "<group>"; };
 		3D735FD2170FF81E0093EE39 /* IntroLayer.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = IntroLayer.mm; sourceTree = "<group>"; };
-		747941B617157B1F00B85384 /* b2bodyArray.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = b2bodyArray.cpp; sourceTree = "<group>"; };
-		747941B717157B2100B85384 /* b2bodyArray.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = b2bodyArray.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -633,8 +630,6 @@
 				3D735FCB170FF81E0093EE39 /* contactListener.h */,
 				3D735FCC170FF81E0093EE39 /* contactListener.mm */,
 				3D735FCD170FF81E0093EE39 /* GLES-Render.h */,
-				747941B617157B1F00B85384 /* b2bodyArray.cpp */,
-				747941B717157B2100B85384 /* b2bodyArray.h */,
 				3D735FCE170FF81E0093EE39 /* GLES-Render.mm */,
 				3D735FCF170FF81E0093EE39 /* HelloWorldLayer.h */,
 				3D735FD0170FF81E0093EE39 /* HelloWorldLayer.mm */,
@@ -1417,7 +1412,6 @@
 				3D735FD5170FF81E0093EE39 /* GLES-Render.mm in Sources */,
 				3D735FD6170FF81F0093EE39 /* HelloWorldLayer.mm in Sources */,
 				3D735FD7170FF81F0093EE39 /* IntroLayer.mm in Sources */,
-				747941B817157B2300B85384 /* b2bodyArray.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
