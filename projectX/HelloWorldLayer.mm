@@ -336,7 +336,7 @@ HelloWorldLayer* instance;
 	// Define another box shape for our dynamic body.
 	b2PolygonShape dynamicBox;
 	dynamicBox.SetAsBox(.5f, .5f);//These are mid points for our 1m box
-	int a = 0.5;
+	
 	// Define the dynamic body fixture.
 	b2FixtureDef fixtureDef;
 	fixtureDef.shape = &dynamicBox;
@@ -907,7 +907,7 @@ public:
 	}
 }
 
-- (BOOL)ccTouchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
+- (void)ccTouchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
 //    CGPoint touchLocation = [self convertTouchToNodeSpace:touch];
     for( UITouch *touch in touches ) {
 		CGPoint location = [touch locationInView: [touch view]];
@@ -917,7 +917,7 @@ public:
         [self selectSpriteForTouch:location];
     CCLOG(@"touchbegin");
     }
-    return TRUE;
+    //return TRUE;
 }
 
 - (void)ccTouchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
@@ -957,7 +957,7 @@ public:
               selSprite.b2Body->GetPosition().y * PTM_RATIO);
                
     } else {
-        CGPoint newPos = ccpAdd(self.position, translation);
+        //CGPoint newPos = ccpAdd(self.position, translation);
         //暂时注释掉场景移动的代码
         //self.position = [self boundLayerPos:newPos];
     }
