@@ -16,6 +16,7 @@
 #import "AppDelegate.h"
 #import <math.h>
 
+#import "body1.h"
 enum {
 	kTagParentNode = 1,
 };
@@ -96,11 +97,7 @@ HelloWorldLayer* instance;
          tagBodyA = 1;
          tagBodyB = 500;
         
-        //add C++ style Array
-        std::vector<b2Body*> explodingBodiesCPP;
-        std::vector<b2Vec2> enterPointsVecCPP;
-        std::vector<b2Body*> enterPointsVecBodyCPP;
-        std::vector<b2Body*> slicedBodiesCPP;
+        
         
 		CGSize s = [CCDirector sharedDirector].winSize;
 		
@@ -131,7 +128,7 @@ HelloWorldLayer* instance;
 
         
 		
-		[self addNewSpriteAtPosition:ccp(s.width/2, s.height/2+200)];
+//		[self addNewSpriteAtPosition:ccp(s.width/2, s.height/2+200)];
         
 		
 		CCLabelTTF *label = [CCLabelTTF labelWithString:@"Tap screen" fontName:@"Marker Felt" fontSize:32];
@@ -162,6 +159,9 @@ HelloWorldLayer* instance;
     
     [movableSprites release];
     movableSprites = nil;
+    
+    [_cache release];
+    _cache = nil;
 	
 	[super dealloc];
 }	
@@ -338,6 +338,24 @@ HelloWorldLayer* instance;
 	kmGLPopMatrix();
 }
 
+-(void) createBodyTest:(CGPoint)p
+{
+      CCLOG(@"Test before create sprite");
+     CCLOG(@"Add sprite %0.2f x %02.f",p.x,p.y);
+        _cache = [[CCArray alloc] initWithCapacity:53];
+        
+    PolygonSprite *sprite = [[body1 alloc] initWithWorld:world at:p ];
+
+        [self addChild:sprite z:1];
+        [sprite activateCollisions];
+        [_cache addObject:sprite];
+    
+    sprite.tag = tagBodyA++;
+    [sprite setPosition: ccp( p.x, p.y)];
+    [movableSprites addObject:sprite];
+   CCLOG(@"sprite position is %0.2f x %02.f",sprite.body->GetPosition().x,sprite.body->GetPosition().y);
+}
+
 -(void) createBody1:(CGPoint)p
 {
     CCLOG(@"Add sprite %0.2f x %02.f",p.x,p.y);
@@ -367,18 +385,21 @@ HelloWorldLayer* instance;
 	//just randomly picking one of the images
 	//int idx = (CCRANDOM_0_1() > .5 ? 0:1);
 	//int idy = (CCRANDOM_0_1() > .5 ? 0:1);
-	CCPhysicsSprite *sprite = [CCPhysicsSprite spriteWithTexture:spriteTexture_ rect:CGRectMake(0,0,32,32)];
     
+	//CCPhysicsSprite *sprite = [CCPhysicsSprite spriteWithTexture:spriteTexture_ rect:CGRectMake(0,0,32,32)];
+    CCLOG(@"before create sprite");
+    PolygonSprite *sprite = [PolygonSprite spriteWithTexture: spriteTexture_ body:body original:NO];
+     CCLOG(@"after create sprite");
     //添加tag用来给碰撞检测时判断物体类型
     //暂时用tag的值的范围代表物体类型
     //1-500之内是BodyA
     sprite.tag = tagBodyA++;
-   
-	[parentSprite addChild:sprite];
-	
-	[sprite setPTMRatio:PTM_RATIO];
-	[sprite setB2Body:body];
-	[sprite setPosition: ccp( p.x, p.y)];
+    [self addChild:sprite z:1];
+	//[parentSprite addChild:sprite];
+	 CCLOG(@"after create sprite1");
+	//[sprite setPTMRatio:PTM_RATIO];
+	//[sprite setB2Body:body];
+	//[sprite setPosition: ccp( p.x, p.y)];
     
     //暂时注释掉setUserData中存入结构体
 //    myUserData *data1 ;
@@ -388,6 +409,7 @@ HelloWorldLayer* instance;
     
     body->SetUserData(sprite);
     [movableSprites addObject:sprite];
+     CCLOG(@"after create sprite1");
 }
 
 -(void) createBody2:(CGPoint)p
@@ -419,17 +441,22 @@ HelloWorldLayer* instance;
 	//just randomly picking one of the images
 //	int idx = (CCRANDOM_0_1() > .5 ? 0:1);
 //	int idy = (CCRANDOM_0_1() > .5 ? 0:1);
+    
+    
 	CCPhysicsSprite *sprite = [CCPhysicsSprite spriteWithTexture:spriteTexture_ rect:CGRectMake(32 ,0,32,32)];
+    
+    // PolygonSprite *sprite = [PolygonSprite spriteWithTexture: spriteTexture_ body:body original:NO];
     
     //添加tag用来给碰撞检测时判断物体类型
     //暂时用tag的值的范围代表物体类型
     //500以上是BodyB
     sprite.tag = tagBodyB++;
     
-	[parentSprite addChild:sprite];
+    // [self addChild:sprite z:1];
+ [parentSprite addChild:sprite];
 	
-	[sprite setPTMRatio:PTM_RATIO];
-	[sprite setB2Body:body];
+ [sprite setPTMRatio:PTM_RATIO];
+ [sprite setB2Body:body];
 	[sprite setPosition: ccp( p.x, p.y)];
     
     //暂时注释掉setUserData中存入结构体
@@ -453,10 +480,12 @@ HelloWorldLayer* instance;
       CCLOG(@"chooseBodyNumber %i",copy_chooseBodyNumber);
         switch (copy_chooseBodyNumber) {
             case 1:
-                [self createBody1:p];
+                //[self createBody1:p];
+                [self createBodyTest:p];
                 break;
             case 2:
                 [self createBody2:p];
+                 //[self createBodyTest:p];
                 break;
             case 3:
                 [self createBody3:p];
@@ -526,25 +555,25 @@ HelloWorldLayer* instance;
    
     
     // Loop through all of the Box2D bodies in our Box2D world..
-    for(b2Body *b = world->GetBodyList(); b; b=b->GetNext()) {
-        
-        // See if there's any user data attached to the Box2D body
-        // There should be, since we set it in addBoxBodyForSprite
-        if (b->GetUserData() != NULL) {
-            
-            // We know that the user data is a sprite since we set
-            // it that way, so cast it...
-            CCPhysicsSprite *sprite = (CCPhysicsSprite *)b->GetUserData();
-            
-            // Convert the Cocos2D position/rotation of the sprite to the Box2D position/rotation
-            b2Vec2 b2Position = b2Vec2(sprite.position.x/PTM_RATIO,
-                                       sprite.position.y/PTM_RATIO);
-            float32 b2Angle = -1 * CC_DEGREES_TO_RADIANS(sprite.rotation);
-            
-            // Update the Box2D position/rotation to match the Cocos2D position/rotation
-            b->SetTransform(b2Position, b2Angle);
-        }
-    }
+//    for(b2Body *b = world->GetBodyList(); b; b=b->GetNext()) {
+//        
+//        // See if there's any user data attached to the Box2D body
+//        // There should be, since we set it in addBoxBodyForSprite
+//        if (b->GetUserData() != NULL) {
+//            
+//            // We know that the user data is a sprite since we set
+//            // it that way, so cast it...
+//            CCPhysicsSprite *sprite = (CCPhysicsSprite *)b->GetUserData();
+//            
+//            // Convert the Cocos2D position/rotation of the sprite to the Box2D position/rotation
+//            b2Vec2 b2Position = b2Vec2(sprite.position.x/PTM_RATIO,
+//                                       sprite.position.y/PTM_RATIO);
+//            float32 b2Angle = -1 * CC_DEGREES_TO_RADIANS(sprite.rotation);
+//            
+//            // Update the Box2D position/rotation to match the Cocos2D position/rotation
+//            b->SetTransform(b2Position, b2Angle);
+//        }
+//    }
     CCNode *parent1 = [self getChildByTag:kTagParentNode];
 
     std::vector<b2Body *>toDestroy;
@@ -563,9 +592,9 @@ HelloWorldLayer* instance;
               CCPhysicsSprite *spriteB = (CCPhysicsSprite *) bodyB->GetUserData();
             
              //只让A和B碰撞后销毁
-            if (((spriteA.tag < 500 && spriteB.tag >=500)|| (spriteA.tag >=500 && spriteB.tag < 500))){
-                [parent1 removeChild:spriteA];
-                [parent1 removeChild:spriteB];
+            if (((spriteA.tag < 500 && spriteB.tag <500)|| (spriteA.tag <500 && spriteB.tag < 500))){
+                //[parent1 removeChild:spriteA];
+                //[parent1 removeChild:spriteB];
                 //经试验，先销毁图像再在下个循环销毁body，效果最好。如果不先销毁图像，渲染会莫名其妙延迟。
                 
                 
@@ -575,20 +604,25 @@ HelloWorldLayer* instance;
                 explosionX = bodyA->GetWorldCenter().x;
                 explosionY = bodyA->GetWorldCenter().y;
                 
-//                for (int i=1; i<=5; i++)
-//                {
-//                    float cutAngle = (arc4random()%360)/360 * pi *2;
-//                    //b2Vec2 point1(0.0f, 10.0f);
-//                    b2Vec2 p1((explosionX+i/10 - 2000 * cos(cutAngle))/PTM_RATIO, (explosionY-2000 * sin(cutAngle))/PTM_RATIO);
-//                    b2Vec2 p2((explosionX+2000 * cos(cutAngle))/PTM_RATIO, (explosionY + 2000 * sin(cutAngle))/PTM_RATIO);
-//                    RayCastAnyCallback callback1;//self.intersection should be called in the virtual class. added by stream.
-//                    world->RayCast(&callback1, p1, p2);
-//                    RayCastAnyCallback callback2;
-//                    world->RayCast(&callback2, p2, p1);
-////
-//                }
-                toDestroy.push_back(bodyA);
-                toDestroy.push_back(bodyB);
+               for (int i=1; i<=5; i++)
+               {
+                   float cutAngle = (arc4random()%360)/360 * pi *2;
+                   //b2Vec2 point1(0.0f, 10.0f);
+                    b2Vec2 p1((explosionX+i/10 - 2000 * cos(cutAngle))/PTM_RATIO, (explosionY-2000 * sin(cutAngle))/PTM_RATIO);
+                    b2Vec2 p2((explosionX+2000 * cos(cutAngle))/PTM_RATIO, (explosionY + 2000 * sin(cutAngle))/PTM_RATIO);
+
+                
+                world->RayCast(_raycastCallback,
+                               b2Vec2(p1.x / PTM_RATIO, p1.y / PTM_RATIO),
+                               b2Vec2(p2.x / PTM_RATIO, p2.y / PTM_RATIO));
+                
+                world->RayCast(_raycastCallback,
+                               b2Vec2(p2.x / PTM_RATIO, p2.y / PTM_RATIO),
+                               b2Vec2(p1.x / PTM_RATIO, p1.y / PTM_RATIO));
+                   [self checkAndSliceObjects:bodyA];
+               }
+              //  toDestroy.push_back(bodyA);
+              //  toDestroy.push_back(bodyB);
                 
                 // 不能立刻销毁body
                 //            world->DestroyBody(bodyA);
@@ -909,6 +943,25 @@ HelloWorldLayer* instance;
             }
         }
     }
+}
+
+-(void)checkAndSliceObjects:(b2Body *)b
+{
+    double curTime = CACurrentMediaTime();
+    
+        if (b->GetUserData() != NULL) {
+            PolygonSprite *sprite = (PolygonSprite*)b->GetUserData();
+            
+            if (sprite.sliceEntered && curTime > sprite.sliceEntryTime)
+            {
+                sprite.sliceEntered = NO;
+            }
+            else if (sprite.sliceEntered && sprite.sliceExited)
+            {
+                [self splitPolygonSprite:sprite];
+            }
+        }
+    
 }
 
 // - (float) intersection:(b2Fixture *)fixture point:(b2Vec2 *)point normal:(b2Vec2 *)normal fraction:(float)fraction

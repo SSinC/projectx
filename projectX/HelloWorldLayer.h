@@ -30,10 +30,10 @@
 #define PTM_RATIO 32
 
 //添加userData 结合贴图和物体编号，方便使用
-typedef struct userdata{
-    int bodyType;
-    CCPhysicsSprite *sprite;
-}myUserData;
+//typedef struct userdata{
+//    int bodyType;
+//    CCPhysicsSprite *sprite;
+//}myUserData;
 
 // HelloWorldLayer
 @interface HelloWorldLayer : CCLayer <GKAchievementViewControllerDelegate, GKLeaderboardViewControllerDelegate>
@@ -44,6 +44,7 @@ typedef struct userdata{
     
     CCSprite * background;
     CCPhysicsSprite * selSprite;
+    PolygonSprite *selSprite1;
     NSMutableArray * movableSprites;
     contactListener *_contactListener;
     CCSpriteBatchNode *parent;
@@ -65,7 +66,8 @@ typedef struct userdata{
     
     //add rayCastCallBack
     RaycastCallback *_raycastCallback;
-
+    
+     CCArray *_cache;
     
     //add C++ style Array 
 //    std::vector<b2Body*> explodingBodiesCPP_;

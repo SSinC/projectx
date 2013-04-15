@@ -40,6 +40,9 @@
 +(id)spriteWithFile:(NSString*)filename body:(b2Body*)body original:(BOOL)original;
 +(id)spriteWithTexture:(CCTexture2D*)texture body:(b2Body*)body original:(BOOL)original;
 -(id)initWithWorld:(b2World*)world;
+
+-(id)initWithWorld:(b2World *)world at:(CGPoint)p;
+
 +(id)spriteWithWorld:(b2World*)world;
 -(b2Body*)createBodyForWorld:(b2World*)world position:(b2Vec2)position rotation:(float)rotation vertices:(b2Vec2*)vertices vertexCount:(int32)count density:(float)density friction:(float)friction restitution:(float)restitution;
 -(void)activateCollisions;

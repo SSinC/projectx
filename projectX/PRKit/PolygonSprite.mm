@@ -123,38 +123,73 @@
     fixture->SetFilterData(filter);
 }
 
+//-(CGAffineTransform) nodeToParentTransform
+//{
+//    b2Vec2 pos  = _body->GetPosition();
+//    
+//    float x = pos.x * PTM_RATIO;
+//    float y = pos.y * PTM_RATIO;
+//    
+//    //Note that the COCOS2D-api has chaned---wk
+//    //_ignoreAnchorPointForPosition == !isRelativeAnchorPoint_
+//    CCLOG(@"enter nodeToparetnTransform");
+//    //if ( !isRelativeAnchorPoint_ ) {
+//    if(_ignoreAnchorPointForPosition){
+//        x += _anchorPointInPoints.x;
+//        y += _anchorPointInPoints.y;
+//    }
+//    
+//    // Make matrix
+//    float radians = _body->GetAngle();
+//    float c = cosf(radians);
+//    float s = sinf(radians);
+//    
+//    if( ! CGPointEqualToPoint(_anchorPointInPoints, CGPointZero) ){
+//        x += c*-_anchorPointInPoints.x + -s*-_anchorPointInPoints.y;
+//        y += s*-_anchorPointInPoints.x + c*-_anchorPointInPoints.y;
+//    }
+//    
+//    // Rot, Translate Matrix
+//    _transform = CGAffineTransformMake( c,  s,
+//                                       -s,c,
+//                                       x,y );
+//    
+//    return _transform;
+//}
+
+
 -(CGAffineTransform) nodeToParentTransform
 {
-    b2Vec2 pos  = _body->GetPosition();
+	b2Vec2 pos  = _body->GetPosition();
+	
+	float x = pos.x * PTM_RATIO;
+	float y = pos.y * PTM_RATIO;
+	
+	if ( _ignoreAnchorPointForPosition ) {
+		x += _anchorPointInPoints.x;
+		y += _anchorPointInPoints.y;
+	}
+	
+	// Make matrix
+	float radians = _body->GetAngle();
+	float c = cosf(radians);
+	float s = sinf(radians);
+	
+	// Although scale is not used by physics engines, it is calculated just in case
+	// the sprite is animated (scaled up/down) using actions.
+	// For more info see: http://www.cocos2d-iphone.org/forum/topic/68990
+	if( ! CGPointEqualToPoint(_anchorPointInPoints, CGPointZero) ){
+		x += c*-_anchorPointInPoints.x * _scaleX + -s*-_anchorPointInPoints.y * _scaleY;
+		y += s*-_anchorPointInPoints.x * _scaleX + c*-_anchorPointInPoints.y * _scaleY;
+	}
     
-    float x = pos.x * PTM_RATIO;
-    float y = pos.y * PTM_RATIO;
-    
-    //Note that the COCOS2D-api has chaned---wk
-    //_ignoreAnchorPointForPosition == !isRelativeAnchorPoint_
-    
-    //if ( !isRelativeAnchorPoint_ ) {
-    if(_ignoreAnchorPointForPosition){
-        x += _anchorPointInPoints.x;
-        y += _anchorPointInPoints.y;
-    }
-    
-    // Make matrix
-    float radians = _body->GetAngle();
-    float c = cosf(radians);
-    float s = sinf(radians);
-    
-    if( ! CGPointEqualToPoint(_anchorPointInPoints, CGPointZero) ){
-        x += c*-_anchorPointInPoints.x + -s*-_anchorPointInPoints.y;
-        y += s*-_anchorPointInPoints.x + c*-_anchorPointInPoints.y;
-    }
-    
-    // Rot, Translate Matrix
-    _transform = CGAffineTransformMake( c,  s,
-                                       -s,c,
-                                       x,y );
-    
-    return _transform;
+	// Rot, Translate Matrix
+	_transform = CGAffineTransformMake( c * _scaleX,	s * _scaleX,
+									   -s * _scaleY,	c * _scaleY,
+									   x,	y );
+	
+	return _transform;
 }
+
 
 @end

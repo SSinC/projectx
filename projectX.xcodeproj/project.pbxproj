@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		187D474E171C497A00C89E9C /* body2.mm in Sources */ = {isa = PBXBuildFile; fileRef = 187D474D171C497A00C89E9C /* body2.mm */; };
+		187D4752171C4A9F00C89E9C /* watermelon-hd.png in Resources */ = {isa = PBXBuildFile; fileRef = 187D474F171C4A9F00C89E9C /* watermelon-hd.png */; };
+		187D4753171C4A9F00C89E9C /* watermelon-ipadhd.png in Resources */ = {isa = PBXBuildFile; fileRef = 187D4750171C4A9F00C89E9C /* watermelon-ipadhd.png */; };
+		187D4754171C4A9F00C89E9C /* watermelon.png in Resources */ = {isa = PBXBuildFile; fileRef = 187D4751171C4A9F00C89E9C /* watermelon.png */; };
 		3D735D84170FF7820093EE39 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D735D83170FF7820093EE39 /* QuartzCore.framework */; };
 		3D735D86170FF7820093EE39 /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D735D85170FF7820093EE39 /* OpenGLES.framework */; };
 		3D735D88170FF7820093EE39 /* OpenAL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D735D87170FF7820093EE39 /* OpenAL.framework */; };
@@ -194,6 +198,11 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		187D474C171C497A00C89E9C /* body1.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = body1.h; sourceTree = "<group>"; };
+		187D474D171C497A00C89E9C /* body2.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = body2.mm; sourceTree = "<group>"; };
+		187D474F171C4A9F00C89E9C /* watermelon-hd.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "watermelon-hd.png"; path = "Resources/watermelon-hd.png"; sourceTree = "<group>"; };
+		187D4750171C4A9F00C89E9C /* watermelon-ipadhd.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "watermelon-ipadhd.png"; path = "Resources/watermelon-ipadhd.png"; sourceTree = "<group>"; };
+		187D4751171C4A9F00C89E9C /* watermelon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = watermelon.png; path = Resources/watermelon.png; sourceTree = "<group>"; };
 		3D735D7F170FF7820093EE39 /* projectX.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = projectX.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		3D735D83170FF7820093EE39 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		3D735D85170FF7820093EE39 /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = System/Library/Frameworks/OpenGLES.framework; sourceTree = SDKROOT; };
@@ -649,6 +658,8 @@
 				3D735FD2170FF81E0093EE39 /* IntroLayer.mm */,
 				3D735FCF170FF81E0093EE39 /* HelloWorldLayer.h */,
 				3D735FD0170FF81E0093EE39 /* HelloWorldLayer.mm */,
+				187D474C171C497A00C89E9C /* body1.h */,
+				187D474D171C497A00C89E9C /* body2.mm */,
 				747941D2171BD87900B85384 /* RaycastCallback.h */,
 				747941DD171BF1FD00B85384 /* PolygonSprite.h */,
 				747941DE171BF1FE00B85384 /* PolygonSprite.mm */,
@@ -663,6 +674,9 @@
 		3D735D96170FF7820093EE39 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				187D474F171C4A9F00C89E9C /* watermelon-hd.png */,
+				187D4750171C4A9F00C89E9C /* watermelon-ipadhd.png */,
+				187D4751171C4A9F00C89E9C /* watermelon.png */,
 				3D735D97170FF7820093EE39 /* Default.png */,
 				3D735D99170FF7820093EE39 /* Default@2x.png */,
 				3D735D9B170FF7820093EE39 /* Default-568h@2x.png */,
@@ -1276,6 +1290,9 @@
 				3D735DAD170FF7820093EE39 /* iTunesArtwork in Resources */,
 				3D735F03170FF7860093EE39 /* ChangeLog in Resources */,
 				3D735FC3170FF7870093EE39 /* blocks.png in Resources */,
+				187D4752171C4A9F00C89E9C /* watermelon-hd.png in Resources */,
+				187D4753171C4A9F00C89E9C /* watermelon-ipadhd.png in Resources */,
+				187D4754171C4A9F00C89E9C /* watermelon.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1448,6 +1465,7 @@
 				747941D6171BD87A00B85384 /* PRRatcliffTriangulator.mm in Sources */,
 				747941D7171BD87A00B85384 /* triangulate.cpp in Sources */,
 				747941DF171BF20000B85384 /* PolygonSprite.mm in Sources */,
+				187D474E171C497A00C89E9C /* body2.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
