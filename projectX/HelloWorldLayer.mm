@@ -236,24 +236,32 @@ HelloWorldLayer* instance;
         
     }];
     
-    CCMenuItem *Cut = [CCMenuItemFont itemWithString:@"CutCut" block:^(id sender){
+    CCMenuItem *Cut = [CCMenuItemFont itemWithString:@"我要切西瓜玩法" block:^(id sender){
+        // Switch the mode to Cut-Mode
         cut = true;
-        
     }];
     
-    CCMenuItem *notCut = [CCMenuItemFont itemWithString:@"Don'tCut" block:^(id sender){
+    CCMenuItem *notCut = [CCMenuItemFont itemWithString:@"切你妹的西瓜，我要Angry Birds玩法" block:^(id sender){
+        // Switch the mode back to Drag-Shoot mode
         cut = false;
-        
     }];
 	
-    CCMenu *menuChooseBody = [CCMenu menuWithItems:chooseBody1, chooseBody2, chooseBody3, Cut, notCut, nil];
+    CCMenu *menuChooseBody1 = [CCMenu menuWithItems:chooseBody1, chooseBody2, chooseBody3,  nil];
 	
-	[menuChooseBody alignItemsHorizontally];
+	[menuChooseBody1 alignItemsHorizontally];
 	
-    [menuChooseBody setPosition:ccp( size.width/6, size.height/2+150)];
+    [menuChooseBody1 setPosition:ccp( size.width/6, size.height/2+150)];
     //z代表图像层次
-    [self addChild: menuChooseBody z:-1];
+    [self addChild: menuChooseBody1 z:-1];
     
+    CCMenu *menuChooseBody2 = [CCMenu menuWithItems:Cut, notCut,  nil];
+	
+	[menuChooseBody2 alignItemsHorizontally];
+	
+    [menuChooseBody2 setPosition:ccp( size.width/6, size.height/2+50)];
+    
+    [self addChild: menuChooseBody2 z:-1];
+
 	
 }
 
@@ -570,9 +578,16 @@ HelloWorldLayer* instance;
 	// generally best to keep the time step and iterations fixed.
 	world->Step(dt, velocityIterations, positionIterations);
     // Updates the physics simulation for 10 iterations for velocity/position
+    
+    
+    
+    //*******************        wk       *********************************
+    //If the cut-mode is on,we should check the bodyA every time-step
     if(cut){
         [self checkAndSliceObjects];
     }
+
+    
     
     // Loop through all of the Box2D bodies in our Box2D world..
 //    for(b2Body *b = world->GetBodyList(); b; b=b->GetNext()) {
@@ -1002,6 +1017,10 @@ HelloWorldLayer* instance;
     }
 }
 
+
+//*******************     wk    ***********************
+//Add this funtion to splice a specific body
+//    to be used **************************************
 -(void)checkAndSliceObjects:(b2Body *)b
 {
     double curTime = CACurrentMediaTime();
@@ -1354,9 +1373,13 @@ HelloWorldLayer* instance;
     CGPoint oldTouchLocation = [touch previousLocationInView:touch.view];
     oldTouchLocation = [[CCDirector sharedDirector] convertToGL:oldTouchLocation];
     //oldTouchLocation = [self convertToNodeSpace:oldTouchLocation];
-    
+        
+    //*********************The following methods is to cut PolygonSprite-body**********************
+    //************************************     WK    **********************************************
+    // Only if the cut-option is on,we could cut the bodyA
     if (cut) {
             _endPoint = touchLocation;
+        //if the thouch-lenght is long enough,we can cut the BodyA
         if (ccpLengthSQ(ccpSub(_startPoint, _endPoint)) > 25)
         {
             world->RayCast(_raycastCallback,
@@ -1369,7 +1392,7 @@ HelloWorldLayer* instance;
             _startPoint = _endPoint;
         }
 
-        }
+     }
     else{
         CGPoint translation = ccpSub(touchLocation, oldTouchLocation);
         [self panForTranslation:translation];

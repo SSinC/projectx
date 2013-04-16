@@ -183,7 +183,7 @@
 //    return _transform;
 //}
 
-//*******************************  Deleted by wk ******************************
+//*******************************  Added by wk ******************************
 //Due to the Api-changes,we must use the new parameter：
 // _ignoreAnchorPointForPosition,_scaleX,_scaleY
 //**************************************************************************

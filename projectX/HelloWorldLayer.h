@@ -52,7 +52,7 @@
     
     //added copy_chooseBodyNumber to choose body type
     __block int copy_chooseBodyNumber;
-    //added cut option
+    //added cut option used to switch touch-mode
     __block BOOL cut;
     
     //add explodeing center
@@ -70,7 +70,8 @@
     //add rayCastCallBack
     RaycastCallback *_raycastCallback;
     
-     CCArray *_cache;
+    //add  array to store sprites
+    CCArray *_cache;
     
     CGPoint _startPoint;
     CGPoint _endPoint;
@@ -104,7 +105,7 @@
  createBody: 此方法创建了活跃的可以和其他body产生碰撞的Box2D body。
  arrangeVertices: 此方法按照逆时针的顺序重排顶点。它使用qsort方法按x坐标升序排列，然后使用determinants来完成最终的重排。
  comparator: 此方法被qsort使用，它完成顶点比较并返回结果给qsort。
- areVerticesAcceptable: 目前，此方法假设所有的顶点都是合理的。
+ areVerticesAcceptable: 此方法假设所有的顶点都是合理的。
  ********************************************************/
 -(b2Vec2*)arrangeVertices:(b2Vec2*)vertices count:(int)count;
 -(void)splitPolygonSprite:(PolygonSprite*)sprite;
