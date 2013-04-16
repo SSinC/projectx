@@ -8,50 +8,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "projectX/HelloWorldLayer.mm"
-         timestampString = "387769181.683124"
+         timestampString = "387789509.518691"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "615"
-         endingLineNumber = "615"
-         landmarkName = "-update:"
-         landmarkType = "5">
-      </FileBreakpoint>
-      <FileBreakpoint
-         shouldBeEnabled = "No"
-         ignoreCount = "0"
-         continueAfterRunningActions = "No"
-         filePath = "projectX/HelloWorldLayer.mm"
-         timestampString = "387769181.683124"
-         startingColumnNumber = "9223372036854775807"
-         endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "602"
-         endingLineNumber = "602"
-         landmarkName = "-update:"
-         landmarkType = "5">
-      </FileBreakpoint>
-      <FileBreakpoint
-         shouldBeEnabled = "No"
-         ignoreCount = "0"
-         continueAfterRunningActions = "No"
-         filePath = "projectX/HelloWorldLayer.mm"
-         timestampString = "387769181.683124"
-         startingColumnNumber = "9223372036854775807"
-         endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "612"
-         endingLineNumber = "612"
-         landmarkName = "-update:"
-         landmarkType = "5">
-      </FileBreakpoint>
-      <FileBreakpoint
-         shouldBeEnabled = "No"
-         ignoreCount = "0"
-         continueAfterRunningActions = "No"
-         filePath = "projectX/HelloWorldLayer.mm"
-         timestampString = "387769181.683124"
-         startingColumnNumber = "9223372036854775807"
-         endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "866"
-         endingLineNumber = "866"
+         startingLineNumber = "918"
+         endingLineNumber = "918"
          landmarkName = "-areVerticesAcceptable:count:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -60,11 +21,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "projectX/HelloWorldLayer.mm"
-         timestampString = "387364777.181718"
+         timestampString = "387788280.182585"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "339"
-         endingLineNumber = "339"
+         startingLineNumber = "350"
+         endingLineNumber = "350"
          landmarkName = "-draw"
          landmarkType = "5">
       </FileBreakpoint>

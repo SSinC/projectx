@@ -26,11 +26,11 @@
     };
     CGSize screen = [[CCDirector sharedDirector] winSize];
     
-    CCLOG(@"screen is %0.2f x %02.f",screen.width/2/PTM_RATIO,screen.height/2/PTM_RATIO);
+    //CCLOG(@"screen is %0.2f x %02.f",screen.width/2/PTM_RATIO,screen.height/2/PTM_RATIO);
     
     b2Body *body = [self createBodyForWorld:world position:b2Vec2(p.x/PTM_RATIO,p.y/PTM_RATIO) rotation:0 vertices:vertices vertexCount:count density:5.0 friction:0.2 restitution:0.2];
     
-    CCLOG(@"Creat sprite position is %0.2f x %02.f",body->GetPosition().x,body->GetPosition().y);
+    //CCLOG(@"Creat sprite position is %0.2f x %02.f",body->GetPosition().x,body->GetPosition().y);
     
     if ((self = [super initWithFile:file body:body original:YES]))
     {

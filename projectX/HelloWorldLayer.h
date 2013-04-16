@@ -52,6 +52,8 @@
     
     //added copy_chooseBodyNumber to choose body type
     __block int copy_chooseBodyNumber;
+    //added cut option
+    __block BOOL cut;
     
     //add explodeing center
     float explosionX;
@@ -63,11 +65,16 @@
     //add tagBody to create uniqe Body ID
     int32 tagBodyA;
     int32 tagBodyB;
+    int32 tagBody1;
     
     //add rayCastCallBack
     RaycastCallback *_raycastCallback;
     
      CCArray *_cache;
+    
+    CGPoint _startPoint;
+    CGPoint _endPoint;
+    
     
     //add C++ style Array 
 //    std::vector<b2Body*> explodingBodiesCPP_;

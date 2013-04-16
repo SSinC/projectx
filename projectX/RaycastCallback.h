@@ -22,12 +22,18 @@ public:
     
     float32 ReportFixture(b2Fixture *fixture,const b2Vec2 &point,const b2Vec2 &normal,float32 fraction)
     {
+       
         PolygonSprite *ps = (PolygonSprite*)fixture->GetBody()->GetUserData();
+        if(!ps){
+         CCLOG(@"in ReportFixture sprite is NULL" );
+        }
+         CCLOG(@"in ReportFixture sprite.tag is: %d",ps.tag);
         if (!ps.sliceEntered)
         {
             ps.sliceEntered = YES;
             
             //we need to get the point coordinates within the shape
+            //ps.entryPoint = point;
             ps.entryPoint  = ps.body->GetLocalPoint(point);
             
             //we also need to store the slice entry time so that there's a time limit for each slice to complete
@@ -35,6 +41,7 @@ public:
         }
         else if (!ps.sliceExited)
         {
+            //ps.exitPoint = point;
             ps.exitPoint = ps.body->GetLocalPoint(point);
             b2Vec2 entrySide = ps.entryPoint - ps.centroid;
             b2Vec2 exitSide = ps.exitPoint - ps.centroid;
@@ -88,6 +95,7 @@ public:
             }
 
         }
+        CCLOG(@"is to out  ReportFixture");
         return 1;
     }
 };
