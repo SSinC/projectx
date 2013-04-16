@@ -236,7 +236,7 @@ HelloWorldLayer* instance;
         
     }];
     
-    CCMenuItem *Cut = [CCMenuItemFont itemWithString:@"我要切西瓜玩法" block:^(id sender){
+    CCMenuItem *Cut = [CCMenuItemFont itemWithString:@"我要切西瓜         " block:^(id sender){
         // Switch the mode to Cut-Mode
         cut = true;
     }];
@@ -258,7 +258,7 @@ HelloWorldLayer* instance;
 	
 	[menuChooseBody2 alignItemsHorizontally];
 	
-    [menuChooseBody2 setPosition:ccp( size.width/6, size.height/2+50)];
+    [menuChooseBody2 setPosition:ccp( size.width/6+150, size.height/2+350)];
     
     [self addChild: menuChooseBody2 z:-1];
 
@@ -352,6 +352,10 @@ HelloWorldLayer* instance;
 	
 	kmGLPushMatrix();
 	
+    if(cut){
+     ccDrawLine(_startPoint, _endPoint);
+    }
+    
 	world->DrawDebugData();	
 	
 	kmGLPopMatrix();
@@ -629,14 +633,15 @@ HelloWorldLayer* instance;
             if (((spriteA.tag >= 500 && spriteB.tag >=500)|| (spriteA.tag >=500 && spriteB.tag >= 500))){
                 [parent1 removeChild:spriteA];
                 [parent1 removeChild:spriteB];
+                toDestroy.push_back(bodyA);
+                toDestroy.push_back(bodyB);
                 //经试验，先销毁图像再在下个循环销毁body，效果最好。如果不先销毁图像，渲染会莫名其妙延迟。
                 
 //            PolygonSprite *spriteA = (PolygonSprite *) bodyA->GetUserData();
 //            PolygonSprite *spriteB = (PolygonSprite *) bodyB->GetUserData();
 //           if (((spriteA.tag >= 1000 && spriteB.tag >=1000)|| (spriteA.tag >=1000 && spriteB.tag >=1000))){
 //               CCLOG(@"in contact");
-//                //BOX2D的检测穿透物体的射线函数，
-//                //回调函数是interaction，后2个参数是决定射线的的2点
+//                
 //                explosionX = bodyA->GetWorldCenter().x;
 //                explosionY = bodyA->GetWorldCenter().y;
 //                CCLOG(@"explosion center is: %0.2f x %02.f",explosionX,explosionY);
@@ -682,9 +687,6 @@ HelloWorldLayer* instance;
 //                CCLOG(@"after splicing bodyA");
             
 //               }//end for
-               
-            toDestroy.push_back(bodyA);
-            toDestroy.push_back(bodyB);
             
                 // 不能立刻销毁body
                 //            world->DestroyBody(bodyA);
@@ -1005,12 +1007,12 @@ HelloWorldLayer* instance;
             
             if (sprite.sliceEntered && curTime > sprite.sliceEntryTime)
             {
-                CCLOG(@"not split body");
+                //CCLOG(@"not split body");
                 sprite.sliceEntered = NO;
             }
             else if (sprite.sliceEntered && sprite.sliceExited)
             {
-                 CCLOG(@"it to split body");
+                 //CCLOG(@"it to split body");
                 [self splitPolygonSprite:sprite];
             }
         }
