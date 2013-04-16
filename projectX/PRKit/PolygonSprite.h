@@ -40,7 +40,9 @@
 +(id)spriteWithFile:(NSString*)filename body:(b2Body*)body original:(BOOL)original;
 +(id)spriteWithTexture:(CCTexture2D*)texture body:(b2Body*)body original:(BOOL)original;
 -(id)initWithWorld:(b2World*)world;
-
+//*******************************  Added by wk  ******************************
+//We can use this method to add sprite at where we want
+//************************************************************************
 -(id)initWithWorld:(b2World *)world at:(CGPoint)p;
 
 +(id)spriteWithWorld:(b2World*)world;

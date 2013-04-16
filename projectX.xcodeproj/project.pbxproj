@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		187D474E171C497A00C89E9C /* body2.mm in Sources */ = {isa = PBXBuildFile; fileRef = 187D474D171C497A00C89E9C /* body2.mm */; };
+		187D474E171C497A00C89E9C /* body1.mm in Sources */ = {isa = PBXBuildFile; fileRef = 187D474D171C497A00C89E9C /* body1.mm */; };
 		187D4752171C4A9F00C89E9C /* watermelon-hd.png in Resources */ = {isa = PBXBuildFile; fileRef = 187D474F171C4A9F00C89E9C /* watermelon-hd.png */; };
 		187D4753171C4A9F00C89E9C /* watermelon-ipadhd.png in Resources */ = {isa = PBXBuildFile; fileRef = 187D4750171C4A9F00C89E9C /* watermelon-ipadhd.png */; };
 		187D4754171C4A9F00C89E9C /* watermelon.png in Resources */ = {isa = PBXBuildFile; fileRef = 187D4751171C4A9F00C89E9C /* watermelon.png */; };
@@ -199,7 +199,7 @@
 
 /* Begin PBXFileReference section */
 		187D474C171C497A00C89E9C /* body1.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = body1.h; sourceTree = "<group>"; };
-		187D474D171C497A00C89E9C /* body2.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = body2.mm; sourceTree = "<group>"; };
+		187D474D171C497A00C89E9C /* body1.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = body1.mm; sourceTree = "<group>"; };
 		187D474F171C4A9F00C89E9C /* watermelon-hd.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "watermelon-hd.png"; path = "Resources/watermelon-hd.png"; sourceTree = "<group>"; };
 		187D4750171C4A9F00C89E9C /* watermelon-ipadhd.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "watermelon-ipadhd.png"; path = "Resources/watermelon-ipadhd.png"; sourceTree = "<group>"; };
 		187D4751171C4A9F00C89E9C /* watermelon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = watermelon.png; path = Resources/watermelon.png; sourceTree = "<group>"; };
@@ -648,6 +648,7 @@
 		3D735D95170FF7820093EE39 /* projectX */ = {
 			isa = PBXGroup;
 			children = (
+				747941E4171CDF0500B85384 /* model */,
 				3D735FC9170FF81E0093EE39 /* AppDelegate.h */,
 				3D735FCA170FF81E0093EE39 /* AppDelegate.mm */,
 				3D735FCB170FF81E0093EE39 /* contactListener.h */,
@@ -658,8 +659,6 @@
 				3D735FD2170FF81E0093EE39 /* IntroLayer.mm */,
 				3D735FCF170FF81E0093EE39 /* HelloWorldLayer.h */,
 				3D735FD0170FF81E0093EE39 /* HelloWorldLayer.mm */,
-				187D474C171C497A00C89E9C /* body1.h */,
-				187D474D171C497A00C89E9C /* body2.mm */,
 				747941D2171BD87900B85384 /* RaycastCallback.h */,
 				747941DD171BF1FD00B85384 /* PolygonSprite.h */,
 				747941DE171BF1FE00B85384 /* PolygonSprite.mm */,
@@ -1226,6 +1225,15 @@
 			path = PRKit;
 			sourceTree = "<group>";
 		};
+		747941E4171CDF0500B85384 /* model */ = {
+			isa = PBXGroup;
+			children = (
+				187D474D171C497A00C89E9C /* body1.mm */,
+				187D474C171C497A00C89E9C /* body1.h */,
+			);
+			name = model;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -1465,7 +1473,7 @@
 				747941D6171BD87A00B85384 /* PRRatcliffTriangulator.mm in Sources */,
 				747941D7171BD87A00B85384 /* triangulate.cpp in Sources */,
 				747941DF171BF20000B85384 /* PolygonSprite.mm in Sources */,
-				187D474E171C497A00C89E9C /* body2.mm in Sources */,
+				187D474E171C497A00C89E9C /* body1.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

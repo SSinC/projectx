@@ -75,10 +75,32 @@
     return nil;
 }
 
+
+//*******************************  Added by wk  ******************************
+//We can use this method to add sprite at where we want
+//************************************************************************
+-(id)initWithWorld:(b2World *)world at:(CGPoint)p
+{
+    //nothing to do here
+    return nil;
+}
+
+//*******************************  Deleted by wk  ******************************
+//Due to the Api-changes,we can not call [super setPosition:position];
+//**************************************************************************
+//-(void)setPosition:(CGPoint)position
+//{
+//    [super setPosition:position];
+//    _body->SetTransform(b2Vec2(position.x/PTM_RATIO,position.y/PTM_RATIO), _body->GetAngle());
+//}
+
+//*******************************  Added by wk  ********************************
+//Due to the Api-changes,we can not call [super setPosition:position];
+//**************************************************************************
 -(void)setPosition:(CGPoint)position
 {
-    [super setPosition:position];
-    _body->SetTransform(b2Vec2(position.x/PTM_RATIO,position.y/PTM_RATIO), _body->GetAngle());
+	float angle = _body->GetAngle();
+	_body->SetTransform( b2Vec2(position.x / PTM_RATIO, position.y / PTM_RATIO), angle );
 }
 
 -(b2Body*)createBodyForWorld:(b2World *)world position:(b2Vec2)position rotation:(float)rotation vertices:(b2Vec2*)vertices vertexCount:(int32)count density:(float)density friction:(float)friction restitution:(float)restitution
@@ -123,6 +145,10 @@
     fixture->SetFilterData(filter);
 }
 
+
+//*******************************  Deleted by wk  ******************************
+//Due to the Api-changes,we can not use isRelativeAnchorPoint_
+//**************************************************************************
 //-(CGAffineTransform) nodeToParentTransform
 //{
 //    b2Vec2 pos  = _body->GetPosition();
@@ -157,7 +183,10 @@
 //    return _transform;
 //}
 
-
+//*******************************  Deleted by wk ******************************
+//Due to the Api-changes,we must use the new parameter：
+// _ignoreAnchorPointForPosition,_scaleX,_scaleY
+//**************************************************************************
 -(CGAffineTransform) nodeToParentTransform
 {
 	b2Vec2 pos  = _body->GetPosition();

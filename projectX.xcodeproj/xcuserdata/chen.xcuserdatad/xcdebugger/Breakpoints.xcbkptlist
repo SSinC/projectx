@@ -8,24 +8,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "projectX/HelloWorldLayer.mm"
-         timestampString = "387287210.872009"
+         timestampString = "387769181.683124"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "612"
-         endingLineNumber = "612"
-         landmarkName = "@implementation HelloWorldLayer"
-         landmarkType = "3">
-      </FileBreakpoint>
-      <FileBreakpoint
-         shouldBeEnabled = "No"
-         ignoreCount = "0"
-         continueAfterRunningActions = "No"
-         filePath = "projectX/HelloWorldLayer.mm"
-         timestampString = "387287210.872009"
-         startingColumnNumber = "9223372036854775807"
-         endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "599"
-         endingLineNumber = "599"
+         startingLineNumber = "615"
+         endingLineNumber = "615"
          landmarkName = "-update:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -34,25 +21,38 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "projectX/HelloWorldLayer.mm"
-         timestampString = "387287210.872009"
+         timestampString = "387769181.683124"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "609"
-         endingLineNumber = "609"
-         landmarkName = "@implementation HelloWorldLayer"
-         landmarkType = "3">
+         startingLineNumber = "602"
+         endingLineNumber = "602"
+         landmarkName = "-update:"
+         landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "projectX/HelloWorldLayer.mm"
-         timestampString = "387287210.872009"
+         timestampString = "387769181.683124"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "863"
-         endingLineNumber = "863"
-         landmarkName = "-leaderboardViewControllerDidFinish:"
+         startingLineNumber = "612"
+         endingLineNumber = "612"
+         landmarkName = "-update:"
+         landmarkType = "5">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "No"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         filePath = "projectX/HelloWorldLayer.mm"
+         timestampString = "387769181.683124"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "866"
+         endingLineNumber = "866"
+         landmarkName = "-areVerticesAcceptable:count:"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
@@ -65,7 +65,7 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "339"
          endingLineNumber = "339"
-         landmarkName = "-createBody1:"
+         landmarkName = "-draw"
          landmarkType = "5">
       </FileBreakpoint>
    </FileBreakpoints>

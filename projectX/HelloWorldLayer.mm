@@ -345,6 +345,13 @@ HelloWorldLayer* instance;
         _cache = [[CCArray alloc] initWithCapacity:53];
         
     PolygonSprite *sprite = [[body1 alloc] initWithWorld:world at:p ];
+    
+    
+//*******************We can not use the following methods to add sprite to parentSprite************
+//*************************This should be fixed or worked arround**********************************
+//********************************          WK         ********************************************
+//    	CCNode *parentSprite = [self getChildByTag:kTagParentNode];
+//        [parentSprite addChild:sprite];
 
         [self addChild:sprite z:1];
         [sprite activateCollisions];
