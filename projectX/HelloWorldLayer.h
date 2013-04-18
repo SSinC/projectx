@@ -77,6 +77,10 @@
     CGPoint _endPoint;
     
     
+    //add physics-effect related parameters
+    __block BOOL attractivelyHoleExist;
+    
+    
     //add C++ style Array 
 //    std::vector<b2Body*> explodingBodiesCPP_;
 //    std::vector<b2Vec2> enterPointsVecCPP_;
