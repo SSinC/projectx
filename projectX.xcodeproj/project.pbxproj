@@ -195,6 +195,7 @@
 		747941D6171BD87A00B85384 /* PRRatcliffTriangulator.mm in Sources */ = {isa = PBXBuildFile; fileRef = 747941CE171BD87900B85384 /* PRRatcliffTriangulator.mm */; };
 		747941D7171BD87A00B85384 /* triangulate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 747941D0171BD87900B85384 /* triangulate.cpp */; };
 		747941DF171BF20000B85384 /* PolygonSprite.mm in Sources */ = {isa = PBXBuildFile; fileRef = 747941DE171BF1FE00B85384 /* PolygonSprite.mm */; };
+		747941F41720D67600B85384 /* magnet.mm in Sources */ = {isa = PBXBuildFile; fileRef = 747941F31720D67600B85384 /* magnet.mm */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -590,6 +591,8 @@
 		747941D2171BD87900B85384 /* RaycastCallback.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RaycastCallback.h; sourceTree = "<group>"; };
 		747941DD171BF1FD00B85384 /* PolygonSprite.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PolygonSprite.h; path = PRKit/PolygonSprite.h; sourceTree = "<group>"; };
 		747941DE171BF1FE00B85384 /* PolygonSprite.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = PolygonSprite.mm; path = PRKit/PolygonSprite.mm; sourceTree = "<group>"; };
+		747941F21720D67600B85384 /* magnet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = magnet.h; sourceTree = "<group>"; };
+		747941F31720D67600B85384 /* magnet.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = magnet.mm; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1228,8 +1231,10 @@
 		747941E4171CDF0500B85384 /* model */ = {
 			isa = PBXGroup;
 			children = (
-				187D474D171C497A00C89E9C /* body1.mm */,
 				187D474C171C497A00C89E9C /* body1.h */,
+				187D474D171C497A00C89E9C /* body1.mm */,
+				747941F21720D67600B85384 /* magnet.h */,
+				747941F31720D67600B85384 /* magnet.mm */,
 			);
 			name = model;
 			sourceTree = "<group>";
@@ -1474,6 +1479,7 @@
 				747941D7171BD87A00B85384 /* triangulate.cpp in Sources */,
 				747941DF171BF20000B85384 /* PolygonSprite.mm in Sources */,
 				187D474E171C497A00C89E9C /* body1.mm in Sources */,
+				747941F41720D67600B85384 /* magnet.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

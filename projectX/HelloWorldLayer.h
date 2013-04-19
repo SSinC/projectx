@@ -49,6 +49,7 @@
     contactListener *_contactListener;
     CCSpriteBatchNode *parent;
     CGPoint locationBegin;
+    CGSize winSize;
     
     //added copy_chooseBodyNumber to choose body type
     __block int copy_chooseBodyNumber;
@@ -78,7 +79,14 @@
     
     
     //add physics-effect related parameters
-    __block BOOL attractivelyHoleExist;
+    __block BOOL magnetExist;
+    PolygonSprite *magnetSprite;
+    __block BOOL airfanExist;
+    PolygonSprite *airfanSprite;
+    
+    
+    //add weaponTest
+    PolygonSprite *weaponTest;
     
     
     //add C++ style Array 

@@ -40,6 +40,7 @@
 +(id)spriteWithFile:(NSString*)filename body:(b2Body*)body original:(BOOL)original;
 +(id)spriteWithTexture:(CCTexture2D*)texture body:(b2Body*)body original:(BOOL)original;
 -(id)initWithWorld:(b2World*)world;
+
 //*******************************  Added by wk  ******************************
 //We can use this method to add sprite at where we want
 //************************************************************************
@@ -47,6 +48,10 @@
 
 +(id)spriteWithWorld:(b2World*)world;
 -(b2Body*)createBodyForWorld:(b2World*)world position:(b2Vec2)position rotation:(float)rotation vertices:(b2Vec2*)vertices vertexCount:(int32)count density:(float)density friction:(float)friction restitution:(float)restitution;
+//*******************************  Added by wk  ******************************
+//Create globular body
+-(b2Body*)createGlobularBodyForWorld:(b2World *)world position:(b2Vec2)position rotation:(float)rotation  radius:(float)radius density:(float)density friction:(float)friction restitution:(float)restitution;
+
 -(void)activateCollisions;
 -(void)deactivateCollisions;
 

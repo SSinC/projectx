@@ -127,6 +127,30 @@
     return body;
 }
 
+-(b2Body*)createGlobularBodyForWorld:(b2World *)world position:(b2Vec2)position rotation:(float)rotation  radius:(float)radius density:(float)density friction:(float)friction restitution:(float)restitution
+{
+    b2BodyDef bodyDef;
+    bodyDef.type = b2_dynamicBody;
+    bodyDef.position = position;
+    bodyDef.angle = rotation;
+    b2Body *body = world->CreateBody(&bodyDef);
+    
+    b2FixtureDef fixtureDef;
+    fixtureDef.density = density;
+    fixtureDef.friction = friction;
+    fixtureDef.restitution = restitution;
+    fixtureDef.filter.categoryBits = 0;
+    fixtureDef.filter.maskBits = 0;
+    //fixtureDef.isSensor = YES;
+    
+    b2CircleShape *circleShape = new b2CircleShape();
+    circleShape->m_radius = radius;
+    fixtureDef.shape = circleShape;
+    body->CreateFixture(&fixtureDef);
+    
+    return body;
+
+}
 -(void)activateCollisions
 {
     b2Fixture *fixture = _body->GetFixtureList();

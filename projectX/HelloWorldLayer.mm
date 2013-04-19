@@ -17,6 +17,7 @@
 #import <math.h>
 
 #import "body1.h"
+#import "magnet.h"
 enum {
 	kTagParentNode = 1,
 };
@@ -100,7 +101,7 @@ HelloWorldLayer* instance;
         copy_chooseBodyNumber = 0;
         cut = false;
         
-		CGSize s = [CCDirector sharedDirector].winSize;
+		CGSize winSize = [CCDirector sharedDirector].winSize;
 		
 		// init physics
 		[self initPhysics];
@@ -135,7 +136,7 @@ HelloWorldLayer* instance;
 		CCLabelTTF *label = [CCLabelTTF labelWithString:@"Tap screen" fontName:@"Marker Felt" fontSize:32];
 		[self addChild:label z:0];
 		[label setColor:ccc3(0,0,255)];
-		label.position = ccp( s.width/2, s.height-50);
+		label.position = ccp( winSize.width/2, winSize.height-50);
         
         //add contactListener
         _contactListener = new contactListener();
@@ -245,6 +246,17 @@ HelloWorldLayer* instance;
         // Switch the mode back to Drag-Shoot mode
         cut = false;
     }];
+    
+    CCMenuItem *createMagnet = [CCMenuItemFont itemWithString:@"磁铁开关" block:^(id sender){
+        if(!magnetExist)
+        {
+            [copy_self createMagnet];
+            magnetExist = true;
+        }else{
+            [copy_self destroyMagnet];
+            magnetExist = false;
+        }
+    }];
 	
     CCMenu *menuChooseBody1 = [CCMenu menuWithItems:chooseBody1, chooseBody2, chooseBody3,  nil];
 	
@@ -254,7 +266,7 @@ HelloWorldLayer* instance;
     //z代表图像层次
     [self addChild: menuChooseBody1 z:-1];
     
-    CCMenu *menuChooseBody2 = [CCMenu menuWithItems:Cut, notCut,  nil];
+    CCMenu *menuChooseBody2 = [CCMenu menuWithItems:Cut, notCut, createMagnet, nil];
 	
 	[menuChooseBody2 alignItemsHorizontally];
 	
@@ -384,8 +396,8 @@ HelloWorldLayer* instance;
     sprite.tag = tagBody1++;
     //[sprite setPosition: ccp( p.x, p.y)];
     [movableSprites addObject:sprite];
-    CCLOG(@"body worldCenter is %0.2f x %02.f%",sprite.body->GetWorldCenter().x,sprite.body->GetWorldCenter().x);
-    CCLOG(@"body localCenter is %0.2f x %02.f%",sprite.body->GetLocalCenter().x,sprite.body->GetLocalCenter().x);
+    CCLOG(@"body worldCenter is %0.2f x %02.f%",sprite.body->GetWorldCenter().x,sprite.body->GetWorldCenter().y);
+    CCLOG(@"body localCenter is %0.2f x %02.f%",sprite.body->GetLocalCenter().x,sprite.body->GetLocalCenter().y);
     //CCLOG(@"sprite position is %0.2f x %02.f",sprite.body->GetPosition().x,sprite.body->GetPosition().y);
 }
 
@@ -506,6 +518,26 @@ HelloWorldLayer* instance;
 {
     
 }
+
+
+-(void) createMagnet
+{
+    magnetSprite = [[magnet alloc] initWithWorld:world  ];
+    
+    [self addChild:magnetSprite z:1];
+    
+    [magnetSprite activateCollisions];
+        
+    magnetSprite.tag = 5000;
+  
+}
+
+-(void) destroyMagnet
+{
+    world->DestroyBody(magnetSprite.body);
+    [self removeChild:magnetSprite cleanup:YES];
+}
+
 
 -(void) addNewSpriteAtPosition:(CGPoint)p
 {
@@ -633,7 +665,8 @@ HelloWorldLayer* instance;
         
         if (bodyA->GetUserData() != NULL && bodyB->GetUserData() != NULL)
         {
-            
+            if(([(id)bodyA->GetUserData() isKindOfClass:[CCPhysicsSprite class]]) &&([(id)bodyB->GetUserData() isKindOfClass:[CCPhysicsSprite class]]))
+            {
             CCPhysicsSprite *spriteA = (CCPhysicsSprite *) bodyA->GetUserData();
             CCPhysicsSprite *spriteB = (CCPhysicsSprite *) bodyB->GetUserData();
             
@@ -702,7 +735,7 @@ HelloWorldLayer* instance;
             }
             
         }
-        
+      }
     }
     //销毁body
     // Loop through all of the box2d bodies we wnat to destroy...
@@ -732,10 +765,52 @@ HelloWorldLayer* instance;
 //************************Physics-Effect************************
 -(void)physicsEffect
 {
-    if (attractivelyHoleExist) {
-        float diffX = 5;
-    }
-    
+    dispatch_queue_t globalQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+    dispatch_async ( globalQueue, ^{
+                       if (magnetExist)
+                       {
+                           float weaponX = weaponTest.centroid.x * PTM_RATIO;
+                           float weaponY = weaponTest.centroid.y * PTM_RATIO;
+                           float diffX = winSize.width  - weaponX;
+                           float diffY = winSize.height - weaponY;
+                           float criticalDistance = 50.0;
+                           
+                           if(sqrt(pow(diffX,2)+pow(diffY,2))< criticalDistance)
+                           {
+                               float forceX = (diffX < 0 ? -1:1)* abs(diffX) / sqrt(pow(diffX,2)+pow(diffY,2)) ;
+                               float forceY = (diffY < 0 ? -1:1)* abs(diffY) / sqrt(pow(diffX,2)+pow(diffY,2)) ;
+                               b2Vec2 force = * new b2Vec2(forceX,forceY);
+                               
+                               weaponTest.body->ApplyLinearImpulse(force, weaponTest.body->GetWorldCenter());
+                           }
+                       }
+
+                   });
+    dispatch_async ( globalQueue, ^{
+                       if (airfanExist)
+                       {
+                           float weaponX = weaponTest.centroid.x * PTM_RATIO;
+                           float weaponY = weaponTest.centroid.y * PTM_RATIO;
+                           float airfanX = airfanSprite.centroid.x;
+                           float airfanY = airfanSprite.centroid.y;
+                           float criticalMin = airfanY - 100;
+                           float criticalMax = airfanY + 100;
+                           float diffX = weaponX - airfanX;
+                           float diffY = weaponY - airfanY;
+                           float MAXforceX = 300;
+                           
+                           if((criticalMin < weaponY < criticalMax) && (diffX < 300) )
+                           {
+                               float forceX = MAXforceX / sqrt(pow(diffX,2)+pow(diffY,2)) ;
+                               float forceY = 0 ;
+                               b2Vec2 force = * new b2Vec2(forceX,forceY);
+                               
+                               weaponTest.body->ApplyLinearImpulse(force, weaponTest.body->GetWorldCenter());
+                           }
+                       }
+                       
+                   });
+
 }
 
 
@@ -747,7 +822,7 @@ HelloWorldLayer* instance;
 -(void)splitPolygonSprite:(PolygonSprite*)sprite
 {
     //declare & initialize variables to be used for later
-    PolygonSprite *newSprite1, *newSprite2;
+    __block PolygonSprite *newSprite1, *newSprite2;
     
     //our original shape's attributes
     b2Fixture *originalFixture = sprite.body->GetFixtureList();
@@ -821,8 +896,8 @@ HelloWorldLayer* instance;
     
     
     //***************************************  NOTICE ******************************************
-    //Note that if we want to use -(void)splitPolygonSprite:(PolygonSprite*)sprite to create Explosion-effect
-    //The entry and exit point MUST be chosen carefully,if they are appropriate enough,the SETP 5 would not be invoked.
+    //Note that if we want to use -(void)splitPolygonSprite:(PolygonSprite*)sprite to make some Explosion-effect
+    //The entry and exit point MUST be chosen carefully.If they are not appropriate enough,the SETP 5 would not be invoked.
     //****************************************   WK  *******************************************
     BOOL sprite1VerticesAcceptable = [self areVerticesAcceptable:sprite1VerticesSorted count:sprite1VertexCount];
     BOOL sprite2VerticesAcceptable = [self areVerticesAcceptable:sprite2VerticesSorted count:sprite2VertexCount];
@@ -838,37 +913,49 @@ HelloWorldLayer* instance;
     //we destroy the old shape and create the new shapes and sprites
     if (sprite1VerticesAcceptable && sprite2VerticesAcceptable)
     {
-        //create the first sprite's body
-        b2Body *body1 = [self createBodyWithPosition:sprite.body->GetPosition() rotation:sprite.body->GetAngle() vertices:sprite1VerticesSorted vertexCount:sprite1VertexCount density:originalFixture->GetDensity() friction:originalFixture->GetFriction() restitution:originalFixture->GetRestitution()];
+        dispatch_group_t group = dispatch_group_create();
+        dispatch_queue_t globalQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
         
-        //create the first sprite
+        dispatch_group_async(group, globalQueue, ^{
+            //create the first sprite's body
+            b2Body *body1 = [self createBodyWithPosition:sprite.body->GetPosition() rotation:sprite.body->GetAngle() vertices:sprite1VerticesSorted vertexCount:sprite1VertexCount density:originalFixture->GetDensity() friction:originalFixture->GetFriction() restitution:originalFixture->GetRestitution()];
+            
+            //create the first sprite
+            
+            newSprite1 = [PolygonSprite spriteWithTexture:sprite.texture body:body1 original:NO];
+            [self addChild:newSprite1 z:1];
+
+        });
         
-        newSprite1 = [PolygonSprite spriteWithTexture:sprite.texture body:body1 original:NO];
-        [self addChild:newSprite1 z:1];
-        
-        //create the second sprite's body
-        b2Body *body2 = [self createBodyWithPosition:sprite.body->GetPosition() rotation:sprite.body->GetAngle() vertices:sprite2VerticesSorted vertexCount:sprite2VertexCount density:originalFixture->GetDensity() friction:originalFixture->GetFriction() restitution:originalFixture->GetRestitution()];
-        
-        //create the second sprite
-        newSprite2 = [PolygonSprite spriteWithTexture:sprite.texture body:body2 original:NO];
-        [self addChild:newSprite2 z:1];
-        
-        //we don't need the old shape & sprite anymore so we either destroy it or squirrel it away
-        CCLOG(@"in Split-body setp 5 ,create sprite1,2");
-        if (sprite.original)
-        {
-            [sprite deactivateCollisions];
-            sprite.position = ccp(-256,-256);   //cast them faraway
-            sprite.sliceEntered = NO;
-            sprite.sliceExited = NO;
-            sprite.entryPoint.SetZero();
-            sprite.exitPoint.SetZero();
-        }
-        else
-        {
-            world->DestroyBody(sprite.body);
-            [self removeChild:sprite cleanup:YES];
-        }
+        dispatch_group_async(group, globalQueue, ^{
+            //create the second sprite's body
+            b2Body *body2 = [self createBodyWithPosition:sprite.body->GetPosition() rotation:sprite.body->GetAngle() vertices:sprite2VerticesSorted vertexCount:sprite2VertexCount density:originalFixture->GetDensity() friction:originalFixture->GetFriction() restitution:originalFixture->GetRestitution()];
+            
+            //create the second sprite
+            newSprite2 = [PolygonSprite spriteWithTexture:sprite.texture body:body2 original:NO];
+            [self addChild:newSprite2 z:1];
+
+            });
+        dispatch_group_notify(group, globalQueue, ^{
+            //we don't need the old shape & sprite anymore so we either destroy it or squirrel it away
+            CCLOG(@"in Split-body setp 5 ,create sprite1,2");
+            if (sprite.original)
+            {
+                [sprite deactivateCollisions];
+                sprite.position = ccp(-256,-256);   //cast them faraway
+                sprite.sliceEntered = NO;
+                sprite.sliceExited = NO;
+                sprite.entryPoint.SetZero();
+                sprite.exitPoint.SetZero();
+            }
+            else
+            {
+                world->DestroyBody(sprite.body);
+                [self removeChild:sprite cleanup:YES];
+            }
+
+        });
+        dispatch_release(group);
     }
     else
     {
@@ -1046,13 +1133,15 @@ HelloWorldLayer* instance;
 
 
 //*******************     wk    ***********************
-//Add this funtion to splice a specific body
+//Add this funtion to splice a specific body where we want
 //    to be used **************************************
 -(void)checkAndSliceObjects:(b2Body *)b
 {
     double curTime = CACurrentMediaTime();
     
     if (b->GetUserData() != NULL) {
+        if([(id)b->GetUserData() isKindOfClass:[PolygonSprite class]])
+        {
         
         PolygonSprite *sprite = (PolygonSprite*)b->GetUserData();
         if(sprite.sliceEntered){
@@ -1072,6 +1161,7 @@ HelloWorldLayer* instance;
             CCLOG(@"it to split body");
             [self splitPolygonSprite:sprite];
         }
+      }
     }
     
 }
