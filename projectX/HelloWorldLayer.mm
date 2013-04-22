@@ -548,10 +548,14 @@ HelloWorldLayer* instance;
         {
             case 1:
                 //[self createBody1:p];
-                [self createBodyTest:p];
+                dispatch_async(globalQueue, ^{
+                   [self createBodyTest:p];
+                });
                 break;
             case 2:
-                [self createBody2:p];
+                dispatch_async(globalQueue, ^{
+                   [self createBody2:p];
+                });
                 //[self createBodyTest:p];
                 break;
             case 3:
@@ -765,51 +769,87 @@ HelloWorldLayer* instance;
 //************************Physics-Effect************************
 -(void)physicsEffect
 {
-    dispatch_queue_t globalQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
-    dispatch_async ( globalQueue, ^{
-                       if (magnetExist)
-                       {
-                           float weaponX = weaponTest.centroid.x * PTM_RATIO;
-                           float weaponY = weaponTest.centroid.y * PTM_RATIO;
-                           float diffX = winSize.width  - weaponX;
-                           float diffY = winSize.height - weaponY;
-                           float criticalDistance = 50.0;
-                           
-                           if(sqrt(pow(diffX,2)+pow(diffY,2))< criticalDistance)
-                           {
-                               float forceX = (diffX < 0 ? -1:1)* abs(diffX) / sqrt(pow(diffX,2)+pow(diffY,2)) ;
-                               float forceY = (diffY < 0 ? -1:1)* abs(diffY) / sqrt(pow(diffX,2)+pow(diffY,2)) ;
-                               b2Vec2 force = * new b2Vec2(forceX,forceY);
-                               
-                               weaponTest.body->ApplyLinearImpulse(force, weaponTest.body->GetWorldCenter());
-                           }
-                       }
-
-                   });
-    dispatch_async ( globalQueue, ^{
-                       if (airfanExist)
-                       {
-                           float weaponX = weaponTest.centroid.x * PTM_RATIO;
-                           float weaponY = weaponTest.centroid.y * PTM_RATIO;
-                           float airfanX = airfanSprite.centroid.x;
-                           float airfanY = airfanSprite.centroid.y;
-                           float criticalMin = airfanY - 100;
-                           float criticalMax = airfanY + 100;
-                           float diffX = weaponX - airfanX;
-                           float diffY = weaponY - airfanY;
-                           float MAXforceX = 300;
-                           
-                           if((criticalMin < weaponY < criticalMax) && (diffX < 300) )
-                           {
-                               float forceX = MAXforceX / sqrt(pow(diffX,2)+pow(diffY,2)) ;
-                               float forceY = 0 ;
-                               b2Vec2 force = * new b2Vec2(forceX,forceY);
-                               
-                               weaponTest.body->ApplyLinearImpulse(force, weaponTest.body->GetWorldCenter());
-                           }
-                       }
-                       
-                   });
+    globalQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+    
+    //**********************  magnet-effect  *********************
+    if (magnetExist)
+    {
+        dispatch_async ( globalQueue, ^{
+            
+            float weaponX = weaponTest.centroid.x * PTM_RATIO;
+            float weaponY = weaponTest.centroid.y * PTM_RATIO;
+            float diffX   = winSize.width  - weaponX;
+            float diffY   = winSize.height - weaponY;
+            float criticalDistance = 50.0;
+            
+            if(sqrt(pow(diffX,2)+pow(diffY,2))< criticalDistance)
+            {
+                float forceX = (diffX < 0 ? -1:1)* abs(diffX) / sqrt(pow(diffX,2)+pow(diffY,2)) ;
+                float forceY = (diffY < 0 ? -1:1)* abs(diffY) / sqrt(pow(diffX,2)+pow(diffY,2)) ;
+                b2Vec2 force = * new b2Vec2(forceX,forceY);
+                
+                weaponTest.body->ApplyLinearImpulse(force, weaponTest.body->GetWorldCenter());
+            }
+        });
+    }
+    
+    //**********************  airfan-effect  *********************
+    if (airfanExist)
+    {
+        dispatch_async ( globalQueue, ^{
+            
+            float weaponX = weaponTest.centroid.x   * PTM_RATIO;
+            float weaponY = weaponTest.centroid.y   * PTM_RATIO;
+            float airfanX = airfanSprite.centroid.x * PTM_RATIO;
+            float airfanY = airfanSprite.centroid.y * PTM_RATIO;
+            float criticalMin = airfanY - 100;
+            float criticalMax = airfanY + 100;
+            float diffX       = weaponX - airfanX;
+            float diffY       = weaponY - airfanY;
+            float MAXforceX   = 300; //The max force
+            
+            if((criticalMin < weaponY < criticalMax) && (diffX < 300) )
+            {
+                float forceX = MAXforceX / sqrt(pow(diffX,2)+pow(diffY,2)) ;
+                float forceY = 0 ;
+                b2Vec2 force = * new b2Vec2(forceX,forceY);
+                
+                weaponTest.body->ApplyLinearImpulse(force, weaponTest.body->GetWorldCenter());
+            }
+        });
+    }
+    
+    //**********************  shock wave effect  *********************
+    if (weaponExploded)
+    {
+        dispatch_async(globalQueue, ^{
+           
+            float weaponX       = weaponTest.centroid.x   * PTM_RATIO;
+            float weaponY       = weaponTest.centroid.y   * PTM_RATIO;
+            float targetSpriteX = airfanSprite.centroid.x * PTM_RATIO;
+            float targetSpriteY = airfanSprite.centroid.y * PTM_RATIO;
+            float diffX         = weaponX - targetSpriteX;
+            float diffY         = weaponY - targetSpriteY;
+            
+            //************   Here is how the forceX and forceY are computed:
+            //       Fx / Fy             = diffX / diffY
+            //       distance            = sqrt( pow (diffX, 2) + pow (diffY, 2))
+            //       F (proportional to) = pow( ratio / distance, 2)
+            //       pow( F, 2 )         = pow(Fx,2)+pow(Fy,2)
+            //
+            //==>    Fx  = pow(ratio,2) * diffX / sqrt( pow( ( pow(diffX,2) + pow(diffY,2) ),3) )
+            //==>    Fy  = pow(ratio,2) * diffY / sqrt( pow( ( pow(diffX,2) + pow(diffY,2) ),3) )
+            
+            float ratio = 350;//the ratio should be carefully chosen
+            float forceX = pow(ratio,2) * diffX / sqrt (pow ((pow(diffX,2) + pow(diffY,2)),3));
+            float forceY = pow(ratio,2) * diffY / sqrt (pow ((pow(diffX,2) + pow(diffY,2)),3));
+            
+            b2Vec2 force = * new b2Vec2(forceX,forceY);
+            
+            targetSprite.body->ApplyLinearImpulse(force, targetSprite.body->GetWorldCenter());
+            
+        });
+    }
 
 }
 
@@ -913,29 +953,42 @@ HelloWorldLayer* instance;
     //we destroy the old shape and create the new shapes and sprites
     if (sprite1VerticesAcceptable && sprite2VerticesAcceptable)
     {
+        //************************************ use GCD to accelerate the game.*****************************
+        // Use dispatch_group_async and dispatch_group_notify to get the work done.
+        // The priority is to be examined.
+        //************************************************************************************************
+        
         dispatch_group_t group = dispatch_group_create();
-        dispatch_queue_t globalQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+        globalQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
         
         dispatch_group_async(group, globalQueue, ^{
+            
             //create the first sprite's body
             b2Body *body1 = [self createBodyWithPosition:sprite.body->GetPosition() rotation:sprite.body->GetAngle() vertices:sprite1VerticesSorted vertexCount:sprite1VertexCount density:originalFixture->GetDensity() friction:originalFixture->GetFriction() restitution:originalFixture->GetRestitution()];
             
             //create the first sprite
-            
             newSprite1 = [PolygonSprite spriteWithTexture:sprite.texture body:body1 original:NO];
+            
             [self addChild:newSprite1 z:1];
-
+            
         });
         
         dispatch_group_async(group, globalQueue, ^{
+            
             //create the second sprite's body
             b2Body *body2 = [self createBodyWithPosition:sprite.body->GetPosition() rotation:sprite.body->GetAngle() vertices:sprite2VerticesSorted vertexCount:sprite2VertexCount density:originalFixture->GetDensity() friction:originalFixture->GetFriction() restitution:originalFixture->GetRestitution()];
             
             //create the second sprite
             newSprite2 = [PolygonSprite spriteWithTexture:sprite.texture body:body2 original:NO];
+            
             [self addChild:newSprite2 z:1];
-
-            });
+            
+        });
+        
+        //****************************      Notice    ************************************
+        // As we can only destroy sprite after 2 b2body are both created,we have to use dispatch_group_notify
+        // to wait for the dispatch_group_async
+        
         dispatch_group_notify(group, globalQueue, ^{
             //we don't need the old shape & sprite anymore so we either destroy it or squirrel it away
             CCLOG(@"in Split-body setp 5 ,create sprite1,2");
@@ -953,8 +1006,10 @@ HelloWorldLayer* instance;
                 world->DestroyBody(sprite.body);
                 [self removeChild:sprite cleanup:YES];
             }
-
+            
         });
+        
+        // release the group
         dispatch_release(group);
     }
     else
@@ -1517,10 +1572,13 @@ HelloWorldLayer* instance;
                 world->RayCast(_raycastCallback,
                                b2Vec2(_endPoint.x / PTM_RATIO, _endPoint.y / PTM_RATIO),
                                b2Vec2(_startPoint.x / PTM_RATIO, _startPoint.y / PTM_RATIO));
+                
                 _startPoint = _endPoint;
             }
             
         }
+        // Only if the spirte is Weapon,could it be moved
+        // else if (selSprite.tag == 9999)
         else
         {
             CGPoint translation = ccpSub(touchLocation, oldTouchLocation);

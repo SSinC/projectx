@@ -83,10 +83,18 @@
     PolygonSprite *magnetSprite;
     __block BOOL airfanExist;
     PolygonSprite *airfanSprite;
-    
+    //add weaponExploded flag
+    BOOL weaponExploded;
+    //add targetSprite
+    PolygonSprite *targetSprite;
     
     //add weaponTest
     PolygonSprite *weaponTest;
+    
+    //add global_queue -default
+    dispatch_queue_t globalQueue ;
+    
+    
     
     
     //add C++ style Array 
