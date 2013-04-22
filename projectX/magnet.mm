@@ -14,7 +14,7 @@
 -(id)initWithWorld:(b2World *)world 
 {
 //    int32 count = 4;
-    NSString *file = @"watermelon.png";
+//    NSString *file = @"watermelon.png";
 //    b2Vec2 vertices[] = {
 //        b2Vec2(5.0/PTM_RATIO,15.0/PTM_RATIO),
 //        b2Vec2(18.0/PTM_RATIO,7.0/PTM_RATIO),

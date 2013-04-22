@@ -101,7 +101,7 @@ HelloWorldLayer* instance;
         copy_chooseBodyNumber = 0;
         cut = false;
         
-		CGSize winSize = [CCDirector sharedDirector].winSize;
+		CGSize windowSize = [CCDirector sharedDirector].winSize;
 		
 		// init physics
 		[self initPhysics];
@@ -136,7 +136,7 @@ HelloWorldLayer* instance;
 		CCLabelTTF *label = [CCLabelTTF labelWithString:@"Tap screen" fontName:@"Marker Felt" fontSize:32];
 		[self addChild:label z:0];
 		[label setColor:ccc3(0,0,255)];
-		label.position = ccp( winSize.width/2, winSize.height-50);
+		label.position = ccp( windowSize.width/2, windowSize.height-50);
         
         //add contactListener
         _contactListener = new contactListener();
@@ -409,8 +409,8 @@ HelloWorldLayer* instance;
     sprite.tag = tagBody1++;
     //[sprite setPosition: ccp( p.x, p.y)];
     [movableSprites addObject:sprite];
-    CCLOG(@"body worldCenter is %0.2f x %02.f%", sprite.body->GetWorldCenter().x, sprite.body->GetWorldCenter().y);
-    CCLOG(@"body localCenter is %0.2f x %02.f%", sprite.body->GetLocalCenter().x, sprite.body->GetLocalCenter().y);
+    CCLOG(@"body worldCenter is %0.2f x %02.f", sprite.body->GetWorldCenter().x, sprite.body->GetWorldCenter().y);
+    CCLOG(@"body localCenter is %0.2f x %02.f", sprite.body->GetLocalCenter().x, sprite.body->GetLocalCenter().y);
     //CCLOG(@"sprite position is %0.2f x %02.f",sprite.body->GetPosition().x,sprite.body->GetPosition().y);
 }
 
@@ -437,7 +437,7 @@ HelloWorldLayer* instance;
 	body->CreateFixture(&fixtureDef);
 	
     
-	CCNode *parentSprite = [self getChildByTag:kTagParentNode];
+//	CCNode *parentSprite = [self getChildByTag:kTagParentNode];
 	
 	//We have a 64x64 sprite sheet with 4 different 32x32 images.  The following code is
 	//just randomly picking one of the images
@@ -513,8 +513,8 @@ HelloWorldLayer* instance;
     // [self addChild:sprite z:1];
     [parentSprite addChild:sprite];
 	
-    [sprite setPTMRatio:PTM_RATIO];
-    [sprite setB2Body:body];
+//    [sprite setPTMRatio:PTM_RATIO];
+    sprite.body = body;
 	[sprite setPosition: ccp( p.x, p.y)];
     
     //暂时注释掉setUserData中存入结构体
@@ -560,13 +560,13 @@ HelloWorldLayer* instance;
         switch (copy_chooseBodyNumber)
         {
             case 1:
-                //[self createBody1:p];
-                dispatch_async(globalQueue, ^{
+                //[self createBody1:p];  replace the globalQueue by "dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)"
+                dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
                    [self createBodyTest:p];
                 });
                 break;
             case 2:
-                dispatch_async(globalQueue, ^{
+                dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
                    [self createBody2:p];
                 });
                 //[self createBodyTest:p];
@@ -882,10 +882,10 @@ HelloWorldLayer* instance;
     b2PolygonShape *originalPolygon = (b2PolygonShape*)originalFixture->GetShape();
     int vertexCount = originalPolygon->GetVertexCount();
     
-    for (int i = 0 ; i < vertexCount; i++)
-    {
-        b2Vec2 point = originalPolygon->GetVertex(i);
-    }
+//    for (int i = 0 ; i < vertexCount; i++)
+//    {
+//        b2Vec2 point = originalPolygon->GetVertex(i);
+//    }
     
     //our determinant(to be described later) and iterator
     float determinant;
@@ -1602,10 +1602,10 @@ HelloWorldLayer* instance;
 
 //Use boundLayerPos to check boundary conditions
 - (CGPoint)boundLayerPos:(CGPoint)newPos {
-    CGSize winSize = [CCDirector sharedDirector].winSize;
+    CGSize windowSize = [CCDirector sharedDirector].winSize;
     CGPoint retval = newPos;
     retval.x = MIN(retval.x, 0);
-    retval.x = MAX(retval.x, -background.contentSize.width+winSize.width);
+    retval.x = MAX(retval.x, -background.contentSize.width + windowSize.width);
     retval.y = self.position.y;
     return retval;
 }
