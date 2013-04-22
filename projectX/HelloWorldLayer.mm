@@ -31,12 +31,12 @@ enum {
 -(void) initPhysics;
 -(void) addNewSpriteAtPosition:(CGPoint)p;
 -(void) createMenu;
--(void) createBody1;
--(void) createBody2;
--(void) createBody3;
--(void) splitObj:(b2Body*)sliceBody A:(b2Vec2)A B:(b2Vec2)B;
--(float)  det:(NSInteger)x1  y1:(NSInteger)y1 x2:(NSInteger)x2 y2:(NSInteger)y2 x3:(NSInteger)x3  y3:(NSInteger)y3;
--(b2Vec2 *)  setExplosionVelocity:(b2Body *)b;
+//-(void) createBody1;
+//-(void) createBody2;
+//-(void) createBody3;
+//-(void) splitObj:(b2Body*)sliceBody A:(b2Vec2)A B:(b2Vec2)B;
+//-(float)  det:(NSInteger)x1  y1:(NSInteger)y1 x2:(NSInteger)x2 y2:(NSInteger)y2 x3:(NSInteger)x3  y3:(NSInteger)y3;
+//-(b2Vec2 *)  setExplosionVelocity:(b2Body *)b;
 
 @end
 
