@@ -24,7 +24,7 @@
         b2Vec2(34.0/PTM_RATIO,59.0/PTM_RATIO),
         b2Vec2(28.0/PTM_RATIO,59.0/PTM_RATIO)
     };
-    CGSize screen = [[CCDirector sharedDirector] winSize];
+//    CGSize screen = [[CCDirector sharedDirector] winSize];
     
     //CCLOG(@"screen is %0.2f x %02.f",screen.width/2/PTM_RATIO,screen.height/2/PTM_RATIO);
     

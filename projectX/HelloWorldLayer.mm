@@ -23,7 +23,7 @@ enum {
 };
 
 #define pi 3.14159265358979323846
-
+#define ARC4RANDOM_MAX      0x100000000
 
 #pragma mark - HelloWorldLayer
 
@@ -360,7 +360,35 @@ HelloWorldLayer* instance;
 
 -(void)goBloom
 {
-    
+    //bloom the sprint
+    NSInteger count = [movableSprites count];
+    if(count > 0)
+    {
+        PolygonSprite *sprite = [movableSprites objectAtIndex:count-1];
+        //get the center of the sprite
+        const b2Vec2& spriteCenter = sprite.body->GetWorldCenter();
+        
+        //create the radom bloom point of the sprite, from 2 to 12;
+        NSInteger radomNum = arc4random() / 10 + 2;
+        
+        for(int i = 0; i < radomNum; i++)
+        {
+            //create the radom point for the cast ray. from -50.0 to 50.0
+            double valx = floorf(((double)arc4random() / ARC4RANDOM_MAX) * 100.0f - 50.0f);
+            double valy = floorf(((double)arc4random() / ARC4RANDOM_MAX) * 100.0f - 50.0f);
+            
+            b2Vec2 endPoint = b2Vec2((spriteCenter.x + valx)/PTM_RATIO, (spriteCenter.y + valy)/PTM_RATIO);
+            
+            world->RayCast(_raycastCallback,
+                           spriteCenter,
+                           endPoint);
+            
+            world->RayCast(_raycastCallback,
+                           endPoint,
+                           spriteCenter);
+        }//end the for
+        
+    }
 }
 
 
