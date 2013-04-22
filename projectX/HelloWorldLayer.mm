@@ -585,17 +585,16 @@ HelloWorldLayer* instance;
 	if(!selSprite)
     {
         CCLOG(@"chooseBodyNumber %i",copy_chooseBodyNumber);
-        globalQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
         switch (copy_chooseBodyNumber)
         {
             case 1:
                 //[self createBody1:p];  replace the globalQueue by "dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)"
-                dispatch_async(globalQueue, ^{
+                dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
                    [self createBodyTest:p];
                 });
                 break;
             case 2:
-                dispatch_async(globalQueue, ^{
+                dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
                    [self createBody2:p];
                 });
                 //[self createBodyTest:p];
