@@ -196,8 +196,8 @@
 		747941D7171BD87A00B85384 /* triangulate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 747941D0171BD87900B85384 /* triangulate.cpp */; };
 		747941DF171BF20000B85384 /* PolygonSprite.mm in Sources */ = {isa = PBXBuildFile; fileRef = 747941DE171BF1FE00B85384 /* PolygonSprite.mm */; };
 		747941F41720D67600B85384 /* magnet.mm in Sources */ = {isa = PBXBuildFile; fileRef = 747941F31720D67600B85384 /* magnet.mm */; };
-		747941F717250FB400B85384 /* weapon.m in Sources */ = {isa = PBXBuildFile; fileRef = 747941F617250FB400B85384 /* weapon.m */; };
-		747941FA1725101A00B85384 /* target.m in Sources */ = {isa = PBXBuildFile; fileRef = 747941F91725101700B85384 /* target.m */; };
+		747941F717250FB400B85384 /* weapon.mm in Sources */ = {isa = PBXBuildFile; fileRef = 747941F617250FB400B85384 /* weapon.mm */; };
+		747941FA1725101A00B85384 /* target.mm in Sources */ = {isa = PBXBuildFile; fileRef = 747941F91725101700B85384 /* target.mm */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -596,9 +596,9 @@
 		747941F21720D67600B85384 /* magnet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = magnet.h; sourceTree = "<group>"; };
 		747941F31720D67600B85384 /* magnet.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = magnet.mm; sourceTree = "<group>"; };
 		747941F517250FB300B85384 /* weapon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = weapon.h; sourceTree = "<group>"; };
-		747941F617250FB400B85384 /* weapon.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = weapon.m; sourceTree = "<group>"; };
+		747941F617250FB400B85384 /* weapon.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = weapon.mm; sourceTree = "<group>"; };
 		747941F81725101700B85384 /* target.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = target.h; sourceTree = "<group>"; };
-		747941F91725101700B85384 /* target.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = target.m; sourceTree = "<group>"; };
+		747941F91725101700B85384 /* target.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = target.mm; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1242,9 +1242,9 @@
 				747941F21720D67600B85384 /* magnet.h */,
 				747941F31720D67600B85384 /* magnet.mm */,
 				747941F81725101700B85384 /* target.h */,
-				747941F91725101700B85384 /* target.m */,
+				747941F91725101700B85384 /* target.mm */,
 				747941F517250FB300B85384 /* weapon.h */,
-				747941F617250FB400B85384 /* weapon.m */,
+				747941F617250FB400B85384 /* weapon.mm */,
 			);
 			name = model;
 			sourceTree = "<group>";
@@ -1490,8 +1490,8 @@
 				747941DF171BF20000B85384 /* PolygonSprite.mm in Sources */,
 				187D474E171C497A00C89E9C /* body1.mm in Sources */,
 				747941F41720D67600B85384 /* magnet.mm in Sources */,
-				747941F717250FB400B85384 /* weapon.m in Sources */,
-				747941FA1725101A00B85384 /* target.m in Sources */,
+				747941F717250FB400B85384 /* weapon.mm in Sources */,
+				747941FA1725101A00B85384 /* target.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

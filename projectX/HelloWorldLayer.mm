@@ -247,6 +247,11 @@ HelloWorldLayer* instance;
         cut = false;
     }];
     
+    CCMenuItem *bloomSplit = [CCMenuItemFont itemWithString:@"爆炸效果" block:^(id sender){
+        // Switch the mode back to Drag-Shoot mode
+        [self goBloom];
+    }];
+    
     CCMenuItem *createMagnet = [CCMenuItemFont itemWithString:@"磁铁开关" block:^(id sender){
         if(!magnetExist)
         {
@@ -266,7 +271,7 @@ HelloWorldLayer* instance;
     //z代表图像层次
     [self addChild: menuChooseBody1 z:-1];
     
-    CCMenu *menuChooseBody2 = [CCMenu menuWithItems:Cut, notCut, createMagnet, nil];
+    CCMenu *menuChooseBody2 = [CCMenu menuWithItems:Cut, notCut, bloomSplit, createMagnet, nil];
 	
 	[menuChooseBody2 alignItemsHorizontally];
 	
@@ -351,6 +356,14 @@ HelloWorldLayer* instance;
 	body->CreateFixture(&fixtureDef);
 }
 
+
+
+-(void)goBloom
+{
+    
+}
+
+
 -(void) draw
 {
 	//
@@ -396,8 +409,8 @@ HelloWorldLayer* instance;
     sprite.tag = tagBody1++;
     //[sprite setPosition: ccp( p.x, p.y)];
     [movableSprites addObject:sprite];
-    CCLOG(@"body worldCenter is %0.2f x %02.f%",sprite.body->GetWorldCenter().x,sprite.body->GetWorldCenter().y);
-    CCLOG(@"body localCenter is %0.2f x %02.f%",sprite.body->GetLocalCenter().x,sprite.body->GetLocalCenter().y);
+    CCLOG(@"body worldCenter is %0.2f x %02.f%", sprite.body->GetWorldCenter().x, sprite.body->GetWorldCenter().y);
+    CCLOG(@"body localCenter is %0.2f x %02.f%", sprite.body->GetLocalCenter().x, sprite.body->GetLocalCenter().y);
     //CCLOG(@"sprite position is %0.2f x %02.f",sprite.body->GetPosition().x,sprite.body->GetPosition().y);
 }
 
