@@ -10,7 +10,7 @@
 #import "HelloWorldLayer.h"
 
 // Not included in "cocos2d.h"
-#import "CCPhysicsSprite.h"
+//#import "CCPhysicsSprite.h"
 
 // Needed to obtain the Navigation Controller
 #import "AppDelegate.h"
@@ -488,9 +488,9 @@ HelloWorldLayer* instance;
     //	int idy = (CCRANDOM_0_1() > .5 ? 0:1);
     
     
-	CCPhysicsSprite *sprite = [CCPhysicsSprite spriteWithTexture:spriteTexture_ rect:CGRectMake(32 ,0,32,32)];
+//	CCPhysicsSprite *sprite = [CCPhysicsSprite spriteWithTexture:spriteTexture_ rect:CGRectMake(32 ,0,32,32)];
     
-    // PolygonSprite *sprite = [PolygonSprite spriteWithTexture: spriteTexture_ body:body original:NO];
+    PolygonSprite *sprite = [PolygonSprite spriteWithTexture: spriteTexture_ body:body original:NO];
     
     //添加tag用来给碰撞检测时判断物体类型
     //暂时用tag的值的范围代表物体类型
@@ -669,10 +669,10 @@ HelloWorldLayer* instance;
         
         if (bodyA->GetUserData() != NULL && bodyB->GetUserData() != NULL)
         {
-            if(([(id)bodyA->GetUserData() isKindOfClass:[CCPhysicsSprite class]]) &&([(id)bodyB->GetUserData() isKindOfClass:[CCPhysicsSprite class]]))
+            if(([(id)bodyA->GetUserData() isKindOfClass:[PolygonSprite class]]) &&([(id)bodyB->GetUserData() isKindOfClass:[PolygonSprite class]]))
             {
-            CCPhysicsSprite *spriteA = (CCPhysicsSprite *) bodyA->GetUserData();
-            CCPhysicsSprite *spriteB = (CCPhysicsSprite *) bodyB->GetUserData();
+            PolygonSprite *spriteA = (PolygonSprite *) bodyA->GetUserData();
+            PolygonSprite *spriteB = (PolygonSprite *) bodyB->GetUserData();
             
             //只让bodyB和B碰撞后销毁
             if (((spriteA.tag >= 500 && spriteB.tag >=500)|| (spriteA.tag >=500 && spriteB.tag >= 500))){
@@ -753,7 +753,7 @@ HelloWorldLayer* instance;
             
             // We know that the user data is a sprite since we set
             // it that way, so cast it...
-            CCPhysicsSprite *sprite = (CCPhysicsSprite *) body->GetUserData();
+            PolygonSprite *sprite = (PolygonSprite *) body->GetUserData();
             
             // Remove the sprite from the scene
             [parent removeChild:sprite];
@@ -1481,8 +1481,8 @@ HelloWorldLayer* instance;
 //************************* add touch-control******************************
 - (void)selectSpriteForTouch:(CGPoint)touchLocation
 {
-    CCPhysicsSprite * newSprite = nil;
-    for (CCPhysicsSprite *sprite in movableSprites)
+    PolygonSprite * newSprite = nil;
+    for (PolygonSprite *sprite in movableSprites)
     {
         if (CGRectContainsPoint(sprite.boundingBox, touchLocation))
         {
@@ -1518,7 +1518,7 @@ HelloWorldLayer* instance;
             {
                 CCLOG(@"fuck");
                 b2Vec2 b = *new b2Vec2(-10*(location1.x-locationBegin.x),-10*(location1.y-locationBegin.y));
-                selSprite.b2Body->ApplyForce(b, selSprite.b2Body->GetWorldCenter());
+                selSprite.body->ApplyForce(b, selSprite.body->GetWorldCenter());
             }else{
                 [self addNewSpriteAtPosition: location1];
             }
@@ -1604,8 +1604,8 @@ HelloWorldLayer* instance;
         CGPoint newPos = ccpAdd(selSprite.position, translation);
         selSprite.position = newPos;
         CCLOG(@"move to position %0.2f x %02.f",
-              selSprite.b2Body->GetPosition().x * PTM_RATIO,
-              selSprite.b2Body->GetPosition().y * PTM_RATIO);
+              selSprite.body->GetPosition().x * PTM_RATIO,
+              selSprite.body->GetPosition().y * PTM_RATIO);
         
     } else {
         //CGPoint newPos = ccpAdd(self.position, translation);

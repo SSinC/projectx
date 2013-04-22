@@ -43,7 +43,7 @@
 	GLESDebugDraw *m_debugDraw;		// strong ref
     
     CCSprite * background;
-    CCPhysicsSprite * selSprite;
+    PolygonSprite * selSprite;
     PolygonSprite *selSprite1;
     NSMutableArray * movableSprites;
     contactListener *_contactListener;
@@ -55,6 +55,9 @@
     __block int copy_chooseBodyNumber;
     //added cut option used to switch touch-mode
     __block BOOL cut;
+    
+    //add for blooming
+    __block BOOL isBloom;
     
     //add explodeing center
     float explosionX;
