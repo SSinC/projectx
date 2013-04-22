@@ -13,7 +13,7 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "347"
          endingLineNumber = "347"
-         landmarkName = "-createBodyTest:"
+         landmarkName = "-draw"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
@@ -26,8 +26,8 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "174"
          endingLineNumber = "174"
-         landmarkName = "-nodeToParentTransform"
-         landmarkType = "5">
+         landmarkName = "@implementation PolygonSprite"
+         landmarkType = "3">
       </FileBreakpoint>
    </FileBreakpoints>
 </Bucket>
