@@ -8,12 +8,12 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "projectX/HelloWorldLayer.mm"
-         timestampString = "387796409.846325"
+         timestampString = "388390001.647521"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "935"
-         endingLineNumber = "935"
-         landmarkName = "-areVerticesAcceptable:count:"
+         startingLineNumber = "885"
+         endingLineNumber = "885"
+         landmarkName = "-splitPolygonSprite:"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
@@ -26,7 +26,7 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "362"
          endingLineNumber = "362"
-         landmarkName = "-draw"
+         landmarkName = "-goBloom"
          landmarkType = "5">
       </FileBreakpoint>
    </FileBreakpoints>

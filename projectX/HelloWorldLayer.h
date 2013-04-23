@@ -23,6 +23,20 @@
 #define calculate_determinant_2x2(x1,y1,x2,y2) x1*y2-y1*x2
 #define calculate_determinant_2x3(x1,y1,x2,y2,x3,y3) x1*y2+x2*y3+x3*y1-y1*x2-y2*x3-y3*x1
 
+//**
+//  some useful macros
+//**
+#define calculate_determinant_2x2(x1,y1,x2,y2) x1*y2-y1*x2
+#define calculate_determinant_2x3(x1,y1,x2,y2,x3,y3) x1*y2+x2*y3+x3*y1-y1*x2-y2*x3-y3*x1
+#define frandom (float)arc4random()/UINT64_C(0x100000000)
+#define frandom_range(low,high) ((high-low)*frandom)+low
+#define random_range(low,high) (arc4random()%(high-low+1))+low
+#define midpoint(a,b) (float)(a+b)/2
+
+
+#define weaponTag  9999    // weapon tag
+#define targetTag  10000   // target tag
+
 //Pixel to metres ratio. Box2D uses metres as the unit for measurement.
 //This ratio defines how many pixels correspond to 1 Box2D "metre"
 //Box2D is optimized for objects of 1x1 metre therefore it makes sense
@@ -94,10 +108,26 @@
     //add weaponTest
     PolygonSprite *weaponTest;
     
+    //add damageSprite
+    CCSprite *damageSprite;
+    
     //add global_queue -default
     dispatch_queue_t globalQueue ;
     
+    //add critical strike flag
+     BOOL criticalStrike;
     
+    //add exploded damage
+    float damage;
+    
+    //add target blood;
+    float targetBlood;
+    
+    //add current target blood;
+    float curTargetBlood;
+    
+    //add damage sprite time step
+    int damageStep;
     
     
     //add C++ style Array 

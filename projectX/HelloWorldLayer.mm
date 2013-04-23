@@ -92,14 +92,16 @@ HelloWorldLayer* instance;
         CCLOG(@"init");
 		
 		// enable events
-        self.touchEnabled = YES;
+        self.touchEnabled         = YES;
 		self.accelerometerEnabled = YES;
         
-        tagBodyA = 1;
-        tagBodyB = 500;
-        tagBody1 = 1000;
+        tagBodyA              = 1;
+        tagBodyB              = 500;
+        tagBody1              = 1000;
         copy_chooseBodyNumber = 0;
-        cut = false;
+        cut                   = false;
+        damageStep            = 1;
+        targetBlood           = 1000;
         
 		CGSize windowSize = [CCDirector sharedDirector].winSize;
 		
@@ -405,7 +407,8 @@ HelloWorldLayer* instance;
 	
 	kmGLPushMatrix();
 	
-    if(cut){
+    if(cut)
+    {
         ccDrawLine(_startPoint, _endPoint);
     }
     
@@ -435,8 +438,10 @@ HelloWorldLayer* instance;
     [_cache addObject:sprite];
     
     sprite.tag = tagBody1++;
+    
     //[sprite setPosition: ccp( p.x, p.y)];
     [movableSprites addObject:sprite];
+    
     CCLOG(@"body worldCenter is %0.2f x %02.f", sprite.body->GetWorldCenter().x, sprite.body->GetWorldCenter().y);
     CCLOG(@"body localCenter is %0.2f x %02.f", sprite.body->GetLocalCenter().x, sprite.body->GetLocalCenter().y);
     //CCLOG(@"sprite position is %0.2f x %02.f",sprite.body->GetPosition().x,sprite.body->GetPosition().y);
@@ -589,18 +594,20 @@ HelloWorldLayer* instance;
         {
             case 1:
                 //[self createBody1:p];  replace the globalQueue by "dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)"
-                dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-                   [self createBodyTest:p];
+                //dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [self createBodyTest:p];
                 });
                 break;
             case 2:
-                dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+                //dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+                 dispatch_async(dispatch_get_main_queue(), ^{
                    [self createBody2:p];
                 });
                 //[self createBodyTest:p];
                 break;
             case 3:
-                [self createBody3:p];
+                [self createBody3:p];                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
                 break;
                 
             default:
@@ -610,46 +617,9 @@ HelloWorldLayer* instance;
     selSprite = nil;
 }
 
-//class RayCastAnyCallback : public b2RayCastCallback
-//{
-//public:
-//    RayCastAnyCallback()
-//    {
-//        m_hit = false;
-//    }
-//
-//    float32 ReportFixture(    b2Fixture* fixture, const b2Vec2& point,
-//                          const b2Vec2& normal, float32 fraction)
-//    {
-//        //这里要完成的功能如下：
-//        b2Body* body=fixture->GetBody();
-//
-//        //[HelloWorldLayer shareInstance].explodingBodiesCPP;
-//        [HelloWorldLayer shareInstance].pos1 = std::find([HelloWorldLayer shareInstance].explodingBodiesCPP.begin(), [HelloWorldLayer shareInstance].explodingBodiesCPP.end(), body);
-//
-//        if ( [HelloWorldLayer shareInstance].pos1 ==[HelloWorldLayer shareInstance].explodingBodiesCPP.end() ) {
-//            return 1;
-//        }
-//
-//
-//        [HelloWorldLayer shareInstance].pos2 = std::find([HelloWorldLayer shareInstance].enterPointsVecCPP.begin(), [HelloWorldLayer shareInstance].enterPointsVecCPP.end(), body);
-//
-//        if ( [HelloWorldLayer shareInstance].pos2 ==[HelloWorldLayer shareInstance].enterPointsVecCPP.end() ) {
-//            [HelloWorldLayer shareInstance].enterPointsVecCPP.push_back(point);
-//        }
-//        else
-//        {
-//            [[HelloWorldLayer shareInstance] splitObj:fixture->GetBody() A:*[HelloWorldLayer shareInstance].pos2 B: point];
-//        }
-//        return 1;
-//
-//           }
-//    bool m_hit;
-//    b2Vec2 m_point;
-//    b2Vec2 m_normal;
-//};
-
-
+//**
+//************--------------------Game Main Loop--------------------------************
+//**
 -(void) update: (ccTime) dt
 {
 	//It is recommended that a fixed time step is used with Box2D for stability
@@ -667,147 +637,108 @@ HelloWorldLayer* instance;
     
     
     
-    //*******************        wk       *********************************
-    //If the cut-mode is on,we need to examine all the bodyA to 
-    // find out if they should be spliced 
-    if(cut){
+    //**
+    //If the cut-mode is on,we need to examine all the bodyA to
+    // find out if they should be spliced
+    if(cut)
+    {
         [self checkAndSliceObjects];
     }
     
+    [self handleContact];
     
+    //    [self physicsEffect];
     
-    // Loop through all of the Box2D bodies in our Box2D world..
-    //    for(b2Body *b = world->GetBodyList(); b; b=b->GetNext()) {
-    //
-    //        // See if there's any user data attached to the Box2D body
-    //        // There should be, since we set it in addBoxBodyForSprite
-    //        if (b->GetUserData() != NULL) {
-    //
-    //            // We know that the user data is a sprite since we set
-    //            // it that way, so cast it...
-    //            CCPhysicsSprite *sprite = (CCPhysicsSprite *)b->GetUserData();
-    //
-    //            // Convert the Cocos2D position/rotation of the sprite to the Box2D position/rotation
-    //            b2Vec2 b2Position = b2Vec2(sprite.position.x/PTM_RATIO,
-    //                                       sprite.position.y/PTM_RATIO);
-    //            float32 b2Angle = -1 * CC_DEGREES_TO_RADIANS(sprite.rotation);
-    //
-    //            // Update the Box2D position/rotation to match the Cocos2D position/rotation
-    //            b->SetTransform(b2Position, b2Angle);
-    //        }
-    //    }
-    CCNode *parent1 = [self getChildByTag:kTagParentNode];
-    
-    std::vector<b2Body *>toDestroy;
-    std::vector<MyContact>::iterator pos;
-    for(pos = _contactListener->_contacts.begin(); pos != _contactListener->_contacts.end(); ++pos)
-    {
-        MyContact contact = *pos;
-        
-        // Get the box2d bodies for each object
-        b2Body *bodyA = contact.fixtureA->GetBody();
-        b2Body *bodyB = contact.fixtureB->GetBody();
-        
-        if (bodyA->GetUserData() != NULL && bodyB->GetUserData() != NULL)
-        {
-            if(([(id)bodyA->GetUserData() isKindOfClass:[PolygonSprite class]]) &&([(id)bodyB->GetUserData() isKindOfClass:[PolygonSprite class]]))
-            {
-            PolygonSprite *spriteA = (PolygonSprite *) bodyA->GetUserData();
-            PolygonSprite *spriteB = (PolygonSprite *) bodyB->GetUserData();
-            
-            //只让bodyB和B碰撞后销毁
-            if (((spriteA.tag >= 500 && spriteB.tag >=500)|| (spriteA.tag >=500 && spriteB.tag >= 500))){
-                [parent1 removeChild:spriteA];
-                [parent1 removeChild:spriteB];
-                toDestroy.push_back(bodyA);
-                toDestroy.push_back(bodyB);
-                //经试验，先销毁图像再在下个循环销毁body，效果最好。如果不先销毁图像，渲染会莫名其妙延迟。
-                
-                //            PolygonSprite *spriteA = (PolygonSprite *) bodyA->GetUserData();
-                //            PolygonSprite *spriteB = (PolygonSprite *) bodyB->GetUserData();
-                //           if (((spriteA.tag >= 1000 && spriteB.tag >=1000)|| (spriteA.tag >=1000 && spriteB.tag >=1000))){
-                //               CCLOG(@"in contact");
-                //
-                //                explosionX = bodyA->GetWorldCenter().x;
-                //                explosionY = bodyA->GetWorldCenter().y;
-                //                CCLOG(@"explosion center is: %0.2f x %02.f",explosionX,explosionY);
-                //               for (int i=1; i<=1; i++)
-                //               {
-                //                   CCLOG(@"in contact");
-                //                   //float cutAngle = (arc4random()%360)/360 * pi *2;
-                //                   //b2Vec2 point1(0.0f, 10.0f);
-                //                    //b2Vec2 p1 = *new b2Vec2((explosionX+i/10 - 10 * cos(cutAngle)), (explosionY-20 * sin(cutAngle)));
-                //                    //b2Vec2 p2 = *new b2Vec2((explosionX+10 * cos(cutAngle)), (explosionY + 20 * sin(cutAngle)));
-                //                   b2Vec2 p1,p2;
-                //                   float cutAngle =rand()*pi*2;
-                //                   p1.x=(explosionX * PTM_RATIO + i/10.0 - 2000*cos(cutAngle));
-                //                   p1.y=(explosionY * PTM_RATIO - 2000*sin(cutAngle));
-                //                   p2.x=(explosionX * PTM_RATIO + 2000*cos(cutAngle));
-                //                   p2.y=(explosionY * PTM_RATIO + 2000*sin(cutAngle));
-                //
-                //                CCLOG(@"explosion point1 is: %0.2f x %02.f",p1.x,p1.y);
-                //                CCLOG(@"explosion point2 is: %0.2f x %02.f",p2.x,p2.y);
-                //                CCLOG(@"before world->RayCast");
-                //                world->RayCast(_raycastCallback,
-                //                               b2Vec2(p1.x / PTM_RATIO, p1.y / PTM_RATIO),
-                //                               b2Vec2(p2.x / PTM_RATIO, p2.y / PTM_RATIO));
-                //
-                //                CCLOG(@"after world->RayCast  1");
-                //
-                //                world->RayCast(_raycastCallback,
-                //                               b2Vec2(p2.x / PTM_RATIO, p2.y / PTM_RATIO),
-                //                               b2Vec2(p1.x / PTM_RATIO, p1.y / PTM_RATIO));
-                //
-                //                CCLOG(@"after world->RayCast  2");
-                //
-                //                  if(spriteA.sliceEntered){
-                //                       CCLOG(@"after world->RayCast  2 ,sprite.sliceEntered: YES");
-                //
-                //                   }else{
-                //                       CCLOG(@"after world->RayCast  2 ,sprite.sliceEntered: NO");
-                //
-                //                   }
-                //
-                //                   [self checkAndSliceObjects:bodyA];
-                //
-                //                CCLOG(@"after splicing bodyA");
-                
-                //               }//end for
-                
-                // 不能立刻销毁body
-                //            world->DestroyBody(bodyA);
-                //            world->DestroyBody(bodyB);
-            }
-            
-        }
-      }
-    }
-    //销毁body
-    // Loop through all of the box2d bodies we wnat to destroy...
-    std::vector<b2Body *>::iterator pos2;
-    for(pos2 = toDestroy.begin(); pos2 != toDestroy.end(); ++pos2) {
-        b2Body *body = *pos2;
-        
-        // See if there's any user data attached to the Box2D body
-        // There should be, since we set it in addBoxBodyForSprite
-        if (body->GetUserData() != NULL) {
-            
-            // We know that the user data is a sprite since we set
-            // it that way, so cast it...
-            PolygonSprite *sprite = (PolygonSprite *) body->GetUserData();
-            
-            // Remove the sprite from the scene
-            [parent removeChild:sprite];
-        }
-        
-        // Destroy the Box2D body as well
-        world->DestroyBody(body);//
-    }
+    //    [self animation];
     
     world->ClearForces();
+    
 }
 
-//************************Physics-Effect************************
+
+//**
+//************************    Handle contact    ************************
+//**
+-(void)handleContact
+{
+    globalQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+    
+    dispatch_async(globalQueue, ^{
+        __block CCNode *parent1 = [self getChildByTag:kTagParentNode];
+        
+        __block std::vector<b2Body *>toDestroy;
+        __block std::vector<MyContact>::iterator pos;
+        __block std::vector<b2Body *>::iterator pos2;
+        
+        //*******************  handle contact  ***********************
+        for(pos = _contactListener->_contacts.begin(); pos != _contactListener->_contacts.end(); ++pos)
+        {
+            MyContact contact = *pos;
+            
+            // Get the box2d bodies for each object
+            b2Body *bodyA = contact.fixtureA->GetBody();
+            b2Body *bodyB = contact.fixtureB->GetBody();
+            
+            if (bodyA->GetUserData() != NULL && bodyB->GetUserData() != NULL)
+            {
+                if(([(id)bodyA->GetUserData() isKindOfClass:[PolygonSprite class]]) &&([(id)bodyB->GetUserData() isKindOfClass:[PolygonSprite class]]))
+                {
+                    PolygonSprite *spriteA = (PolygonSprite *) bodyA->GetUserData();
+                    PolygonSprite *spriteB = (PolygonSprite *) bodyB->GetUserData();
+                    
+                    //we can destroy the specific body we want here.
+                    //Now i destroy the contacted watermelon just test
+                    if (((spriteA.tag >= 1000 && spriteB.tag >= 1000)|| (spriteA.tag >= 1000 && spriteB.tag >= 1000)))
+                    {
+                        //[parent1 removeChild:spriteA];
+                        //[parent1 removeChild:spriteB];
+                        toDestroy.push_back(bodyA);
+                        toDestroy.push_back(bodyB);
+                    }
+                    
+                    //
+                    if((spriteA.tag == weaponTag && spriteB.tag == targetTag) || (spriteB.tag == weaponTag && spriteA.tag == targetTag))
+                    {
+                        weaponExploded = true;
+                    }
+                    
+                }
+            }
+        }
+        
+        //***************   Use contacted-information to update graphic  ****************
+        dispatch_async(dispatch_get_main_queue(), ^{
+            // Loop through all of the box2d bodies we wnat to destroy...
+            
+            for(pos2 = toDestroy.begin(); pos2 != toDestroy.end(); ++pos2)
+            {
+                b2Body *body = *pos2;
+                
+                // See if there's any user data attached to the Box2D body
+                // There should be, since we set it in addBoxBodyForSprite
+                if (body->GetUserData() != NULL)
+                {
+                    
+                    // We know that the user data is a sprite since we set
+                    // it that way, so cast it...
+                    PolygonSprite *sprite = (PolygonSprite *) body->GetUserData();
+                    
+                    // Remove the sprite from the scene
+                    [self removeChild:sprite];
+                }
+                
+                // Destroy the Box2D body as well
+                world->DestroyBody(body);//
+            }
+            
+        });
+    });
+}
+
+                   
+//**
+//************************    Physics-Effect    ************************
+//**
 -(void)physicsEffect
 {
     globalQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
@@ -817,8 +748,8 @@ HelloWorldLayer* instance;
     {
         dispatch_async ( globalQueue, ^{
             
-            float weaponX = weaponTest.centroid.x * PTM_RATIO;
-            float weaponY = weaponTest.centroid.y * PTM_RATIO;
+            float weaponX = weaponTest.body->GetWorldCenter().x * PTM_RATIO;
+            float weaponY = weaponTest.body->GetWorldCenter().y * PTM_RATIO;
             float diffX   = winSize.width  - weaponX;
             float diffY   = winSize.height - weaponY;
             float criticalDistance = 50.0;
@@ -839,10 +770,10 @@ HelloWorldLayer* instance;
     {
         dispatch_async ( globalQueue, ^{
             
-            float weaponX = weaponTest.centroid.x   * PTM_RATIO;
-            float weaponY = weaponTest.centroid.y   * PTM_RATIO;
-            float airfanX = airfanSprite.centroid.x * PTM_RATIO;
-            float airfanY = airfanSprite.centroid.y * PTM_RATIO;
+            float weaponX = weaponTest.body->GetWorldCenter().x   * PTM_RATIO;
+            float weaponY = weaponTest.body->GetWorldCenter().y   * PTM_RATIO;
+            float airfanX = airfanSprite.body->GetWorldCenter().x * PTM_RATIO;
+            float airfanY = airfanSprite.body->GetWorldCenter().y * PTM_RATIO;
             float criticalMin = airfanY - 100;
             float criticalMax = airfanY + 100;
             float diffX       = weaponX - airfanX;
@@ -865,10 +796,10 @@ HelloWorldLayer* instance;
     {
         dispatch_async(globalQueue, ^{
            
-            float weaponX       = weaponTest.centroid.x   * PTM_RATIO;
-            float weaponY       = weaponTest.centroid.y   * PTM_RATIO;
-            float targetSpriteX = airfanSprite.centroid.x * PTM_RATIO;
-            float targetSpriteY = airfanSprite.centroid.y * PTM_RATIO;
+            float weaponX       = weaponTest.body->GetWorldCenter().x   * PTM_RATIO;
+            float weaponY       = weaponTest.body->GetWorldCenter().y   * PTM_RATIO;
+            float targetSpriteX = targetSprite.body->GetWorldCenter().x * PTM_RATIO;
+            float targetSpriteY = targetSprite.body->GetWorldCenter().y * PTM_RATIO;
             float diffX         = weaponX - targetSpriteX;
             float diffY         = weaponY - targetSpriteY;
             
@@ -881,23 +812,80 @@ HelloWorldLayer* instance;
             //==>    Fx  = pow(ratio,2) * diffX / sqrt( pow( ( pow(diffX,2) + pow(diffY,2) ),3) )
             //==>    Fy  = pow(ratio,2) * diffY / sqrt( pow( ( pow(diffX,2) + pow(diffY,2) ),3) )
             
-            float ratio = 350;//the ratio should be carefully chosen
-            float forceX = pow(ratio,2) * diffX / sqrt (pow ((pow(diffX,2) + pow(diffY,2)),3));
-            float forceY = pow(ratio,2) * diffY / sqrt (pow ((pow(diffX,2) + pow(diffY,2)),3));
             
+            //The ratio must be chosen very carefully.
+            //Here i use random ratio so critical strike would happen sometimes
+            float ratio = frandom_range(100,400);
+            
+            float forceX = pow(ratio,2) * diffX / sqrt (pow ((pow(diffX,2) + pow(diffY,2)),3));
+            float forceY = pow(ratio,2) * diffY / sqrt (pow ((pow(diffX,2) + pow(diffY,2)),3));            
             b2Vec2 force = * new b2Vec2(forceX,forceY);
             
+            //target should be blown away
             targetSprite.body->ApplyLinearImpulse(force, targetSprite.body->GetWorldCenter());
             
+            
+            
+            //handle damage
+            damage = sqrt((pow(force.x,2) + pow(force.y,2)));
+            
+            if(damage >= 500)
+            {
+                criticalStrike = true;
+            }
+            curTargetBlood = targetBlood - damage;
+            
+            //We neet to generate a damage sprite based on the damage.
+            //For now, i just use a png to test anyway.
+            dispatch_async(dispatch_get_main_queue(), ^{
+                damageSprite = [CCSprite spriteWithFile:@"blocks.png" rect:CGRectMake(32,32,32,32)];
+                [self addChild:damageSprite];
+                [damageSprite setPosition: ccp( targetSpriteX, targetSpriteY + 20)];
+            });
         });
     }
 
 }
+//**
+//*****************************  Animation  ********************************
+//**
+-(void) animation
+{
+    float targetSpriteX = targetSprite.body->GetWorldCenter().x * PTM_RATIO;
+    float targetSpriteY = targetSprite.body->GetWorldCenter().y * PTM_RATIO;
+    
+    if((damageStep <= 40) && weaponExploded)
+    {
+        id actionMove = [CCMoveTo actionWithDuration:0.05
+                                            position:ccp(targetSpriteX , targetSpriteY + 3 * damageStep)];
+        
+        id actionFade = [CCFadeTo actionWithDuration:0.05
+                                             opacity:255-6 * damageStep++];
+        
+        [damageSprite runAction:[CCSequence actions:actionMove, actionFade, nil]];
+    }
+    else
+    {
+        damageStep = 0;
+        weaponExploded = false;
+    }
+}
 
 
 
+//**
+//  Handle damage1.0
+//**
+-(float) handleDamage:(b2Vec2)force
+{
+    float damage = sqrt((pow(force.x,2) + pow(force.y,2)));
+    if(damage >= 500)
+    {
+        criticalStrike = true;
+    }
 
-///////////////////////一些用于计算分裂效果的基础函数
+}
+
 
 
 -(void)splitPolygonSprite:(PolygonSprite*)sprite
@@ -998,12 +986,12 @@ HelloWorldLayer* instance;
         // Use dispatch_group_async and dispatch_group_notify to get the work done.
         // The priority is to be examined.
         //************************************************************************************************
+//        
+//        dispatch_group_t group = dispatch_group_create();
+//        globalQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+//        
+//        dispatch_group_async(group, globalQueue, ^{
         
-        dispatch_group_t group = dispatch_group_create();
-        globalQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
-        
-        dispatch_group_async(group, globalQueue, ^{
-            
             //create the first sprite's body
             b2Body *body1 = [self createBodyWithPosition:sprite.body->GetPosition() rotation:sprite.body->GetAngle() vertices:sprite1VerticesSorted vertexCount:sprite1VertexCount density:originalFixture->GetDensity() friction:originalFixture->GetFriction() restitution:originalFixture->GetRestitution()];
             
@@ -1012,10 +1000,10 @@ HelloWorldLayer* instance;
             
             [self addChild:newSprite1 z:1];
             
-        });
+//        });
+//        
+//        dispatch_group_async(group, globalQueue, ^{
         
-        dispatch_group_async(group, globalQueue, ^{
-            
             //create the second sprite's body
             b2Body *body2 = [self createBodyWithPosition:sprite.body->GetPosition() rotation:sprite.body->GetAngle() vertices:sprite2VerticesSorted vertexCount:sprite2VertexCount density:originalFixture->GetDensity() friction:originalFixture->GetFriction() restitution:originalFixture->GetRestitution()];
             
@@ -1023,14 +1011,14 @@ HelloWorldLayer* instance;
             newSprite2 = [PolygonSprite spriteWithTexture:sprite.texture body:body2 original:NO];
             
             [self addChild:newSprite2 z:1];
-            
-        });
-        
-        //****************************      Notice    ************************************
-        // As we can only destroy sprite after 2 b2body are both created,we have to use dispatch_group_notify
-        // to wait for the dispatch_group_async
-        
-        dispatch_group_notify(group, globalQueue, ^{
+//            
+//        });
+//        
+//        //****************************      Notice    ************************************
+//        // As we can only destroy sprite after 2 b2body are both created,we have to use dispatch_group_notify
+//        // to wait for the dispatch_group_async
+//        
+//        dispatch_group_notify(group, globalQueue, ^{
             //we don't need the old shape & sprite anymore so we either destroy it or squirrel it away
             CCLOG(@"in Split-body setp 5 ,create sprite1,2");
             if (sprite.original)
@@ -1048,10 +1036,10 @@ HelloWorldLayer* instance;
                 [self removeChild:sprite cleanup:YES];
             }
             
-        });
-        
-        // release the group
-        dispatch_release(group);
+//        });
+//        
+//        // release the group
+//        dispatch_release(group);
     }
     else
     {
@@ -1694,3 +1682,109 @@ HelloWorldLayer* instance;
 }
 
 @end
+
+
+//经试验，先销毁图像再在下个循环销毁body，效果最好。如果不先销毁图像，渲染会莫名其妙延迟。
+
+//            PolygonSprite *spriteA = (PolygonSprite *) bodyA->GetUserData();
+//            PolygonSprite *spriteB = (PolygonSprite *) bodyB->GetUserData();
+//           if (((spriteA.tag >= 1000 && spriteB.tag >=1000)|| (spriteA.tag >=1000 && spriteB.tag >=1000))){
+//               CCLOG(@"in contact");
+//
+//                explosionX = bodyA->GetWorldCenter().x;
+//                explosionY = bodyA->GetWorldCenter().y;
+//                CCLOG(@"explosion center is: %0.2f x %02.f",explosionX,explosionY);
+//               for (int i=1; i<=1; i++)
+//               {
+//                   CCLOG(@"in contact");
+//                   //float cutAngle = (arc4random()%360)/360 * pi *2;
+//                   //b2Vec2 point1(0.0f, 10.0f);
+//                    //b2Vec2 p1 = *new b2Vec2((explosionX+i/10 - 10 * cos(cutAngle)), (explosionY-20 * sin(cutAngle)));
+//                    //b2Vec2 p2 = *new b2Vec2((explosionX+10 * cos(cutAngle)), (explosionY + 20 * sin(cutAngle)));
+//                   b2Vec2 p1,p2;
+//                   float cutAngle =rand()*pi*2;
+//                   p1.x=(explosionX * PTM_RATIO + i/10.0 - 2000*cos(cutAngle));
+//                   p1.y=(explosionY * PTM_RATIO - 2000*sin(cutAngle));
+//                   p2.x=(explosionX * PTM_RATIO + 2000*cos(cutAngle));
+//                   p2.y=(explosionY * PTM_RATIO + 2000*sin(cutAngle));
+//
+//                CCLOG(@"explosion point1 is: %0.2f x %02.f",p1.x,p1.y);
+//                CCLOG(@"explosion point2 is: %0.2f x %02.f",p2.x,p2.y);
+//                CCLOG(@"before world->RayCast");
+//                world->RayCast(_raycastCallback,
+//                               b2Vec2(p1.x / PTM_RATIO, p1.y / PTM_RATIO),
+//                               b2Vec2(p2.x / PTM_RATIO, p2.y / PTM_RATIO));
+//
+//                CCLOG(@"after world->RayCast  1");
+//
+//                world->RayCast(_raycastCallback,
+//                               b2Vec2(p2.x / PTM_RATIO, p2.y / PTM_RATIO),
+//                               b2Vec2(p1.x / PTM_RATIO, p1.y / PTM_RATIO));
+//
+//                CCLOG(@"after world->RayCast  2");
+//
+//                  if(spriteA.sliceEntered){
+//                       CCLOG(@"after world->RayCast  2 ,sprite.sliceEntered: YES");
+//
+//                   }else{
+//                       CCLOG(@"after world->RayCast  2 ,sprite.sliceEntered: NO");
+//
+//                   }
+//
+//                   [self checkAndSliceObjects:bodyA];
+//
+//                CCLOG(@"after splicing bodyA");
+
+//               }//end for
+
+// 不能立刻销毁body
+//            world->DestroyBody(bodyA);
+//            world->DestroyBody(bodyB);
+
+// Loop through all of the Box2D bodies in our Box2D world..
+//    for(b2Body *b = world->GetBodyList(); b; b=b->GetNext()) {
+//
+//        // See if there's any user data attached to the Box2D body
+//        // There should be, since we set it in addBoxBodyForSprite
+//        if (b->GetUserData() != NULL) {
+//
+//            // We know that the user data is a sprite since we set
+//            // it that way, so cast it...
+//            CCPhysicsSprite *sprite = (CCPhysicsSprite *)b->GetUserData();
+//
+//            // Convert the Cocos2D position/rotation of the sprite to the Box2D position/rotation
+//            b2Vec2 b2Position = b2Vec2(sprite.position.x/PTM_RATIO,
+//                                       sprite.position.y/PTM_RATIO);
+//            float32 b2Angle = -1 * CC_DEGREES_TO_RADIANS(sprite.rotation);
+//
+//            // Update the Box2D position/rotation to match the Cocos2D position/rotation
+//            b->SetTransform(b2Position, b2Angle);
+//        }
+//    }
+
+
+
+//
+//        // Loop through all of the box2d bodies we wnat to destroy...
+//        std::vector<b2Body *>::iterator pos2;
+//        for(pos2 = toDestroy.begin(); pos2 != toDestroy.end(); ++pos2)
+//        {
+//            b2Body *body = *pos2;
+//
+//            // See if there's any user data attached to the Box2D body
+//            // There should be, since we set it in addBoxBodyForSprite
+//            if (body->GetUserData() != NULL)
+//            {
+//
+//                // We know that the user data is a sprite since we set
+//                // it that way, so cast it...
+//                PolygonSprite *sprite = (PolygonSprite *) body->GetUserData();
+//
+//                // Remove the sprite from the scene
+//                [parent1 removeChild:sprite];
+//            }
+//
+//            // Destroy the Box2D body as well
+//            world->DestroyBody(body);//
+//        }
+
