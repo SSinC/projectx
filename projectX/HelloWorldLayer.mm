@@ -17,7 +17,10 @@
 #import <math.h>
 
 #import "body1.h"
+//#import "body2.h"
 #import "magnet.h"
+
+
 enum {
 	kTagParentNode = 1,
 };
@@ -447,117 +450,164 @@ HelloWorldLayer* instance;
     //CCLOG(@"sprite position is %0.2f x %02.f",sprite.body->GetPosition().x,sprite.body->GetPosition().y);
 }
 
--(void) createBody1:(CGPoint)p
-{
-    CCLOG(@"Add sprite %0.2f x %02.f",p.x,p.y);
-	// Define the dynamic body.
-	//Set up a 1m squared box in the physics world
-	b2BodyDef bodyDef;
-	bodyDef.type = b2_dynamicBody;
-	bodyDef.position.Set(p.x/PTM_RATIO, p.y/PTM_RATIO);
-	b2Body *body = world->CreateBody(&bodyDef);
-	
-	// Define another box shape for our dynamic body.
-	b2PolygonShape dynamicBox;
-	dynamicBox.SetAsBox(.5f, .5f);//These are mid points for our 1m box
-	
-	// Define the dynamic body fixture.
-	b2FixtureDef fixtureDef;
-	fixtureDef.shape = &dynamicBox;
-	fixtureDef.density = 1.5f;
-	fixtureDef.friction = 0.7f;
-    fixtureDef.restitution = 0.7f;
-	body->CreateFixture(&fixtureDef);
-	
-    
-//	CCNode *parentSprite = [self getChildByTag:kTagParentNode];
-	
-	//We have a 64x64 sprite sheet with 4 different 32x32 images.  The following code is
-	//just randomly picking one of the images
-	//int idx = (CCRANDOM_0_1() > .5 ? 0:1);
-	//int idy = (CCRANDOM_0_1() > .5 ? 0:1);
-    
-	//CCPhysicsSprite *sprite = [CCPhysicsSprite spriteWithTexture:spriteTexture_ rect:CGRectMake(0,0,32,32)];
-    CCLOG(@"before create sprite");
-    PolygonSprite *sprite = [PolygonSprite spriteWithTexture: spriteTexture_ body:body original:NO];
-    CCLOG(@"after create sprite");
-    //添加tag用来给碰撞检测时判断物体类型
-    //暂时用tag的值的范围代表物体类型
-    //1-500之内是BodyA
-    sprite.tag = tagBodyA++;
-    [self addChild:sprite z:1];
-	//[parentSprite addChild:sprite];
-    CCLOG(@"after create sprite1");
-	//[sprite setPTMRatio:PTM_RATIO];
-	//[sprite setB2Body:body];
-	//[sprite setPosition: ccp( p.x, p.y)];
-    
-    //暂时注释掉setUserData中存入结构体
-    //    myUserData *data1 ;
-    //    data1->bodyType = 1;
-    //    data1->sprite = sprite;
-    //    body->SetUserData(data1);
-    
-    body->SetUserData(sprite);
-    [movableSprites addObject:sprite];
-    CCLOG(@"after create sprite1");
-}
+//-(void) createBody1:(CGPoint)p
+//{
+//    CCLOG(@"Add sprite %0.2f x %02.f",p.x,p.y);
+//	// Define the dynamic body.
+//	//Set up a 1m squared box in the physics world
+//	b2BodyDef bodyDef;
+//	bodyDef.type = b2_dynamicBody;
+//	bodyDef.position.Set(p.x/PTM_RATIO, p.y/PTM_RATIO);
+//	b2Body *body = world->CreateBody(&bodyDef);
+//	
+//	// Define another box shape for our dynamic body.
+//	b2PolygonShape dynamicBox;
+//	dynamicBox.SetAsBox(.5f, .5f);//These are mid points for our 1m box
+//	
+//	// Define the dynamic body fixture.
+//	b2FixtureDef fixtureDef;
+//	fixtureDef.shape = &dynamicBox;
+//	fixtureDef.density = 1.5f;
+//	fixtureDef.friction = 0.7f;
+//    fixtureDef.restitution = 0.7f;
+//	body->CreateFixture(&fixtureDef);
+//	
+//    
+////	CCNode *parentSprite = [self getChildByTag:kTagParentNode];
+//	
+//	//We have a 64x64 sprite sheet with 4 different 32x32 images.  The following code is
+//	//just randomly picking one of the images
+//	//int idx = (CCRANDOM_0_1() > .5 ? 0:1);
+//	//int idy = (CCRANDOM_0_1() > .5 ? 0:1);
+//    
+//	//CCPhysicsSprite *sprite = [CCPhysicsSprite spriteWithTexture:spriteTexture_ rect:CGRectMake(0,0,32,32)];
+//    CCLOG(@"before create sprite");
+//    PolygonSprite *sprite = [PolygonSprite spriteWithTexture: spriteTexture_ body:body original:NO];
+//    CCLOG(@"after create sprite");
+//    //添加tag用来给碰撞检测时判断物体类型
+//    //暂时用tag的值的范围代表物体类型
+//    //1-500之内是BodyA
+//    sprite.tag = tagBodyA++;
+//    [self addChild:sprite z:1];
+//	//[parentSprite addChild:sprite];
+//    CCLOG(@"after create sprite1");
+//	//[sprite setPTMRatio:PTM_RATIO];
+//	//[sprite setB2Body:body];
+//	//[sprite setPosition: ccp( p.x, p.y)];
+//    
+//    //暂时注释掉setUserData中存入结构体
+//    //    myUserData *data1 ;
+//    //    data1->bodyType = 1;
+//    //    data1->sprite = sprite;
+//    //    body->SetUserData(data1);
+//    
+//    body->SetUserData(sprite);
+//    [movableSprites addObject:sprite];
+//    CCLOG(@"after create sprite1");
+//}
 
 -(void) createBody2:(CGPoint)p
 {
     CCLOG(@"Add sprite %0.2f x %02.f",p.x,p.y);
-	// Define the dynamic body.
-	//Set up a 1m squared box in the physics world
-	b2BodyDef bodyDef;
-	bodyDef.type = b2_dynamicBody;
-	bodyDef.position.Set(p.x/PTM_RATIO, p.y/PTM_RATIO);
-	b2Body *body = world->CreateBody(&bodyDef);
-	
-	// Define another box shape for our dynamic body.
-	b2PolygonShape dynamicBox;
-	dynamicBox.SetAsBox(.5f, .5f);//These are mid points for our 1m box
-	
-	// Define the dynamic body fixture.
-	b2FixtureDef fixtureDef;
-	fixtureDef.shape = &dynamicBox;
+//	// Define the dynamic body.
+//	//Set up a 1m squared box in the physics world
+//	b2BodyDef bodyDef;
+//	bodyDef.type = b2_dynamicBody;
+//	bodyDef.position.Set(p.x/PTM_RATIO, p.y/PTM_RATIO);
+//	b2Body *body = world->CreateBody(&bodyDef);
+//	
+//	// Define another box shape for our dynamic body.
+//	b2PolygonShape dynamicBox;
+//	dynamicBox.SetAsBox(.5f, .5f);//These are mid points for our 1m box
+//
+//	// Define the dynamic body fixture.
+//	b2FixtureDef fixtureDef;
+//	fixtureDef.shape = &dynamicBox;
+//	fixtureDef.density = 1.5f;
+//	fixtureDef.friction = 0.7f;
+//    fixtureDef.restitution = 0.7f;
+//	body->CreateFixture(&fixtureDef);
+//	
+//    
+//	CCNode *parentSprite = [self getChildByTag:kTagParentNode];
+//	
+//	//We have a 64x64 sprite sheet with 4 different 32x32 images.  The following code is
+//	//just randomly picking one of the images
+//    //	int idx = (CCRANDOM_0_1() > .5 ? 0:1);
+//    //	int idy = (CCRANDOM_0_1() > .5 ? 0:1);
+//    
+//    
+////	CCPhysicsSprite *sprite = [CCPhysicsSprite spriteWithTexture:spriteTexture_ rect:CGRectMake(32 ,0,32,32)];
+//    
+//    PolygonSprite *sprite = [PolygonSprite spriteWithTexture: spriteTexture_ body:body original:NO];
+//    
+//    //添加tag用来给碰撞检测时判断物体类型
+//    //暂时用tag的值的范围代表物体类型
+//    //500以上是BodyB
+//    sprite.tag = tagBodyB++;
+//    
+//    // [self addChild:sprite z:1];
+//    [parentSprite addChild:sprite];
+//	
+////    [sprite setPTMRatio:PTM_RATIO];
+//    sprite.body = body;
+//	[sprite setPosition: ccp( p.x, p.y)];
+//    
+//    //暂时注释掉setUserData中存入结构体
+//    //    myUserData *data1 ;
+//    //    data1->bodyType = 1;
+//    //    data1->sprite = sprite;
+//    //    body->SetUserData(data1);
+//    
+//    body->SetUserData(sprite);
+//    [movableSprites addObject:sprite];
+    
+    
+    // CCLOG(@"Test before create sprite");
+    CCLOG(@"Add sprite position %0.2f x %02.f",p.x,p.y);    
+    _cache = [[CCArray alloc] initWithCapacity:53];
+    b2BodyDef bodyDef;
+    bodyDef.type = b2_dynamicBody;
+    bodyDef.position = b2Vec2(p.x/PTM_RATIO,p.y/PTM_RATIO);
+    bodyDef.angle = 0;
+    b2Body *body = world->CreateBody(&bodyDef);
+    
+    b2FixtureDef fixtureDef;
 	fixtureDef.density = 1.5f;
 	fixtureDef.friction = 0.7f;
     fixtureDef.restitution = 0.7f;
-	body->CreateFixture(&fixtureDef);
-	
+
+    fixtureDef.filter.categoryBits = 0;
+    fixtureDef.filter.maskBits = 0;
+    //fixtureDef.isSensor = YES;
     
-	CCNode *parentSprite = [self getChildByTag:kTagParentNode];
-	
-	//We have a 64x64 sprite sheet with 4 different 32x32 images.  The following code is
-	//just randomly picking one of the images
-    //	int idx = (CCRANDOM_0_1() > .5 ? 0:1);
-    //	int idy = (CCRANDOM_0_1() > .5 ? 0:1);
+    b2PolygonShape shape;
+    shape.SetAsBox(.5f, .5f);
+//     shape.SetAsBox(1.5f, 1.5f);
+//    shape.Set(vertices, count);
+    fixtureDef.shape = &shape;
+    body->CreateFixture(&fixtureDef);
+    NSString *file = @"blocks.png"; 
+    PolygonSprite *sprite = [[[PolygonSprite alloc] initWithFile:file body:body original:YES] autorelease];
     
     
-//	CCPhysicsSprite *sprite = [CCPhysicsSprite spriteWithTexture:spriteTexture_ rect:CGRectMake(32 ,0,32,32)];
+    //*******************We can not use the following methods to add sprite to parentSprite************
+    //*************************This should be fixed or worked arround**********************************
+    //********************************          WK         ********************************************
+    //    	CCNode *parentSprite = [self getChildByTag:kTagParentNode];
+    //        [parentSprite addChild:sprite];
     
-    PolygonSprite *sprite = [PolygonSprite spriteWithTexture: spriteTexture_ body:body original:NO];
+    [self addChild:sprite z:1];
+    [sprite activateCollisions];
+    [_cache addObject:sprite];
     
-    //添加tag用来给碰撞检测时判断物体类型
-    //暂时用tag的值的范围代表物体类型
-    //500以上是BodyB
     sprite.tag = tagBodyB++;
     
-    // [self addChild:sprite z:1];
-    [parentSprite addChild:sprite];
-	
-//    [sprite setPTMRatio:PTM_RATIO];
-    sprite.body = body;
-	[sprite setPosition: ccp( p.x, p.y)];
-    
-    //暂时注释掉setUserData中存入结构体
-    //    myUserData *data1 ;
-    //    data1->bodyType = 1;
-    //    data1->sprite = sprite;
-    //    body->SetUserData(data1);
-    
-    body->SetUserData(sprite);
+    //[sprite setPosition: ccp( p.x, p.y)];
     [movableSprites addObject:sprite];
+    
+    CCLOG(@"body worldCenter is %0.2f x %02.f", sprite.body->GetWorldCenter().x, sprite.body->GetWorldCenter().y);
+    CCLOG(@"body localCenter is %0.2f x %02.f", sprite.body->GetLocalCenter().x, sprite.body->GetLocalCenter().y);
 }
 
 -(void) createBody3:(CGPoint)p
@@ -664,7 +714,7 @@ HelloWorldLayer* instance;
     globalQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
     
     dispatch_async(globalQueue, ^{
-        __block CCNode *parent1 = [self getChildByTag:kTagParentNode];
+//        __block CCNode *parent1 = [self getChildByTag:kTagParentNode];
         
         __block std::vector<b2Body *>toDestroy;
         __block std::vector<MyContact>::iterator pos;
@@ -874,16 +924,15 @@ HelloWorldLayer* instance;
 
 
 //**
-//  Handle damage
+//  Handle damage1.0
 //**
 -(float) handleDamage:(b2Vec2)force
 {
-    float damage = sqrt((pow(force.x,2) + pow(force.y,2)));
-    if(damage >= 500)
+    float damageValue = sqrt((pow(force.x,2) + pow(force.y,2)));
+    if(damageValue >= 500)
     {
         criticalStrike = true;
     }
-
 }
 
 
