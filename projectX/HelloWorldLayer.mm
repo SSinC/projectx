@@ -874,7 +874,7 @@ HelloWorldLayer* instance;
 
 
 //**
-//  Handle damage1.0
+//  Handle damage
 //**
 -(float) handleDamage:(b2Vec2)force
 {
