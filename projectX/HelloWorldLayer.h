@@ -100,8 +100,13 @@
     PolygonSprite *magnetSprite;
     __block BOOL airfanExist;
     PolygonSprite *airfanSprite;
+    
+    //target-hitted flag
+    BOOL targetHitted;
+    
     //add weaponExploded flag
     BOOL weaponExploded;
+    
     //add targetSprite
     PolygonSprite *targetSprite;
     
@@ -111,8 +116,14 @@
     //add damageSprite
     CCSprite *damageSprite;
     
+    ////damage-sprite appeared flag
+    BOOL damageSpriteAppeared;
+    
     //add global_queue -default
     dispatch_queue_t globalQueue ;
+    
+    //add main_queue
+    dispatch_queue_t mainQueue ;
     
     //add critical strike flag
      BOOL criticalStrike;

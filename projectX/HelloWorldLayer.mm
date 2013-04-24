@@ -106,6 +106,9 @@ HelloWorldLayer* instance;
         damageStep            = 1;
         targetBlood           = 1000;
         
+        globalQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+        mainQueue   = dispatch_get_main_queue();
+        
 		CGSize windowSize = [CCDirector sharedDirector].winSize;
 		
 		// init physics
@@ -582,7 +585,7 @@ HelloWorldLayer* instance;
     //fixtureDef.isSensor = YES;
     
     b2PolygonShape shape;
-    shape.SetAsBox(.5f, .5f);
+    shape.SetAsBox(1.0f, 1.0f);
 //     shape.SetAsBox(1.5f, 1.5f);
 //    shape.Set(vertices, count);
     fixtureDef.shape = &shape;
@@ -697,9 +700,9 @@ HelloWorldLayer* instance;
     
     [self handleContact];
     
-    //    [self physicsEffect];
+//  [self physicsEffect];
     
-    //    [self animation];
+    [self animation];
     
     world->ClearForces();
     
@@ -711,7 +714,7 @@ HelloWorldLayer* instance;
 //**
 -(void)handleContact
 {
-    globalQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+//    globalQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
     
     dispatch_async(globalQueue, ^{
 //        __block CCNode *parent1 = [self getChildByTag:kTagParentNode];
@@ -749,7 +752,7 @@ HelloWorldLayer* instance;
                     //
                     if((spriteA.tag == weaponTag && spriteB.tag == targetTag) || (spriteB.tag == weaponTag && spriteA.tag == targetTag))
                     {
-                        weaponExploded = true;
+                        targetHitted = true;
                     }
                     
                 }
@@ -757,7 +760,7 @@ HelloWorldLayer* instance;
         }
         
         //***************   Use contacted-information to update graphic  ****************
-        dispatch_async(dispatch_get_main_queue(), ^{
+        dispatch_async(mainQueue, ^{
             // Loop through all of the box2d bodies we wnat to destroy...
             
             for(pos2 = toDestroy.begin(); pos2 != toDestroy.end(); ++pos2)
@@ -791,8 +794,6 @@ HelloWorldLayer* instance;
 //**
 -(void)physicsEffect
 {
-    globalQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
-    
     //**********************  magnet-effect  *********************
     if (magnetExist)
     {
@@ -842,8 +843,9 @@ HelloWorldLayer* instance;
     }
     
     //**********************  shock wave effect  *********************
-    if (weaponExploded)
+    if (targetHitted)
     {
+        targetHitted = false;
         dispatch_async(globalQueue, ^{
            
             float weaponX       = weaponTest.body->GetWorldCenter().x   * PTM_RATIO;
@@ -874,9 +876,12 @@ HelloWorldLayer* instance;
             //target should be blown away
             targetSprite.body->ApplyLinearImpulse(force, targetSprite.body->GetWorldCenter());
             
+            //Now the weapon is exploded
+            weaponExploded = true;
             
-            
-            //handle damage
+            //**
+            //***************  handle damage   *******************
+            //**
             damage = sqrt((pow(force.x,2) + pow(force.y,2)));
             
             if(damage >= 500)
@@ -887,10 +892,13 @@ HelloWorldLayer* instance;
             
             //We neet to generate a damage sprite based on the damage.
             //For now, i just use a png to test anyway.
-            dispatch_async(dispatch_get_main_queue(), ^{
+            dispatch_async(mainQueue, ^{
+                
                 damageSprite = [CCSprite spriteWithFile:@"blocks.png" rect:CGRectMake(32,32,32,32)];
                 [self addChild:damageSprite];
                 [damageSprite setPosition: ccp( targetSpriteX, targetSpriteY + 20)];
+                
+                damageSpriteAppeared = true;
             });
         });
     }
@@ -901,24 +909,45 @@ HelloWorldLayer* instance;
 //**
 -(void) animation
 {
-    float targetSpriteX = targetSprite.body->GetWorldCenter().x * PTM_RATIO;
-    float targetSpriteY = targetSprite.body->GetWorldCenter().y * PTM_RATIO;
+    if(weaponExploded && damageSpriteAppeared)
+        {            
+            dispatch_async ( globalQueue, ^{
+
+            float targetSpriteX = targetSprite.body->GetWorldCenter().x * PTM_RATIO;
+            float targetSpriteY = targetSprite.body->GetWorldCenter().y * PTM_RATIO;
+            
+            dispatch_async(mainQueue, ^{
+                if(damageStep <= 40)
+                {
+                    id actionMove = [CCMoveTo actionWithDuration:0.05
+                                                        position:ccp(targetSpriteX , targetSpriteY + 3 * damageStep)];
+                    
+                    id actionFade = [CCFadeTo actionWithDuration:0.05
+                                                         opacity:255-6 * damageStep++];
+                    
+                    [damageSprite runAction:[CCSequence actions:actionMove, actionFade, nil]];
+                }
+                else
+                {
+                    //destroy the damage sprite
+                    [self removeChild:magnetSprite cleanup:YES];
+                    
+                    // reset all the arguments after destroying the damage sprite
+                    damageStep           = 0;
+                    weaponExploded       = false;
+                    damageSpriteAppeared = false;
+                }                
+            });        
+        });
+    }
+}
+
+//**
+//  Update blood status
+//**
+- (void) updateBloodStatus
+{
     
-    if((damageStep <= 40) && weaponExploded)
-    {
-        id actionMove = [CCMoveTo actionWithDuration:0.05
-                                            position:ccp(targetSpriteX , targetSpriteY + 3 * damageStep)];
-        
-        id actionFade = [CCFadeTo actionWithDuration:0.05
-                                             opacity:255-6 * damageStep++];
-        
-        [damageSprite runAction:[CCSequence actions:actionMove, actionFade, nil]];
-    }
-    else
-    {
-        damageStep = 0;
-        weaponExploded = false;
-    }
 }
 
 
