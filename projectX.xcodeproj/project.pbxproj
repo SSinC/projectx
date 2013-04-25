@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		187D474E171C497A00C89E9C /* body1.mm in Sources */ = {isa = PBXBuildFile; fileRef = 187D474D171C497A00C89E9C /* body1.mm */; };
+		187D474E171C497A00C89E9C /* watermelon.mm in Sources */ = {isa = PBXBuildFile; fileRef = 187D474D171C497A00C89E9C /* watermelon.mm */; };
 		187D4752171C4A9F00C89E9C /* watermelon-hd.png in Resources */ = {isa = PBXBuildFile; fileRef = 187D474F171C4A9F00C89E9C /* watermelon-hd.png */; };
 		187D4753171C4A9F00C89E9C /* watermelon-ipadhd.png in Resources */ = {isa = PBXBuildFile; fileRef = 187D4750171C4A9F00C89E9C /* watermelon-ipadhd.png */; };
 		187D4754171C4A9F00C89E9C /* watermelon.png in Resources */ = {isa = PBXBuildFile; fileRef = 187D4751171C4A9F00C89E9C /* watermelon.png */; };
@@ -202,8 +202,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		187D474C171C497A00C89E9C /* body1.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = body1.h; sourceTree = "<group>"; };
-		187D474D171C497A00C89E9C /* body1.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = body1.mm; sourceTree = "<group>"; };
+		187D474C171C497A00C89E9C /* watermelon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = watermelon.h; sourceTree = "<group>"; };
+		187D474D171C497A00C89E9C /* watermelon.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = watermelon.mm; sourceTree = "<group>"; };
 		187D474F171C4A9F00C89E9C /* watermelon-hd.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "watermelon-hd.png"; path = "Resources/watermelon-hd.png"; sourceTree = "<group>"; };
 		187D4750171C4A9F00C89E9C /* watermelon-ipadhd.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "watermelon-ipadhd.png"; path = "Resources/watermelon-ipadhd.png"; sourceTree = "<group>"; };
 		187D4751171C4A9F00C89E9C /* watermelon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = watermelon.png; path = Resources/watermelon.png; sourceTree = "<group>"; };
@@ -1242,8 +1242,8 @@
 			children = (
 				3D3642AA1726CFFA00897FBD /* body2.h */,
 				3D3642AB1726CFFA00897FBD /* body2.mm */,
-				187D474C171C497A00C89E9C /* body1.h */,
-				187D474D171C497A00C89E9C /* body1.mm */,
+				187D474C171C497A00C89E9C /* watermelon.h */,
+				187D474D171C497A00C89E9C /* watermelon.mm */,
 				747941F21720D67600B85384 /* magnet.h */,
 				747941F31720D67600B85384 /* magnet.mm */,
 				747941F81725101700B85384 /* target.h */,
@@ -1493,7 +1493,7 @@
 				747941D6171BD87A00B85384 /* PRRatcliffTriangulator.mm in Sources */,
 				747941D7171BD87A00B85384 /* triangulate.cpp in Sources */,
 				747941DF171BF20000B85384 /* PolygonSprite.mm in Sources */,
-				187D474E171C497A00C89E9C /* body1.mm in Sources */,
+				187D474E171C497A00C89E9C /* watermelon.mm in Sources */,
 				747941F41720D67600B85384 /* magnet.mm in Sources */,
 				747941F717250FB400B85384 /* weapon.mm in Sources */,
 				747941FA1725101A00B85384 /* target.mm in Sources */,

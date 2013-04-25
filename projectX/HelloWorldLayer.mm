@@ -16,10 +16,11 @@
 #import "AppDelegate.h"
 #import <math.h>
 
-#import "body1.h"
+#import "watermelon.h"
 //#import "body2.h"
 #import "magnet.h"
-
+#import "weapon.h"
+#import "target.h"
 
 enum {
 	kTagParentNode = 1,
@@ -109,7 +110,7 @@ HelloWorldLayer* instance;
         globalQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
         mainQueue   = dispatch_get_main_queue();
         
-		CGSize windowSize = [CCDirector sharedDirector].winSize;
+		CGSize winSize = [CCDirector sharedDirector].winSize;
 		
 		// init physics
 		[self initPhysics];
@@ -118,6 +119,7 @@ HelloWorldLayer* instance;
 		[self createMenu];
 		
         movableSprites = [[NSMutableArray alloc] init];
+        catchSprite = [[CCArray alloc] initWithCapacity:53];
         
 		//Set up sprite
 		
@@ -144,7 +146,7 @@ HelloWorldLayer* instance;
 		CCLabelTTF *label = [CCLabelTTF labelWithString:@"Tap screen" fontName:@"Marker Felt" fontSize:32];
 		[self addChild:label z:0];
 		[label setColor:ccc3(0,0,255)];
-		label.position = ccp( windowSize.width/2, windowSize.height-50);
+		label.position = ccp( winSize.width/2, winSize.height-50);
         
         //add contactListener
         _contactListener = new contactListener();
@@ -170,8 +172,8 @@ HelloWorldLayer* instance;
     [movableSprites release];
     movableSprites = nil;
     
-    [_cache release];
-    _cache = nil;
+    [catchSprite release];
+    catchSprite = nil;
 	
 	[super dealloc];
 }
@@ -230,53 +232,58 @@ HelloWorldLayer* instance;
     [self addChild: menu z:-1];
     
     //__block int copy_chooseBodyNumber = chooseBodyNumber;
-    CCMenuItem *chooseBody1 = [CCMenuItemFont itemWithString:@"Body1" block:^(id sender){
-        copy_chooseBodyNumber = 1;
+    CCMenuItem *chooseBody1 = [CCMenuItemFont itemWithString:@"Watermelon" block:^(id sender){
+        copy_chooseBodyNumber = createWatermelon;
         
     }];
     
-    CCMenuItem *chooseBody2 = [CCMenuItemFont itemWithString:@"Body2" block:^(id sender){
-        copy_chooseBodyNumber = 2;
+    CCMenuItem *chooseBody2 = [CCMenuItemFont itemWithString:@"Block" block:^(id sender){
+        copy_chooseBodyNumber = createBody1;
         
     }];
     
-    CCMenuItem *chooseBody3 = [CCMenuItemFont itemWithString:@"Body3" block:^(id sender){
-        copy_chooseBodyNumber = 3;
+    CCMenuItem *chooseBody3 = [CCMenuItemFont itemWithString:@"Weapon" block:^(id sender){
+        copy_chooseBodyNumber = createWeapon;
         
     }];
     
-    CCMenuItem *Cut = [CCMenuItemFont itemWithString:@"我要切西瓜         " block:^(id sender){
+    CCMenuItem *chooseBody4 = [CCMenuItemFont itemWithString:@"target" block:^(id sender){
+        copy_chooseBodyNumber = createTarget;
+        
+    }];
+    
+    CCMenuItem *Cut = [CCMenuItemFont itemWithString:@"CutCut         " block:^(id sender){
         // Switch the mode to Cut-Mode
         cut = true;
     }];
     
-    CCMenuItem *notCut = [CCMenuItemFont itemWithString:@"切你妹的西瓜，我要Angry Birds玩法" block:^(id sender){
+    CCMenuItem *notCut = [CCMenuItemFont itemWithString:@"shoot" block:^(id sender){
         // Switch the mode back to Drag-Shoot mode
         cut = false;
     }];
     
-    CCMenuItem *bloomSplit = [CCMenuItemFont itemWithString:@"爆炸效果" block:^(id sender){
-        // Switch the mode back to Drag-Shoot mode
+    CCMenuItem *bloomSplit = [CCMenuItemFont itemWithString:@"explode" block:^(id sender){
+        // explode the last created-body 
         [self goBloom];
     }];
     
-    CCMenuItem *createMagnet = [CCMenuItemFont itemWithString:@"磁铁开关" block:^(id sender){
+    CCMenuItem *createMagnet = [CCMenuItemFont itemWithString:@"maganet" block:^(id sender){
         if(!magnetExist)
         {
-            [copy_self createMagnet];
+            [self createMagnet];
             magnetExist = true;
         }else{
-            [copy_self destroyMagnet];
+            [self destroyMagnet];
             magnetExist = false;
         }
     }];
 	
-    CCMenu *menuChooseBody1 = [CCMenu menuWithItems:chooseBody1, chooseBody2, chooseBody3,  nil];
+    CCMenu *menuChooseBody1 = [CCMenu menuWithItems:chooseBody1, chooseBody2, chooseBody3,chooseBody4,  nil];
 	
 	[menuChooseBody1 alignItemsHorizontally];
 	
     [menuChooseBody1 setPosition:ccp( size.width/6, size.height/2+150)];
-    //z代表图像层次
+    
     [self addChild: menuChooseBody1 z:-1];
     
     CCMenu *menuChooseBody2 = [CCMenu menuWithItems:Cut, notCut, bloomSplit, createMagnet, nil];
@@ -427,10 +434,8 @@ HelloWorldLayer* instance;
 {
     // CCLOG(@"Test before create sprite");
     CCLOG(@"Add sprite position %0.2f x %02.f",p.x,p.y);
-   
-    _cache = [[CCArray alloc] initWithCapacity:53];
     
-    PolygonSprite *sprite = [[body1 alloc] initWithWorld:world at:p ];
+    PolygonSprite *sprite = [[watermelon alloc] initWithWorld:world at:p ];
     
     
     //*******************We can not use the following methods to add sprite to parentSprite************
@@ -441,7 +446,7 @@ HelloWorldLayer* instance;
     
     [self addChild:sprite z:1];
     [sprite activateCollisions];
-    [_cache addObject:sprite];
+    [catchSprite addObject:sprite];
     
     sprite.tag = tagBody1++;
     
@@ -451,6 +456,44 @@ HelloWorldLayer* instance;
     CCLOG(@"body worldCenter is %0.2f x %02.f", sprite.body->GetWorldCenter().x, sprite.body->GetWorldCenter().y);
     CCLOG(@"body localCenter is %0.2f x %02.f", sprite.body->GetLocalCenter().x, sprite.body->GetLocalCenter().y);
     //CCLOG(@"sprite position is %0.2f x %02.f",sprite.body->GetPosition().x,sprite.body->GetPosition().y);
+}
+
+
+-(void) CreateWeapon
+{
+    CGPoint p  = ccp(winSize.width-200,winSize.height/3);
+    
+    CCLOG(@"Add weapon position %0.2f x %02.f",p.x,p.y);
+    
+    PolygonSprite *sprite = [[weapon alloc] initWithWorld:world at:p ];
+        
+    [self addChild:sprite z:1];
+    
+    [sprite activateCollisions];
+    
+    sprite.tag = weaponTag;
+    
+    [movableSprites addObject:sprite];
+    [catchSprite addObject:sprite];
+}
+
+
+-(void) CreateTarget
+{
+    CGPoint p  = ccp(winSize.width/5,winSize.height/3);
+    
+    CCLOG(@"Add target position %0.2f x %02.f",p.x,p.y);
+    
+    PolygonSprite *sprite = [[target alloc] initWithWorld:world at:p ];
+    
+    [self addChild:sprite z:1];
+    
+    [sprite activateCollisions];
+    
+    sprite.tag = weaponTag;
+    
+    [movableSprites addObject:sprite];
+    [catchSprite addObject:sprite];
 }
 
 //-(void) createBody1:(CGPoint)p
@@ -511,64 +554,9 @@ HelloWorldLayer* instance;
 
 -(void) createBody2:(CGPoint)p
 {
-    CCLOG(@"Add sprite %0.2f x %02.f",p.x,p.y);
-//	// Define the dynamic body.
-//	//Set up a 1m squared box in the physics world
-//	b2BodyDef bodyDef;
-//	bodyDef.type = b2_dynamicBody;
-//	bodyDef.position.Set(p.x/PTM_RATIO, p.y/PTM_RATIO);
-//	b2Body *body = world->CreateBody(&bodyDef);
-//	
-//	// Define another box shape for our dynamic body.
-//	b2PolygonShape dynamicBox;
-//	dynamicBox.SetAsBox(.5f, .5f);//These are mid points for our 1m box
-//
-//	// Define the dynamic body fixture.
-//	b2FixtureDef fixtureDef;
-//	fixtureDef.shape = &dynamicBox;
-//	fixtureDef.density = 1.5f;
-//	fixtureDef.friction = 0.7f;
-//    fixtureDef.restitution = 0.7f;
-//	body->CreateFixture(&fixtureDef);
-//	
-//    
-//	CCNode *parentSprite = [self getChildByTag:kTagParentNode];
-//	
-//	//We have a 64x64 sprite sheet with 4 different 32x32 images.  The following code is
-//	//just randomly picking one of the images
-//    //	int idx = (CCRANDOM_0_1() > .5 ? 0:1);
-//    //	int idy = (CCRANDOM_0_1() > .5 ? 0:1);
-//    
-//    
-////	CCPhysicsSprite *sprite = [CCPhysicsSprite spriteWithTexture:spriteTexture_ rect:CGRectMake(32 ,0,32,32)];
-//    
-//    PolygonSprite *sprite = [PolygonSprite spriteWithTexture: spriteTexture_ body:body original:NO];
-//    
-//    //添加tag用来给碰撞检测时判断物体类型
-//    //暂时用tag的值的范围代表物体类型
-//    //500以上是BodyB
-//    sprite.tag = tagBodyB++;
-//    
-//    // [self addChild:sprite z:1];
-//    [parentSprite addChild:sprite];
-//	
-////    [sprite setPTMRatio:PTM_RATIO];
-//    sprite.body = body;
-//	[sprite setPosition: ccp( p.x, p.y)];
-//    
-//    //暂时注释掉setUserData中存入结构体
-//    //    myUserData *data1 ;
-//    //    data1->bodyType = 1;
-//    //    data1->sprite = sprite;
-//    //    body->SetUserData(data1);
-//    
-//    body->SetUserData(sprite);
-//    [movableSprites addObject:sprite];
-    
-    
-    // CCLOG(@"Test before create sprite");
+
     CCLOG(@"Add sprite position %0.2f x %02.f",p.x,p.y);    
-    _cache = [[CCArray alloc] initWithCapacity:53];
+    catchSprite = [[CCArray alloc] initWithCapacity:53];
     b2BodyDef bodyDef;
     bodyDef.type = b2_dynamicBody;
     bodyDef.position = b2Vec2(p.x/PTM_RATIO,p.y/PTM_RATIO);
@@ -594,15 +582,9 @@ HelloWorldLayer* instance;
     PolygonSprite *sprite = [[[PolygonSprite alloc] initWithFile:file body:body original:YES] autorelease];
     
     
-    //*******************We can not use the following methods to add sprite to parentSprite************
-    //*************************This should be fixed or worked arround**********************************
-    //********************************          WK         ********************************************
-    //    	CCNode *parentSprite = [self getChildByTag:kTagParentNode];
-    //        [parentSprite addChild:sprite];
-    
     [self addChild:sprite z:1];
     [sprite activateCollisions];
-    [_cache addObject:sprite];
+    [catchSprite addObject:sprite];
     
     sprite.tag = tagBodyB++;
     
@@ -749,12 +731,11 @@ HelloWorldLayer* instance;
                         toDestroy.push_back(bodyB);
                     }
                     
-                    //
+                    //We can determine if the weapon is contacting the target 
                     if((spriteA.tag == weaponTag && spriteB.tag == targetTag) || (spriteB.tag == weaponTag && spriteA.tag == targetTag))
                     {
                         targetHitted = true;
-                    }
-                    
+                    }                    
                 }
             }
         }
@@ -866,7 +847,7 @@ HelloWorldLayer* instance;
             
             
             //The ratio must be chosen very carefully.
-            //Here i use random ratio so critical strike would happen sometimes
+            //Here i use a random ratio so critical strike would happen sometimes
             float ratio = frandom_range(100,400);
             
             float forceX = pow(ratio,2) * diffX / sqrt (pow ((pow(diffX,2) + pow(diffY,2)),3));
@@ -911,33 +892,34 @@ HelloWorldLayer* instance;
 {
     if(weaponExploded && damageSpriteAppeared)
         {            
-            dispatch_async ( globalQueue, ^{
-
-            float targetSpriteX = targetSprite.body->GetWorldCenter().x * PTM_RATIO;
-            float targetSpriteY = targetSprite.body->GetWorldCenter().y * PTM_RATIO;
-            
-            dispatch_async(mainQueue, ^{
-                if(damageStep <= 40)
-                {
-                    id actionMove = [CCMoveTo actionWithDuration:0.05
-                                                        position:ccp(targetSpriteX , targetSpriteY + 3 * damageStep)];
+            dispatch_async(globalQueue, ^{
+                
+                float targetSpriteX = targetSprite.body->GetWorldCenter().x * PTM_RATIO;
+                float targetSpriteY = targetSprite.body->GetWorldCenter().y * PTM_RATIO;
+                
+                dispatch_async(mainQueue, ^{
                     
-                    id actionFade = [CCFadeTo actionWithDuration:0.05
-                                                         opacity:255-6 * damageStep++];
-                    
-                    [damageSprite runAction:[CCSequence actions:actionMove, actionFade, nil]];
-                }
-                else
-                {
-                    //destroy the damage sprite
-                    [self removeChild:magnetSprite cleanup:YES];
-                    
-                    // reset all the arguments after destroying the damage sprite
-                    damageStep           = 0;
-                    weaponExploded       = false;
-                    damageSpriteAppeared = false;
-                }                
-            });        
+                    if(damageStep <= 40)
+                    {
+                        id actionMove = [CCMoveTo actionWithDuration:0.05
+                                                            position:ccp(targetSpriteX , targetSpriteY + 20 + 3 * damageStep)];
+                        
+                        id actionFade = [CCFadeTo actionWithDuration:0.05
+                                                             opacity:255-6 * damageStep++];
+                        
+                        [damageSprite runAction:[CCSequence actions:actionMove, actionFade, nil]];
+                    }
+                    else
+                    {
+                        //destroy the damage sprite
+                        [self removeChild:damageSprite cleanup:YES];
+                        
+                        // reset all the arguments after destroying the damage sprite
+                        damageStep           = 0;
+                        weaponExploded       = false;
+                        damageSpriteAppeared = false;
+                    }                
+                });
         });
     }
 }
@@ -955,7 +937,7 @@ HelloWorldLayer* instance;
 //**
 //  Handle damage1.0
 //**
--(float) handleDamage:(b2Vec2)force
+-(void) handleDamage:(b2Vec2)force
 {
     float damageValue = sqrt((pow(force.x,2) + pow(force.y,2)));
     if(damageValue >= 500)
@@ -1610,7 +1592,7 @@ HelloWorldLayer* instance;
         CCLOG(@"select");
     }
 }
-//用新的touch-api，可以扩展为多点触摸
+
 - (void)ccTouchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
 {
 	//Add a new body/atlas sprite at the touched location
@@ -1621,9 +1603,10 @@ HelloWorldLayer* instance;
 		CGPoint location1 = [[CCDirector sharedDirector] convertToGL: location];
         if(!cut)
         {
-            if(selSprite)
+            //We can only shoot weapon
+            if(selSprite && (selSprite.tag == weaponTag))
             {
-                CCLOG(@"fuck");
+                CCLOG(@"shoot");
                 b2Vec2 b = *new b2Vec2(-10*(location1.x-locationBegin.x),-10*(location1.y-locationBegin.y));
                 selSprite.body->ApplyForce(b, selSprite.body->GetWorldCenter());
             }else{
@@ -1641,12 +1624,17 @@ HelloWorldLayer* instance;
 		
 		location = [[CCDirector sharedDirector] convertToGL: location];
         locationBegin = location;
+        
+        // select the specific sprite we touch
         [self selectSpriteForTouch:location];
+        
+        
         if (cut)
         {
             _startPoint = location;
             _endPoint = location;
         }
+        
         CCLOG(@"touchbegin");
     }
     //return TRUE;
@@ -1660,8 +1648,6 @@ HelloWorldLayer* instance;
         
         touchLocation = [[CCDirector sharedDirector] convertToGL: touchLocation];
         
-        CGPoint oldTouchLocation = [touch previousLocationInView:touch.view];
-        oldTouchLocation = [[CCDirector sharedDirector] convertToGL:oldTouchLocation];
         //oldTouchLocation = [self convertToNodeSpace:oldTouchLocation];
         
         //*********************The following method is used to cut PolygonSprite-body******************
@@ -1688,6 +1674,9 @@ HelloWorldLayer* instance;
         // else if (selSprite.tag == 9999)
         else
         {
+            CGPoint oldTouchLocation = [touch previousLocationInView:touch.view];
+            oldTouchLocation = [[CCDirector sharedDirector] convertToGL:oldTouchLocation];
+            
             CGPoint translation = ccpSub(touchLocation, oldTouchLocation);
             [self panForTranslation:translation];
         }

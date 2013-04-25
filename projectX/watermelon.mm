@@ -6,10 +6,10 @@
 //  Copyright StreamStan 2013. All rights reserved.
 //
 
-#import "body1.h"
+#import "watermelon.h"
 
 
-@implementation body1
+@implementation watermelon
 
 -(id)initWithWorld:(b2World *)world at:(CGPoint)p
 {

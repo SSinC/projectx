@@ -33,9 +33,19 @@
 #define random_range(low,high) (arc4random()%(high-low+1))+low
 #define midpoint(a,b) (float)(a+b)/2
 
+//**
+//  Sprite Tag
+//**
+#define weaponTag  9999      // weapon tag
+#define targetTag  10000     // target tag
 
-#define weaponTag  9999    // weapon tag
-#define targetTag  10000   // target tag
+//**
+//  body type
+//**
+#define createWatermelon 1   // create Watermelon
+#define createBody1      2   // create Body1
+#define createWeapon     3   // create weapon
+#define createTarget     4   // create target
 
 //Pixel to metres ratio. Box2D uses metres as the unit for measurement.
 //This ratio defines how many pixels correspond to 1 Box2D "metre"
@@ -89,7 +99,7 @@
     RaycastCallback *_raycastCallback;
     
     //add  array to store sprites
-    CCArray *_cache;
+    CCArray *catchSprite;
     
     CGPoint _startPoint;
     CGPoint _endPoint;

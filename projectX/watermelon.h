@@ -10,7 +10,7 @@
 #import "cocos2d.h"
 #import "PolygonSprite.h"
 
-@interface body1 : PolygonSprite {
+@interface watermelon : PolygonSprite {
     
 }
 

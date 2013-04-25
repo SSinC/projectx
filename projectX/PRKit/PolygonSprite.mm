@@ -103,6 +103,18 @@
 	_body->SetTransform( b2Vec2(position.x / PTM_RATIO, position.y / PTM_RATIO), angle );
 }
 
+//**
+//  add get position
+//**
+-(CGPoint)position
+{
+	b2Vec2 pos  = _body->GetPosition();
+	
+	float x = pos.x * PTM_RATIO;
+	float y = pos.y * PTM_RATIO;
+	return ccp(x,y);
+}
+
 -(b2Body*)createBodyForWorld:(b2World *)world position:(b2Vec2)position rotation:(float)rotation vertices:(b2Vec2*)vertices vertexCount:(int32)count density:(float)density friction:(float)friction restitution:(float)restitution
 {
     b2BodyDef bodyDef;
