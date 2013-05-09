@@ -14,6 +14,12 @@
 
 #define collinear(x1,y1,x2,y2,x3,y3) fabsf((y1-y2) * (x1-x3) - (y1-y3) * (x1-x2))
 
+//**
+//  Sprite Tag
+//**
+#define weaponTag  9999      // weapon tag
+#define targetTag  10000     // target tag
+
 class RaycastCallback : public b2RayCastCallback
 {
 public:
@@ -24,6 +30,13 @@ public:
     {
        
         PolygonSprite *ps = (PolygonSprite*)fixture->GetBody()->GetUserData();
+        
+        /// return -1: ignore this fixture and continue
+        /// return 0: terminate the ray cast
+        /// return fraction: clip the ray to this point
+        /// return 1: don't clip the ray and continue
+        if(ps.tag == targetTag) return -1;
+        
         if(!ps){
          CCLOG(@"in ReportFixture sprite is NULL" );
         }

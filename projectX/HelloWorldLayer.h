@@ -76,12 +76,15 @@
     CGSize winSize;
     
     //added copy_chooseBodyNumber to choose body type
-    __block int copy_chooseBodyNumber;
+    __block int chooseBodyNumber;
     //added cut option used to switch touch-mode
-    __block BOOL cut;
+    __block BOOL cutMode;
     
     //add for blooming
     __block BOOL isBloom;
+    
+    //add-body mode
+    __block BOOL addBodyMode;
     
     //add explodeing center
     float explosionX;

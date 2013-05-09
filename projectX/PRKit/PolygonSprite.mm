@@ -155,6 +155,7 @@
     fixtureDef.filter.maskBits = 0;
     //fixtureDef.isSensor = YES;
     
+    //create a circleShape
     b2CircleShape *circleShape = new b2CircleShape();
     circleShape->m_radius = radius;
     fixtureDef.shape = circleShape;
