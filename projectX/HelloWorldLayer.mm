@@ -253,6 +253,11 @@ HelloWorldLayer* instance;
         
     }];
     
+    CCMenuItem *chooseBody5 = [CCMenuItemFont itemWithString:@"airfan" block:^(id sender){
+        airfanExist = airfanExist ? false : true;
+        
+    }];
+    
     CCMenuItem *add = [CCMenuItemFont itemWithString:@"add-body Mode   " block:^(id sender){
         // Switch the mode to Cut-Mode
         addBodyMode = true;
@@ -284,7 +289,7 @@ HelloWorldLayer* instance;
         }
     }];
 	
-    CCMenu *menuChooseBody1 = [CCMenu menuWithItems:chooseBody1, chooseBody2, chooseBody3,chooseBody4,  nil];
+    CCMenu *menuChooseBody1 = [CCMenu menuWithItems:chooseBody1, chooseBody2, chooseBody3,chooseBody4,chooseBody5,  nil];
 	
 	[menuChooseBody1 alignItemsHorizontally];
 	
