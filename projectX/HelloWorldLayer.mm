@@ -890,7 +890,7 @@ HelloWorldLayer* instance;
             weaponExploded = true;
             
             //**
-            //***************  handle damage   *******************
+            //  ***************  handle damage   *******************
             //**
             damage = sqrt((pow(force.x,2) + pow(force.y,2)));
             // if the damage is bigger than a certain number,we consider the strike as a critical strike
@@ -917,6 +917,7 @@ HelloWorldLayer* instance;
                 [self addChild:damageSprite];
                 [damageSprite setPosition: ccp( targetSpriteX, targetSpriteY + 20)];
                 
+                //now the damage is appeared
                 damageSpriteAppeared = true;
             });
         });
@@ -928,9 +929,10 @@ HelloWorldLayer* instance;
 //**
 -(void) animation
 {
+    
     if(weaponExploded && damageSpriteAppeared)
         {
-            //Since the main-loop is about 60 frame/s, if using the dispatch_async could improve the performance is to be examineds.
+            //Since the main-loop is about 60 frame/s, if using the dispatch_async could improve the performance is to be examined.
             
             //dispatch_async(globalQueue, ^{
                 
@@ -971,22 +973,31 @@ HelloWorldLayer* instance;
 {
     CGContextRef ctx = UIGraphicsGetCurrentContext();
     CGContextSaveGState(ctx);
-
     CGContextSetLineCap(ctx, kCGLineCapRound);
+    
+    //blood-status-line width
     CGContextSetLineWidth(ctx, 2.0);
     CGContextSetAllowsAntialiasing(ctx, YES);
-    CGContextSetRGBStrokeColor(ctx, 0.1, 0.1, 0.1, 1.0);
-    CGContextBeginPath(ctx);
     
+    float *color;
+//    color[0] = [self generateBloodColor][0];
+//    color[1] = [self generateBloodColor][1];
+//    color[2] = [self generateBloodColor][2];
+    color = [self generateBloodColor];
+    CGContextSetRGBStrokeColor(ctx, color[0], color[1], color[2], 1.0);
+    
+    CGContextBeginPath(ctx);    
     CGContextMoveToPoint(ctx, 60, 35);
-    CGContextAddLineToPoint(ctx, winSize.width-60, 35);
-        
+    CGContextAddLineToPoint(ctx, winSize.width-60, 35);        
     
     CGContextStrokePath(ctx);
     
 }
 
-- (NSMutableArray*) generateBloodStatus
+//**
+//  generate blood status color
+//**
+- (float *) generateBloodColor
 {
     // green is (127,255,0) and red is (139,0,0)
     
@@ -995,9 +1006,13 @@ HelloWorldLayer* instance;
     float c2 = (255.0 + ratio * (0.0 - 255.0)) / 256.0;
     float c3 = 0;
     
-    NSMutableArray *color = [NSMutableArray arrayWithCapacity:3];
+    float color[3] = {c1,c2,c3};
+//    float *bloodColor = (float *)calloc(3, sizeof(float));
+//    bloodColor[0] = c1;
+//    bloodColor[1] = c2;
+//    bloodColor[2] = c3;
     
-    //color[0] = c1;
+    return color;
     
 }
 
@@ -1014,7 +1029,9 @@ HelloWorldLayer* instance;
 }
 
 
-
+//**
+//  Split the specific PolygonSprite that the method world->RayCast returnd into 2 pieces,both b2body and sprtie 
+//**
 -(void)splitPolygonSprite:(PolygonSprite*)sprite
 {
     //declare & initialize variables to be used for later
