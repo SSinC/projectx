@@ -85,6 +85,9 @@
     
     //add-body mode
     __block BOOL addBodyMode;
+
+    ///add simple ai 
+    __block BOOL aiMode;
     
     //add explodeing center
     float explosionX;

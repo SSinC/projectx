@@ -39,8 +39,8 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "940"
          endingLineNumber = "940"
-         landmarkName = "-animation"
-         landmarkType = "5">
+         landmarkName = "@implementation HelloWorldLayer"
+         landmarkType = "3">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -52,7 +52,7 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "300"
          endingLineNumber = "300"
-         landmarkName = "-initPhysics"
+         landmarkName = "-createMenu"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
@@ -65,8 +65,8 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "181"
          endingLineNumber = "181"
-         landmarkName = "-createMenu"
-         landmarkType = "5">
+         landmarkName = "@implementation HelloWorldLayer"
+         landmarkType = "3">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -91,7 +91,7 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "994"
          endingLineNumber = "994"
-         landmarkName = "-generateBloodColor"
+         landmarkName = "-updateBloodStatus"
          landmarkType = "5">
       </FileBreakpoint>
    </FileBreakpoints>

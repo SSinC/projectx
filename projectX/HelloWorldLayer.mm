@@ -289,6 +289,10 @@ HelloWorldLayer* instance;
         }
     }];
 	
+    CCMenuItem *AI = [CCMenuItemFont itemWithString:@"AI" block:^(id sender){
+       aiMode = aiMode ? ! false :true;
+    }];
+
     CCMenu *menuChooseBody1 = [CCMenu menuWithItems:chooseBody1, chooseBody2, chooseBody3,chooseBody4,chooseBody5,  nil];
 	
 	[menuChooseBody1 alignItemsHorizontally];
@@ -297,7 +301,7 @@ HelloWorldLayer* instance;
     
     [self addChild: menuChooseBody1 z:-1];
     
-    CCMenu *menuChooseBody2 = [CCMenu menuWithItems:add,cut, notCut, bloomSplit, createMagnet, nil];
+    CCMenu *menuChooseBody2 = [CCMenu menuWithItems:add,cut, notCut, bloomSplit, createMagnet, AI, nil];
 	
 	[menuChooseBody2 alignItemsHorizontally];
 	
@@ -719,6 +723,8 @@ HelloWorldLayer* instance;
     [self animation];
     
     [self updateBloodStatus];
+
+//  [self simpleAI];
     
     world->ClearForces();
     
@@ -898,6 +904,7 @@ HelloWorldLayer* instance;
             //  ***************  handle damage   *******************
             //**
             damage = sqrt((pow(force.x,2) + pow(force.y,2)));
+            CCLOG(@"damage is %f",damage);
             // if the damage is bigger than a certain number,we consider the strike as a critical strike
             // and the damage-sprite should be bigger than usual
             if(damage >= 500)
@@ -1019,6 +1026,63 @@ HelloWorldLayer* instance;
     
     return color;
     
+}
+
+//**
+//  simple AI test
+//**
+-(void) simpleAI
+{
+    if(AIFired){
+    	AIFired = false;
+        dispatch_async(globalQueue, ^{
+            
+            /// Step 1
+            // get the position of the player
+            // Do we use the precise position or the approximately position ?
+            // Do we use the real-time traced position or a certain fixed position ?
+            playerPosX ;
+            playerPosY ;
+            
+            /// Step 2
+            // determine the attack way
+            (frandom_range(1,10) <= 5) ? (attackWay = parabolic) :(attackWay = straight);
+             
+             float weaponX       = weaponAI.body->GetWorldCenter().x   * PTM_RATIO;
+             float weaponY       = weaponAI.body->GetWorldCenter().y   * PTM_RATIO;
+             float targetSpriteX = targetPlayer.body->GetWorldCenter().x * PTM_RATIO;
+             float targetSpriteY = targetPlayer.body->GetWorldCenter().y * PTM_RATIO;
+             float diffX         = weaponX - targetSpriteX;
+             loat diffY         = weaponY - targetSpriteY;
+
+            if( attackWay == parabolic)
+            {
+                
+                ///  Time is a given certain argument
+                ///        Vx * Time          = diffX
+                ///        0.5 * G * (t1 ^ 2) = Hmax           ~ 5 * (t1 ^ 2) = Hmax
+                ///        0.5 * G * (t2 ^ 2) = Hmax - diffY   ~ 5 * (t1 ^ 2) = Hmax - diffY
+                ///        t1 + t2            = Time
+
+                /// ==>   Vx = diffX / Time
+                /// ==>   t1 = 0.5 * ( Time + diffY / 0.5 * G * Time )
+                /// ==>   t2 = 0.5 * ( Time - diffY / 0.5 * G * Time )
+                /// ==>   Vy = G * t1 = 0.5 * G * Time + diffY / 0.5 * Time
+                
+                float Vx = * 0.5 * diffX / Time / PTM_RATIO;
+                float Vy = * 0.5 * G * Time + diffY / 0.5 * Time / PTM_RATIO;
+
+                b2Vec2 Velocity = * new b2Vec2(Vx,Vy);
+                
+                targetSprite.body->SetLinearVelocity(Velocity);
+               
+            }
+            else
+            {
+                
+            } 
+        });
+    }
 }
 
 //**

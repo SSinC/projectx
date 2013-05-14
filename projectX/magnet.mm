@@ -32,7 +32,7 @@
     //Since that i want the manget to be a Globular-body,i have to create a new method
     // createGlobularBodyForWorld  --- this method is to be examined.
     //*****************WK
-    b2Body *body = [self createGlobularBodyForWorld:world position:b2Vec2(screen.width/PTM_RATIO,screen.height/PTM_RATIO) rotation:0 radius:5.0 density:5.0 friction:0.2 restitution:0.2];
+    b2Body *body = [self createGlobularBodyForWorld:world position:b2Vec2(screen.width/2/PTM_RATIO,screen.height/2/PTM_RATIO) rotation:0 radius:5.0 density:5.0 friction:0.2 restitution:0.2];
     
     
     CCSpriteBatchNode *parentNode = [CCSpriteBatchNode batchNodeWithFile:@"blocks.png" capacity:100];
