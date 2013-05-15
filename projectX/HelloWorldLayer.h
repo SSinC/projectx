@@ -59,6 +59,12 @@
 //    CCPhysicsSprite *sprite;
 //}myUserData;
 
+
+typedef enum{
+    straight = 1UL << 0,
+    parabolic = 1UL << 1
+}attackWay;
+
 // HelloWorldLayer
 @interface HelloWorldLayer : CCLayer <GKAchievementViewControllerDelegate, GKLeaderboardViewControllerDelegate>
 {
@@ -120,6 +126,9 @@
     //target-hitted flag
     BOOL targetHitted;
     
+    /// player-hitted flag
+    BOOL playerHitted;
+    
     //add weaponExploded flag
     BOOL weaponExploded;
     
@@ -128,6 +137,12 @@
     
     //add weaponTest
     PolygonSprite *weaponTest;
+    
+    //add targetSprite
+    PolygonSprite *targetPlayer;
+    
+    //add weaponTest
+    PolygonSprite *weaponAI;
     
     //add damageSprite
     CCSprite *damageSprite;
@@ -153,9 +168,22 @@
     //add current target blood;
     float curTargetBlood;
     
+    //add target blood;
+    float playerBlood;
+    
+    //add current target blood;
+    float curPlayerBlood;
+    
+    BOOL targetBloodNeedUpdate;
+    BOOL playerBloodNeedUpdate;
+    
     //add damage sprite time step
     int damageStep;
     
+    /// add AI-could-fire flag
+    BOOL AICouldFire;
+    
+
     
     //add C++ style Array 
 //    std::vector<b2Body*> explodingBodiesCPP_;

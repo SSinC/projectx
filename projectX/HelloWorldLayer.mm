@@ -107,6 +107,7 @@ HelloWorldLayer* instance;
         addBodyMode           = true;
         damageStep            = 1;
         targetBlood           = 1000;
+        AICouldFire           = false;
         
         globalQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
         mainQueue   = dispatch_get_main_queue();
@@ -867,6 +868,7 @@ HelloWorldLayer* instance;
     if (targetHitted)
     {
         targetHitted = false;
+        
         dispatch_async(globalQueue, ^{
            
             float weaponX       = weaponTest.body->GetWorldCenter().x   * PTM_RATIO;
@@ -876,7 +878,7 @@ HelloWorldLayer* instance;
             float diffX         = weaponX - targetSpriteX;
             float diffY         = weaponY - targetSpriteY;
             
-            //************   Here is how the forceX and forceY are computed:
+            //************   Here is how the forceX and forceY are generated:
             //       Fx / Fy             = diffX / diffY
             //       distance            = sqrt( pow (diffX, 2) + pow (diffY, 2))
             //       F (proportional to) = pow( ratio / distance, 2)
@@ -903,7 +905,7 @@ HelloWorldLayer* instance;
             //**
             //  ***************  handle damage   *******************
             //**
-            damage = sqrt((pow(force.x,2) + pow(force.y,2)));
+            float damage = sqrt((pow(force.x,2) + pow(force.y,2)));
             CCLOG(@"damage is %f",damage);
             // if the damage is bigger than a certain number,we consider the strike as a critical strike
             // and the damage-sprite should be bigger than usual
@@ -931,11 +933,87 @@ HelloWorldLayer* instance;
                 
                 //now the damage is appeared
                 damageSpriteAppeared = true;
+                targetBloodNeedUpdate = true;
+            });
+        });
+    }
+    
+    
+    if (playerHitted)
+    {
+        playerHitted = false;
+        
+        dispatch_async(globalQueue, ^{
+            
+            float weaponX       = weaponAI.body->GetWorldCenter().x   * PTM_RATIO;
+            float weaponY       = weaponTest.body->GetWorldCenter().y   * PTM_RATIO;
+            float targetSpriteX = targetPlayer.body->GetWorldCenter().x * PTM_RATIO;
+            float targetSpriteY = targetPlayer.body->GetWorldCenter().y * PTM_RATIO;
+            float diffX         = weaponX - targetSpriteX;
+            float diffY         = weaponY - targetSpriteY;
+            
+            //************   Here is how the forceX and forceY are generated:
+            //       Fx / Fy             = diffX / diffY
+            //       distance            = sqrt( pow (diffX, 2) + pow (diffY, 2))
+            //       F (proportional to) = pow( ratio / distance, 2)
+            //       pow( F, 2 )         = pow(Fx,2)+pow(Fy,2)
+            //
+            //==>    Fx  = pow(ratio,2) * diffX / sqrt( pow( ( pow(diffX,2) + pow(diffY,2) ),3) )
+            //==>    Fy  = pow(ratio,2) * diffY / sqrt( pow( ( pow(diffX,2) + pow(diffY,2) ),3) )
+            
+            
+            //The ratio must be chosen very carefully.
+            //Here i use a random ratio so critical strike would happen sometimes
+            float ratio = frandom_range(100,400);
+            
+            float forceX = pow(ratio,2) * diffX / sqrt (pow ((pow(diffX,2) + pow(diffY,2)),3));
+            float forceY = pow(ratio,2) * diffY / sqrt (pow ((pow(diffX,2) + pow(diffY,2)),3));
+            b2Vec2 force = * new b2Vec2(forceX,forceY);
+            
+            //target should be blown away by the shockWave
+            targetPlayer.body->ApplyLinearImpulse(force, targetPlayer.body->GetWorldCenter());
+            
+            //Now the weapon is exploded
+            weaponExploded = true;
+            
+            //**
+            //  ***************  handle damage   *******************
+            //**
+            float damage = sqrt((pow(force.x,2) + pow(force.y,2)));
+            CCLOG(@"damage is %f",damage);
+            // if the damage is bigger than a certain number,we consider the strike as a critical strike
+            // and the damage-sprite should be bigger than usual
+            if(damage >= 500)
+            {
+                criticalStrike = true;
+            }
+            curPlayerBlood = playerBlood - damage;
+            
+            //We neet to generate a damage sprite based on the damage.
+            //For now, i just use a png to test anyway.
+            dispatch_async(mainQueue, ^{
+                
+                if(!criticalStrike)
+                {
+                    damageSprite = [CCSprite spriteWithFile:@"blocks.png" rect:CGRectMake(32,32,32,32)];
+                }
+                else
+                {
+                    damageSprite = [CCSprite spriteWithFile:@"blocks.png" rect:CGRectMake(32,32,32,32)];
+                    
+                }
+                [self addChild:damageSprite];
+                [damageSprite setPosition: ccp( targetSpriteX, targetSpriteY + 20)];
+                
+                //now the damage is appeared
+                damageSpriteAppeared = true;
             });
         });
     }
 
 }
+
+
 //**
 //  ***************************  Animation  ********************************
 //**
@@ -947,7 +1025,7 @@ HelloWorldLayer* instance;
             //Since the main-loop is about 60 frame/s, if using the dispatch_async could improve the performance is to be examined.
             
             //dispatch_async(globalQueue, ^{
-                
+            
                 float targetSpriteX = targetSprite.body->GetWorldCenter().x * PTM_RATIO;
                 float targetSpriteY = targetSprite.body->GetWorldCenter().y * PTM_RATIO;
                 
@@ -995,21 +1073,39 @@ HelloWorldLayer* instance;
 //    color[0] = [self generateBloodColor][0];
 //    color[1] = [self generateBloodColor][1];
 //    color[2] = [self generateBloodColor][2];
-    color = [self generateBloodColor];
-    CGContextSetRGBStrokeColor(ctx, color[0], color[1], color[2], 1.0);
-    
-    CGContextBeginPath(ctx);    
-    CGContextMoveToPoint(ctx, 60, 35);
-    CGContextAddLineToPoint(ctx, winSize.width-60, 35);        
-    
-    CGContextStrokePath(ctx);
-    
+    if(targetBloodNeedUpdate)
+    {
+        color = [self generateBloodColor:targetBlood curBlood:curTargetBlood];
+        targetBloodNeedUpdate = false;
+        
+        CGContextSetRGBStrokeColor(ctx, color[0], color[1], color[2], 1.0);
+        
+        CGContextBeginPath(ctx);
+        CGContextMoveToPoint(ctx, 10, 35);
+        CGContextAddLineToPoint(ctx, winSize.width-150, 35);
+        
+        CGContextStrokePath(ctx);
+
+    }
+    if(playerBloodNeedUpdate)
+    {
+        color = [self generateBloodColor:playerBlood curBlood:curPlayerBlood];
+        playerBloodNeedUpdate = false;
+        
+        CGContextSetRGBStrokeColor(ctx, color[0], color[1], color[2], 1.0);
+        
+        CGContextBeginPath(ctx);
+        CGContextMoveToPoint(ctx, winSize.width-140, 35);
+        CGContextAddLineToPoint(ctx, winSize.width-10, 35);
+        
+        CGContextStrokePath(ctx);
+    }
 }
 
 //**
 //  generate blood status color
 //**
-- (float *) generateBloodColor
+- (float *) generateBloodColor:(float)targetBlood curBlood:(float)curTargetBlood
 {
     // green is (127,255,0) and red is (139,0,0)
     
@@ -1033,16 +1129,16 @@ HelloWorldLayer* instance;
 //**
 -(void) simpleAI
 {
-    if(AIFired){
-    	AIFired = false;
+    if(AICouldFire){
+    	AICouldFire = false;
         dispatch_async(globalQueue, ^{
             
             /// Step 1
             // get the position of the player
             // Do we use the precise position or the approximately position ?
             // Do we use the real-time traced position or a certain fixed position ?
-            playerPosX ;
-            playerPosY ;
+            float playerPosX ;
+            float playerPosY ;
             
             /// Step 2
             // determine the attack way
@@ -1053,34 +1149,44 @@ HelloWorldLayer* instance;
              float targetSpriteX = targetPlayer.body->GetWorldCenter().x * PTM_RATIO;
              float targetSpriteY = targetPlayer.body->GetWorldCenter().y * PTM_RATIO;
              float diffX         = weaponX - targetSpriteX;
-             loat diffY         = weaponY - targetSpriteY;
-
+             float diffY         = weaponY - targetSpriteY;
+              
+             float Vx,Vy;
+ 
+            /// Step 3
+            // Compute the Velocity of the AI-weapon
             if( attackWay == parabolic)
             {
                 
                 ///  Time is a given certain argument
-                ///        Vx * Time          = diffX
+                ///        Vx  * Time         = Dx
                 ///        0.5 * G * (t1 ^ 2) = Hmax           ~ 5 * (t1 ^ 2) = Hmax
-                ///        0.5 * G * (t2 ^ 2) = Hmax - diffY   ~ 5 * (t1 ^ 2) = Hmax - diffY
-                ///        t1 + t2            = Time
+                ///        0.5 * G * (t2 ^ 2) = Hmax - Dy      ~ 5 * (t1 ^ 2) = Hmax - Dy
+                ///        t1  + t2           = Time
 
-                /// ==>   Vx = diffX / Time
-                /// ==>   t1 = 0.5 * ( Time + diffY / 0.5 * G * Time )
-                /// ==>   t2 = 0.5 * ( Time - diffY / 0.5 * G * Time )
-                /// ==>   Vy = G * t1 = 0.5 * G * Time + diffY / 0.5 * Time
+                /// ==>    Vx = diffX / Time
+                /// ==>    t1 = 0.5 * ( Time + Dy / 0.5 * G * Time )
+                /// ==>    t2 = 0.5 * ( Time - Dy / 0.5 * G * Time )
+                /// ==>    Vy = G * t1 = 0.5 * G * Time + Dy / 0.5 * Time
                 
-                float Vx = * 0.5 * diffX / Time / PTM_RATIO;
-                float Vy = * 0.5 * G * Time + diffY / 0.5 * Time / PTM_RATIO;
-
-                b2Vec2 Velocity = * new b2Vec2(Vx,Vy);
-                
-                targetSprite.body->SetLinearVelocity(Velocity);
+                Vx = * 0.5 * diffX / Time / PTM_RATIO;
+                Vy = * 0.5 * G * Time + diffY / 0.5 * Time / PTM_RATIO;
                
             }
             else
             {
+                ///        Vy * T - 0.5 * G * T ^ 2 = Dy
+                /// ==>    Vy = (Dy + 0.5 * G * T ^ 2) / T 
                 
+                Vx = diffX / Time / PTM_RATIO;
+                Vy = (diffY + 0.5 * G * Time ^ 2) / Time / PTM_RATIO;
+
             } 
+
+            /// Step 4
+            // Fire the AI-weapon
+             b2Vec2 Velocity = * new b2Vec2(Vx,Vy);
+             targetSprite.body->SetLinearVelocity(Velocity);
         });
     }
 }
