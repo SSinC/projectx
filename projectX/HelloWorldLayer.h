@@ -36,8 +36,10 @@
 //**
 //  Sprite Tag
 //**
-#define weaponTag  9999      // weapon tag
-#define targetTag  10000     // target tag
+#define weaponTag      9999       // weapon tag
+#define targetTag      10000      // target tag
+#define playerTag      10001      // weapon tag
+#define AIWeaponTag    10002      // weapon tag
 
 //**
 //  body type
@@ -53,7 +55,7 @@
 //to define the ratio so that your most common object type is 1x1 metre.
 #define PTM_RATIO 32
 
-//添加userData 结合贴图和物体编号，方便使用
+
 //typedef struct userdata{
 //    int bodyType;
 //    CCPhysicsSprite *sprite;
@@ -61,9 +63,17 @@
 
 
 typedef enum{
-    straight = 1UL << 0,
+    straight  = 1UL << 0,
     parabolic = 1UL << 1
 }attackWay;
+
+
+typedef enum{
+    impactForce     = 1UL << 0,
+    attractiveForce = 1UL << 1
+}weaponType;
+
+
 
 // HelloWorldLayer
 @interface HelloWorldLayer : CCLayer <GKAchievementViewControllerDelegate, GKLeaderboardViewControllerDelegate>
@@ -160,7 +170,7 @@ typedef enum{
      BOOL criticalStrike;
     
     //add exploded damage
-    float damage;
+    //float damage;
     
     //add target blood;
     float targetBlood;

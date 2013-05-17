@@ -39,8 +39,8 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "940"
          endingLineNumber = "940"
-         landmarkName = "@implementation HelloWorldLayer"
-         landmarkType = "3">
+         landmarkName = "-physicsEffect"
+         landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -65,8 +65,8 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "181"
          endingLineNumber = "181"
-         landmarkName = "@implementation HelloWorldLayer"
-         landmarkType = "3">
+         landmarkName = "-dealloc"
+         landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -91,7 +91,7 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "994"
          endingLineNumber = "994"
-         landmarkName = "-updateBloodStatus"
+         landmarkName = "-physicsEffect"
          landmarkType = "5">
       </FileBreakpoint>
    </FileBreakpoints>

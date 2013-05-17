@@ -28,6 +28,7 @@ enum {
 
 #define pi 3.14159265358979323846
 #define ARC4RANDOM_MAX      0x100000000
+#define G 9.8
 
 #pragma mark - HelloWorldLayer
 
@@ -725,7 +726,7 @@ HelloWorldLayer* instance;
     
     [self updateBloodStatus];
 
-//  [self simpleAI];
+//  [self simpleAI：Time];
     
     world->ClearForces();
     
@@ -762,8 +763,8 @@ HelloWorldLayer* instance;
                     PolygonSprite *spriteA = (PolygonSprite *) bodyA->GetUserData();
                     PolygonSprite *spriteB = (PolygonSprite *) bodyB->GetUserData();
                     
-                    //we can destroy the specific body we want here.
-                    //Now i destroy the contacted watermelon just test
+                    //we can destroy the specific body we want.
+                    //Now i destroy the contacted watermelon for just testing
                     if (((spriteA.tag >= 1000 && spriteB.tag >= 1000)|| (spriteA.tag >= 1000 && spriteB.tag >= 1000)))
                     {
                         //[parent1 removeChild:spriteA];
@@ -776,7 +777,13 @@ HelloWorldLayer* instance;
                     if((spriteA.tag == weaponTag && spriteB.tag == targetTag) || (spriteB.tag == weaponTag && spriteA.tag == targetTag))
                     {
                         targetHitted = true;
-                    }                    
+                    }
+                    
+                    //Detect if the player is being hitted by AI-weapon
+                    if((spriteA.tag == playerTag && spriteB.tag == AIWeaponTag) || (spriteB.tag == AIWeaponTag && spriteA.tag == playerTag))
+                    {
+                        playerHitted = true;
+                    }
                 }
             }
         }
@@ -932,7 +939,7 @@ HelloWorldLayer* instance;
                 [damageSprite setPosition: ccp( targetSpriteX, targetSpriteY + 20)];
                 
                 //now the damage is appeared
-                damageSpriteAppeared = true;
+                damageSpriteAppeared  = true;
                 targetBloodNeedUpdate = true;
             });
         });
@@ -982,7 +989,7 @@ HelloWorldLayer* instance;
             float damage = sqrt((pow(force.x,2) + pow(force.y,2)));
             CCLOG(@"damage is %f",damage);
             // if the damage is bigger than a certain number,we consider the strike as a critical strike
-            // and the damage-sprite should be bigger than usual
+            // and the damage-sprite should be bigger than normal
             if(damage >= 500)
             {
                 criticalStrike = true;
@@ -1006,7 +1013,8 @@ HelloWorldLayer* instance;
                 [damageSprite setPosition: ccp( targetSpriteX, targetSpriteY + 20)];
                 
                 //now the damage is appeared
-                damageSpriteAppeared = true;
+                damageSpriteAppeared  = true;
+                playerBloodNeedUpdate = true;
             });
         });
     }
@@ -1127,7 +1135,7 @@ HelloWorldLayer* instance;
 //**
 //  simple AI test
 //**
--(void) simpleAI
+-(void) simpleAI:(float)time
 {
     if(AICouldFire){
     	AICouldFire = false;
@@ -1139,6 +1147,9 @@ HelloWorldLayer* instance;
             // Do we use the real-time traced position or a certain fixed position ?
             float playerPosX ;
             float playerPosY ;
+            attackWay attackWay;
+            
+            float Time = time;
             
             /// Step 2
             // determine the attack way
@@ -1169,8 +1180,8 @@ HelloWorldLayer* instance;
                 /// ==>    t2 = 0.5 * ( Time - Dy / 0.5 * G * Time )
                 /// ==>    Vy = G * t1 = 0.5 * G * Time + Dy / 0.5 * Time
                 
-                Vx = * 0.5 * diffX / Time / PTM_RATIO;
-                Vy = * 0.5 * G * Time + diffY / 0.5 * Time / PTM_RATIO;
+                Vx =  diffX / Time / PTM_RATIO;
+                Vy =  0.5 * G * Time + diffY / 0.5 * Time / PTM_RATIO;
                
             }
             else
@@ -1179,7 +1190,7 @@ HelloWorldLayer* instance;
                 /// ==>    Vy = (Dy + 0.5 * G * T ^ 2) / T 
                 
                 Vx = diffX / Time / PTM_RATIO;
-                Vy = (diffY + 0.5 * G * Time ^ 2) / Time / PTM_RATIO;
+                Vy = (diffY + 0.5 * G * pow( Time, 2 ) ) / Time / PTM_RATIO;
 
             } 
 
