@@ -149,16 +149,22 @@ typedef enum{
     PolygonSprite *weaponTest;
     
     //add targetSprite
-    PolygonSprite *targetPlayer;
+    PolygonSprite *playerSprite;
     
     //add weaponTest
     PolygonSprite *weaponAI;
     
     //add damageSprite
-    CCSprite *damageSprite;
+    CCSprite *targetDamageSprite;
+    
+    //add playerDamageSprite
+    CCSprite *playerDamageSprite;
     
     ////damage-sprite appeared flag
-    BOOL damageSpriteAppeared;
+    BOOL targetDamageSpritePresented;
+    
+    ////damage-sprite appeared flag
+    BOOL playerDamageSpritePresented;
     
     //add global_queue -default
     dispatch_queue_t globalQueue ;
@@ -187,8 +193,12 @@ typedef enum{
     BOOL targetBloodNeedUpdate;
     BOOL playerBloodNeedUpdate;
     
-    //add damage sprite time step
-    int damageStep;
+    ///add damage sprite time step
+    int targetDamageStep;
+    
+    ///add damage sprite time step
+    int playerDamageStep;
+
     
     /// add AI-could-fire flag
     BOOL AICouldFire;

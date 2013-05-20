@@ -106,7 +106,8 @@ HelloWorldLayer* instance;
         chooseBodyNumber      = 0;
         cutMode               = false;
         addBodyMode           = true;
-        damageStep            = 1;
+        targetDamageStep      = 1;
+        playerDamageStep      = 1;
         targetBlood           = 1000;
         AICouldFire           = false;
         
@@ -786,7 +787,7 @@ HelloWorldLayer* instance;
                     }
                 }
             }
-        }
+        } // end of for
         
         //***************   Use contacted-information to update graphic  ****************
         dispatch_async(mainQueue, ^{
@@ -922,28 +923,36 @@ HelloWorldLayer* instance;
             }
             curTargetBlood = targetBlood - damage;
             
+        
             //We neet to generate a damage sprite based on the damage.
             //For now, i just use a png to test anyway.
             dispatch_async(mainQueue, ^{
                 
                 if(!criticalStrike)
                 {
-                    damageSprite = [CCSprite spriteWithFile:@"blocks.png" rect:CGRectMake(32,32,32,32)];
+                    targetDamageSprite = [CCSprite spriteWithFile:@"blocks.png" rect:CGRectMake(32,32,32,32)];
                 }
                 else
                 {
-                    damageSprite = [CCSprite spriteWithFile:@"blocks.png" rect:CGRectMake(32,32,32,32)];
+                    targetDamageSprite = [CCSprite spriteWithFile:@"blocks.png" rect:CGRectMake(32,32,32,32)];
                     
                 }
-                [self addChild:damageSprite];
-                [damageSprite setPosition: ccp( targetSpriteX, targetSpriteY + 20)];
+                [self addChild:targetDamageSprite];
+                [targetDamageSprite setPosition: ccp( targetSpriteX, targetSpriteY + 20)];
                 
-                //now the damage is appeared
-                damageSpriteAppeared  = true;
+                //now the target-damage-sprite is appeared
+                targetDamageSpritePresented  = true;
                 targetBloodNeedUpdate = true;
             });
+            
+            ///If the curTargetBlood is smaller than 0,the target should be exploded and than destroyed
+            if(curTargetBlood < 1.0)
+            {
+                [self targetDestroyed:targetSprite];
+            }
+            
         });
-    }
+    } // end of if(targetHitted)
     
     
     if (playerHitted)
@@ -954,8 +963,8 @@ HelloWorldLayer* instance;
             
             float weaponX       = weaponAI.body->GetWorldCenter().x   * PTM_RATIO;
             float weaponY       = weaponTest.body->GetWorldCenter().y   * PTM_RATIO;
-            float targetSpriteX = targetPlayer.body->GetWorldCenter().x * PTM_RATIO;
-            float targetSpriteY = targetPlayer.body->GetWorldCenter().y * PTM_RATIO;
+            float targetSpriteX = playerSprite.body->GetWorldCenter().x * PTM_RATIO;
+            float targetSpriteY = playerSprite.body->GetWorldCenter().y * PTM_RATIO;
             float diffX         = weaponX - targetSpriteX;
             float diffY         = weaponY - targetSpriteY;
             
@@ -978,7 +987,7 @@ HelloWorldLayer* instance;
             b2Vec2 force = * new b2Vec2(forceX,forceY);
             
             //target should be blown away by the shockWave
-            targetPlayer.body->ApplyLinearImpulse(force, targetPlayer.body->GetWorldCenter());
+            playerSprite.body->ApplyLinearImpulse(force, playerSprite.body->GetWorldCenter());
             
             //Now the weapon is exploded
             weaponExploded = true;
@@ -1002,22 +1011,28 @@ HelloWorldLayer* instance;
                 
                 if(!criticalStrike)
                 {
-                    damageSprite = [CCSprite spriteWithFile:@"blocks.png" rect:CGRectMake(32,32,32,32)];
+                    playerDamageSprite = [CCSprite spriteWithFile:@"blocks.png" rect:CGRectMake(32,32,32,32)];
                 }
                 else
                 {
-                    damageSprite = [CCSprite spriteWithFile:@"blocks.png" rect:CGRectMake(32,32,32,32)];
+                    playerDamageSprite = [CCSprite spriteWithFile:@"blocks.png" rect:CGRectMake(32,32,32,32)];
                     
                 }
-                [self addChild:damageSprite];
-                [damageSprite setPosition: ccp( targetSpriteX, targetSpriteY + 20)];
+                [self addChild:playerDamageSprite];
+                [playerDamageSprite setPosition: ccp( targetSpriteX, targetSpriteY + 20)];
                 
-                //now the damage is appeared
-                damageSpriteAppeared  = true;
+                //now the player-damage-sprite is presented
+                playerDamageSpritePresented  = true;
                 playerBloodNeedUpdate = true;
             });
+            
+            ///If the curTargetBlood is smaller than 0,the player should be exploded and than destroyed
+            if(curPlayerBlood < 1.0)
+            {
+                [self targetDestroyed:playerSprite];
+            }
         });
-    }
+    }//end of if(playerHitted)
 
 }
 
@@ -1028,7 +1043,10 @@ HelloWorldLayer* instance;
 -(void) animation
 {
     
-    if(weaponExploded && damageSpriteAppeared)
+    if(weaponExploded)
+    {
+        /// Animation of target
+        if(targetDamageSpritePresented)
         {
             //Since the main-loop is about 60 frame/s, if using the dispatch_async could improve the performance is to be examined.
             
@@ -1039,29 +1057,67 @@ HelloWorldLayer* instance;
                 
                 //dispatch_async(mainQueue, ^{
                     
-                    if(damageStep <= 40)
+                    if(targetDamageStep <= 40)
                     {
                         id actionMove = [CCMoveTo actionWithDuration:0.05
-                                                            position:ccp(targetSpriteX , targetSpriteY + 20 + 3 * damageStep)];
+                                                            position:ccp(targetSpriteX , targetSpriteY + 20 + 3 * targetDamageStep)];
                         
                         id actionFade = [CCFadeTo actionWithDuration:0.05
-                                                             opacity:255-6 * damageStep++];
+                                                             opacity:255-6 * targetDamageStep++];
                         
-                        [damageSprite runAction:[CCSequence actions:actionMove, actionFade, nil]];
+                        [targetDamageSprite runAction:[CCSequence actions:actionMove, actionFade, nil]];
                     }
                     else
                     {
                         //destroy the damage sprite
-                        [self removeChild:damageSprite cleanup:YES];
+                        [self removeChild:targetDamageSprite cleanup:YES];
                         
                         // reset all the arguments after destroying the damage sprite
-                        damageStep           = 0;
-                        weaponExploded       = false;
-                        damageSpriteAppeared = false;
+                        targetDamageStep            = 0;
+                        weaponExploded              = false;
+                        targetDamageSpritePresented = false;
                     }                
                // });
         //});
-    }
+        }// end of if(targetDamageSpritePresented)
+        
+        /// Animation of player
+        if(playerDamageSpritePresented)
+        {
+            //Since the main-loop is about 60 frame/s, if using the dispatch_async could improve the performance is to be examined.
+            
+            //dispatch_async(globalQueue, ^{
+            
+            float playerSpriteX = playerSprite.body->GetWorldCenter().x * PTM_RATIO;
+            float playerSpriteY = playerSprite.body->GetWorldCenter().y * PTM_RATIO;
+            
+            //dispatch_async(mainQueue, ^{
+            
+            if(playerDamageStep <= 40)
+            {
+                id actionMove = [CCMoveTo actionWithDuration:0.05
+                                                    position:ccp(playerSpriteX , playerSpriteY + 20 + 3 * playerDamageStep)];
+                
+                id actionFade = [CCFadeTo actionWithDuration:0.05
+                                                     opacity:255-6 * playerDamageStep++];
+                
+                [playerDamageSprite runAction:[CCSequence actions:actionMove, actionFade, nil]];
+            }
+            else
+            {
+                //destroy the damage sprite
+                [self removeChild:playerDamageSprite cleanup:YES];
+                
+                // reset all the arguments after destroying the damage sprite
+                playerDamageStep            = 0;
+                weaponExploded              = false;
+                playerDamageSpritePresented = false;
+            }
+            // });
+            //});
+        } // end of if(playerDamageSpritePresented)
+
+    }// end of if(weaponExploded) 
 }
 
 //**
@@ -1132,6 +1188,15 @@ HelloWorldLayer* instance;
     
 }
 
+
+//**
+//  Explode and destroy the given polygonSprite target
+//**
+-(void) targetDestroyed :(PolygonSprite*)target
+{
+    
+}
+
 //**
 //  simple AI test
 //**
@@ -1157,8 +1222,8 @@ HelloWorldLayer* instance;
              
              float weaponX       = weaponAI.body->GetWorldCenter().x   * PTM_RATIO;
              float weaponY       = weaponAI.body->GetWorldCenter().y   * PTM_RATIO;
-             float targetSpriteX = targetPlayer.body->GetWorldCenter().x * PTM_RATIO;
-             float targetSpriteY = targetPlayer.body->GetWorldCenter().y * PTM_RATIO;
+             float targetSpriteX = playerSprite.body->GetWorldCenter().x * PTM_RATIO;
+             float targetSpriteY = playerSprite.body->GetWorldCenter().y * PTM_RATIO;
              float diffX         = weaponX - targetSpriteX;
              float diffY         = weaponY - targetSpriteY;
               
