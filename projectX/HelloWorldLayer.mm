@@ -104,10 +104,17 @@ HelloWorldLayer* instance;
         tagBodyB              = 500;
         tagBody1              = 1000;
         chooseBodyNumber      = 0;
+        
         cutMode               = false;
         addBodyMode           = true;
-        targetDamageStep      = 1;
-        playerDamageStep      = 1;
+        aiMode                = false;
+        
+        targetDamageStep       = 1;
+        playerDamageStep       = 1;
+        targetHitted           = false;
+        playerHitted           = false;
+        criticalStrikeToTarget = false;
+        criticalStrikeToPlayer = false;
         
         targetBlood     = 500;
         curTargetBlood  = 500;
@@ -120,6 +127,7 @@ HelloWorldLayer* instance;
         weaponToPlayerExploded  = false;
         targetBloodNeedUpdate   = false;
         playerBloodNeedUpdate   = false;
+       
         
         globalQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
         mainQueue   = dispatch_get_main_queue();
@@ -929,7 +937,7 @@ HelloWorldLayer* instance;
             // and the damage-sprite should be bigger than usual
             if(damage >= 500)
             {
-                criticalStrike = true;
+                criticalStrikeToTarget = true;
             }
             curTargetBlood = targetBlood - damage;
             
@@ -938,7 +946,7 @@ HelloWorldLayer* instance;
             //For now, i just use a png to test anyway.
             dispatch_async(mainQueue, ^{
                 
-                if(!criticalStrike)
+                if(!criticalStrikeToTarget)
                 {
                     targetDamageSprite = [CCSprite spriteWithFile:@"blocks.png" rect:CGRectMake(32,32,32,32)];
                 }
@@ -1011,7 +1019,7 @@ HelloWorldLayer* instance;
             // and the damage-sprite should be bigger than normal
             if(damage >= 500)
             {
-                criticalStrike = true;
+                criticalStrikeToPlayer = true;
             }
             curPlayerBlood = playerBlood - damage;
             
@@ -1019,7 +1027,7 @@ HelloWorldLayer* instance;
             //For now, i just use a png to test anyway.
             dispatch_async(mainQueue, ^{
                 
-                if(!criticalStrike)
+                if(!criticalStrikeToPlayer)
                 {
                     playerDamageSprite = [CCSprite spriteWithFile:@"blocks.png" rect:CGRectMake(32,32,32,32)];
                 }
@@ -1093,6 +1101,13 @@ HelloWorldLayer* instance;
         
     }// end of if(weaponToTargetExploded)
     
+//     UIBezierPath *movePath = [UIBezierPath bezierPath];
+//    CABasicAnimation *animation=[CABasicAnimation animationWithKeyPath:@"transform.translation"];
+//    animation.duration = 1.0f;
+//   
+//    
+//    CGMutablePathRef path = CGPathCreateMutable();
+//    
     if(weaponToPlayerExploded)
     {
         /// Animation of player
@@ -1289,7 +1304,7 @@ HelloWorldLayer* instance;
     float damageValue = sqrt((pow(force.x,2) + pow(force.y,2)));
     if(damageValue >= 500)
     {
-        criticalStrike = true;
+        criticalStrikeToTarget = true;
     }
 }
 

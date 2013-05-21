@@ -176,7 +176,10 @@ typedef enum{
     dispatch_queue_t mainQueue ;
     
     //add critical strike flag
-     BOOL criticalStrike;
+    BOOL criticalStrikeToTarget;
+    
+    //add critical strike flag
+    BOOL criticalStrikeToPlayer;
     
     //add exploded damage
     //float damage;
