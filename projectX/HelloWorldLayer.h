@@ -139,8 +139,11 @@ typedef enum{
     /// player-hitted flag
     BOOL playerHitted;
     
-    //add weaponExploded flag
-    BOOL weaponExploded;
+    ///add targetWeaponExploded flag
+    BOOL weaponToTargetExploded;
+    
+    ///add weaponExploded flag
+    BOOL weaponToPlayerExploded;
     
     //add targetSprite
     PolygonSprite *targetSprite;
@@ -190,6 +193,7 @@ typedef enum{
     //add current target blood;
     float curPlayerBlood;
     
+    //add bloodNeedUpdate flag
     BOOL targetBloodNeedUpdate;
     BOOL playerBloodNeedUpdate;
     

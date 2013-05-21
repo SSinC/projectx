@@ -108,8 +108,18 @@ HelloWorldLayer* instance;
         addBodyMode           = true;
         targetDamageStep      = 1;
         playerDamageStep      = 1;
-        targetBlood           = 1000;
-        AICouldFire           = false;
+        
+        targetBlood     = 500;
+        curTargetBlood  = 500;
+        playerBlood     = 500;
+        curPlayerBlood  = 500;
+ 
+        AICouldFire             = false;
+        
+        weaponToTargetExploded  = false;
+        weaponToPlayerExploded  = false;
+        targetBloodNeedUpdate   = false;
+        playerBloodNeedUpdate   = false;
         
         globalQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
         mainQueue   = dispatch_get_main_queue();
@@ -908,7 +918,7 @@ HelloWorldLayer* instance;
             targetSprite.body->ApplyLinearImpulse(force, targetSprite.body->GetWorldCenter());
             
             //Now the weapon is exploded
-            weaponExploded = true;
+            weaponToTargetExploded = true;
             
             //**
             //  ***************  handle damage   *******************
@@ -961,8 +971,8 @@ HelloWorldLayer* instance;
         
         dispatch_async(globalQueue, ^{
             
-            float weaponX       = weaponAI.body->GetWorldCenter().x   * PTM_RATIO;
-            float weaponY       = weaponTest.body->GetWorldCenter().y   * PTM_RATIO;
+            float weaponX       = weaponAI.body->GetWorldCenter().x     * PTM_RATIO;
+            float weaponY       = weaponAI.body->GetWorldCenter().y     * PTM_RATIO;
             float targetSpriteX = playerSprite.body->GetWorldCenter().x * PTM_RATIO;
             float targetSpriteY = playerSprite.body->GetWorldCenter().y * PTM_RATIO;
             float diffX         = weaponX - targetSpriteX;
@@ -990,7 +1000,7 @@ HelloWorldLayer* instance;
             playerSprite.body->ApplyLinearImpulse(force, playerSprite.body->GetWorldCenter());
             
             //Now the weapon is exploded
-            weaponExploded = true;
+            weaponToPlayerExploded = true;
             
             //**
             //  ***************  handle damage   *******************
@@ -1043,7 +1053,7 @@ HelloWorldLayer* instance;
 -(void) animation
 {
     
-    if(weaponExploded)
+    if(weaponToTargetExploded)
     {
         /// Animation of target
         if(targetDamageSpritePresented)
@@ -1074,13 +1084,17 @@ HelloWorldLayer* instance;
                         
                         // reset all the arguments after destroying the damage sprite
                         targetDamageStep            = 0;
-                        weaponExploded              = false;
+                        weaponToTargetExploded      = false;
                         targetDamageSpritePresented = false;
                     }                
                // });
         //});
         }// end of if(targetDamageSpritePresented)
         
+    }// end of if(weaponToTargetExploded)
+    
+    if(weaponToPlayerExploded)
+    {
         /// Animation of player
         if(playerDamageSpritePresented)
         {
@@ -1110,14 +1124,14 @@ HelloWorldLayer* instance;
                 
                 // reset all the arguments after destroying the damage sprite
                 playerDamageStep            = 0;
-                weaponExploded              = false;
+                weaponToPlayerExploded      = false;
                 playerDamageSpritePresented = false;
             }
             // });
             //});
         } // end of if(playerDamageSpritePresented)
 
-    }// end of if(weaponExploded) 
+    }// end of if(weaponToPlayerExploded) 
 }
 
 //**
@@ -1220,8 +1234,8 @@ HelloWorldLayer* instance;
             // determine the attack way
             (frandom_range(1,10) <= 5) ? (attackWay = parabolic) :(attackWay = straight);
              
-             float weaponX       = weaponAI.body->GetWorldCenter().x   * PTM_RATIO;
-             float weaponY       = weaponAI.body->GetWorldCenter().y   * PTM_RATIO;
+             float weaponX       = weaponAI.body->GetWorldCenter().x     * PTM_RATIO;
+             float weaponY       = weaponAI.body->GetWorldCenter().y     * PTM_RATIO;
              float targetSpriteX = playerSprite.body->GetWorldCenter().x * PTM_RATIO;
              float targetSpriteY = playerSprite.body->GetWorldCenter().y * PTM_RATIO;
              float diffX         = weaponX - targetSpriteX;
@@ -1246,7 +1260,7 @@ HelloWorldLayer* instance;
                 /// ==>    Vy = G * t1 = 0.5 * G * Time + Dy / 0.5 * Time
                 
                 Vx =  diffX / Time / PTM_RATIO;
-                Vy =  0.5 * G * Time + diffY / 0.5 * Time / PTM_RATIO;
+                Vy =  (0.5 * G * Time + diffY / 0.5 * Time)/ PTM_RATIO;
                
             }
             else
