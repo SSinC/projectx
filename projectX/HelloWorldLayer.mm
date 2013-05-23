@@ -424,18 +424,32 @@ HelloWorldLayer* instance;
         for(int i = 0; i < radomNum; i++)
         {
             //create the radom point for the cast ray. from -50.0 to 50.0
-            double valx = floorf(((double)arc4random() / ARC4RANDOM_MAX) * 100.0f - 50.0f);
-            double valy = floorf(((double)arc4random() / ARC4RANDOM_MAX) * 100.0f - 50.0f);
+            double valx = floorf(((double)arc4random() / ARC4RANDOM_MAX) * 10.0f);
+            double valy = floorf(((double)arc4random() / ARC4RANDOM_MAX) * 10.0f);
+            CCLOG(@"body valx is %0.2f ", valx);
+            CCLOG(@"body valy is %0.2f ", valy);
             
-            b2Vec2 endPoint = b2Vec2((spriteCenter.x + valx)/PTM_RATIO, (spriteCenter.y + valy)/PTM_RATIO);
+            double valx2 = floorf(((double)arc4random() / ARC4RANDOM_MAX) * 10.0f);
+            double valy2 = floorf(((double)arc4random() / ARC4RANDOM_MAX) * 10.0f);
+            CCLOG(@"body valx is %0.2f ", valx2);
+            CCLOG(@"body valy is %0.2f ", valy2);
+            //            b2Vec2 startPoint = b2Vec2((spriteCenter.x - valx)/PTM_RATIO, (spriteCenter.y - valy)/PTM_RATIO);
+            //            b2Vec2 endPoint = b2Vec2((spriteCenter.x + valx2)/PTM_RATIO, (spriteCenter.y - valy2)/PTM_RATIO);
             
+            b2Vec2 startPoint = b2Vec2((spriteCenter.x - valx), (spriteCenter.y - valy));
+            b2Vec2 endPoint = b2Vec2((spriteCenter.x + valx2), (spriteCenter.y - valy2));
+            CCLOG(@"body start is %0.2f , %0.2f ", startPoint.x, startPoint.y);
+            CCLOG(@"body start is %0.2f , %0.2f ", endPoint.x, endPoint.y);
+            //            b2Vec2 endPoint = b2Vec2((spriteCenter.x + valx)/PTM_RATIO, (spriteCenter.y + valy)/PTM_RATIO);
+            //
             world->RayCast(_raycastCallback,
-                           spriteCenter,
+                           startPoint,
                            endPoint);
             
             world->RayCast(_raycastCallback,
                            endPoint,
-                           spriteCenter);
+                           startPoint);
+
         }//end the for
         
     }
