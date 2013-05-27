@@ -12,6 +12,7 @@
 		187D4753171C4A9F00C89E9C /* watermelon-ipadhd.png in Resources */ = {isa = PBXBuildFile; fileRef = 187D4750171C4A9F00C89E9C /* watermelon-ipadhd.png */; };
 		187D4754171C4A9F00C89E9C /* watermelon.png in Resources */ = {isa = PBXBuildFile; fileRef = 187D4751171C4A9F00C89E9C /* watermelon.png */; };
 		3D3642AC1726CFFA00897FBD /* body2.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3D3642AB1726CFFA00897FBD /* body2.mm */; };
+		3D5C960117533E2C0057E684 /* Box2DUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D5C960017533E2C0057E684 /* Box2DUtils.cpp */; };
 		3D735D84170FF7820093EE39 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D735D83170FF7820093EE39 /* QuartzCore.framework */; };
 		3D735D86170FF7820093EE39 /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D735D85170FF7820093EE39 /* OpenGLES.framework */; };
 		3D735D88170FF7820093EE39 /* OpenAL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D735D87170FF7820093EE39 /* OpenAL.framework */; };
@@ -209,6 +210,8 @@
 		187D4751171C4A9F00C89E9C /* watermelon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = watermelon.png; path = Resources/watermelon.png; sourceTree = "<group>"; };
 		3D3642AA1726CFFA00897FBD /* body2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = body2.h; sourceTree = "<group>"; };
 		3D3642AB1726CFFA00897FBD /* body2.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = body2.mm; sourceTree = "<group>"; };
+		3D5C95FE17533DF40057E684 /* Box2DUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Box2DUtils.h; sourceTree = "<group>"; };
+		3D5C960017533E2C0057E684 /* Box2DUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Box2DUtils.cpp; sourceTree = "<group>"; };
 		3D735D7F170FF7820093EE39 /* projectX.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = projectX.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		3D735D83170FF7820093EE39 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		3D735D85170FF7820093EE39 /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = System/Library/Frameworks/OpenGLES.framework; sourceTree = SDKROOT; };
@@ -673,6 +676,8 @@
 				3D735FD0170FF81E0093EE39 /* HelloWorldLayer.mm */,
 				747941D2171BD87900B85384 /* RaycastCallback.h */,
 				747941DD171BF1FD00B85384 /* PolygonSprite.h */,
+				3D5C95FE17533DF40057E684 /* Box2DUtils.h */,
+				3D5C960017533E2C0057E684 /* Box2DUtils.cpp */,
 				747941DE171BF1FE00B85384 /* PolygonSprite.mm */,
 				747941C8171BD87900B85384 /* PRKit */,
 				3D735D96170FF7820093EE39 /* Resources */,
@@ -1498,6 +1503,7 @@
 				747941F717250FB400B85384 /* weapon.mm in Sources */,
 				747941FA1725101A00B85384 /* target.mm in Sources */,
 				3D3642AC1726CFFA00897FBD /* body2.mm in Sources */,
+				3D5C960117533E2C0057E684 /* Box2DUtils.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -21,6 +21,7 @@
 #import "magnet.h"
 #import "weapon.h"
 #import "target.h"
+#import "Box2DUtils.h"
 
 enum {
 	kTagParentNode = 1,
@@ -108,6 +109,8 @@ HelloWorldLayer* instance;
         cutMode               = false;
         addBodyMode           = true;
         aiMode                = false;
+        
+        isBloom               = false;
         
         targetDamageStep       = 1;
         playerDamageStep       = 1;
@@ -411,48 +414,53 @@ HelloWorldLayer* instance;
 -(void)goBloom
 {
     //bloom the sprint
+    isBloom = true;
+    
     NSInteger count = [movableSprites count];
-    if(count > 0)
-    {
-        PolygonSprite *sprite = [movableSprites objectAtIndex:count-1];
-        //get the center of the sprite
-        const b2Vec2& spriteCenter = sprite.body->GetWorldCenter();
-        
-        //create the radom bloom point of the sprite, from 2 to 12;
-        NSInteger radomNum = arc4random() / 10 + 2;
-        
-        for(int i = 0; i < radomNum; i++)
-        {
-            //create the radom point for the cast ray. from -50.0 to 50.0
-            double valx = floorf(((double)arc4random() / ARC4RANDOM_MAX) * 10.0f);
-            double valy = floorf(((double)arc4random() / ARC4RANDOM_MAX) * 10.0f);
-            CCLOG(@"body valx is %0.2f ", valx);
-            CCLOG(@"body valy is %0.2f ", valy);
-            
-            double valx2 = floorf(((double)arc4random() / ARC4RANDOM_MAX) * 10.0f);
-            double valy2 = floorf(((double)arc4random() / ARC4RANDOM_MAX) * 10.0f);
-            CCLOG(@"body valx is %0.2f ", valx2);
-            CCLOG(@"body valy is %0.2f ", valy2);
-            //            b2Vec2 startPoint = b2Vec2((spriteCenter.x - valx)/PTM_RATIO, (spriteCenter.y - valy)/PTM_RATIO);
-            //            b2Vec2 endPoint = b2Vec2((spriteCenter.x + valx2)/PTM_RATIO, (spriteCenter.y - valy2)/PTM_RATIO);
-            
-            b2Vec2 startPoint = b2Vec2((spriteCenter.x - valx), (spriteCenter.y - valy));
-            b2Vec2 endPoint = b2Vec2((spriteCenter.x + valx2), (spriteCenter.y - valy2));
-            CCLOG(@"body start is %0.2f , %0.2f ", startPoint.x, startPoint.y);
-            CCLOG(@"body start is %0.2f , %0.2f ", endPoint.x, endPoint.y);
-            //            b2Vec2 endPoint = b2Vec2((spriteCenter.x + valx)/PTM_RATIO, (spriteCenter.y + valy)/PTM_RATIO);
-            //
-            world->RayCast(_raycastCallback,
-                           startPoint,
-                           endPoint);
-            
-            world->RayCast(_raycastCallback,
-                           endPoint,
-                           startPoint);
-
-        }//end the for
-        
-    }
+//    if(count > 0)
+//    {
+//        PolygonSprite *sprite = [movableSprites objectAtIndex:count-1];
+//        //get the center of the sprite
+//        const b2Vec2& spriteCenter = sprite.body->GetWorldCenter();
+//        
+//        //create the radom bloom point of the sprite, from 2 to 12;
+//        NSInteger radomNum = arc4random() % 10 + 2;
+//        CCLOG(@"body valx is %d ", radomNum);
+//        for(int i = 0; i < radomNum; i++)
+//        {
+//            //create the radom point for the cast ray. from -50.0 to 50.0
+//            double valx = floorf(((double)arc4random() / ARC4RANDOM_MAX)); // * 10.0f);
+//            double valy = floorf(((double)arc4random() / ARC4RANDOM_MAX)); // * 10.0f);
+//            
+//            
+//            
+//            CCLOG(@"body valx is %0.2f ", valx);
+//            CCLOG(@"body valy is %0.2f ", valy);
+//            
+//            double valx2 = floorf(((double)arc4random() / ARC4RANDOM_MAX)); //* 10.0f);
+//            double valy2 = floorf(((double)arc4random() / ARC4RANDOM_MAX)); // * 10.0f);
+//            CCLOG(@"body valx is %0.2f ", valx2);
+//            CCLOG(@"body valy is %0.2f ", valy2);
+//            //            b2Vec2 startPoint = b2Vec2((spriteCenter.x - valx)/PTM_RATIO, (spriteCenter.y - valy)/PTM_RATIO);
+//            //            b2Vec2 endPoint = b2Vec2((spriteCenter.x + valx2)/PTM_RATIO, (spriteCenter.y - valy2)/PTM_RATIO);
+//            
+//            b2Vec2 startPoint = b2Vec2((_startPoint.x - valx), (_startPoint.y - valy));
+//            b2Vec2 endPoint = b2Vec2((_endPoint.x + valx2), (_endPoint.y - valy2));
+//            CCLOG(@"body start is %0.2f , %0.2f ", startPoint.x, startPoint.y);
+//            CCLOG(@"body start is %0.2f , %0.2f ", endPoint.x, endPoint.y);
+//            //            b2Vec2 endPoint = b2Vec2((spriteCenter.x + valx)/PTM_RATIO, (spriteCenter.y + valy)/PTM_RATIO);
+//            //
+//            world->RayCast(_raycastCallback,
+//                           startPoint,
+//                           endPoint);
+//            
+//            world->RayCast(_raycastCallback,
+//                           endPoint,
+//                           startPoint);
+//
+//        }//end the for
+//        
+//    }
 }
 
 
@@ -629,17 +637,17 @@ HelloWorldLayer* instance;
     CCLOG(@"Add sprite position %0.2f x %02.f",p.x,p.y);    
     catchSprite = [[CCArray alloc] initWithCapacity:53];
     b2BodyDef bodyDef;
-    bodyDef.type = b2_dynamicBody;
-    bodyDef.position = b2Vec2(p.x/PTM_RATIO,p.y/PTM_RATIO);
-    bodyDef.angle = 0;
+    bodyDef.type = b2_dynamicBody; //类型
+    bodyDef.position = b2Vec2(p.x/PTM_RATIO,p.y/PTM_RATIO); //位置
+    bodyDef.angle = 0; //旋转角度
     b2Body *body = world->CreateBody(&bodyDef);
     
     b2FixtureDef fixtureDef;
-	fixtureDef.density = 1.5f;
-	fixtureDef.friction = 0.7f;
-    fixtureDef.restitution = 0.7f;
+	fixtureDef.density = 1.5f;//密度
+	fixtureDef.friction = 0.7f;//摩擦系数
+    fixtureDef.restitution = 0.7f;//反弹系数
 
-    fixtureDef.filter.categoryBits = 0;
+    fixtureDef.filter.categoryBits = 0;  //categoryBits用于定义自己所属的碰撞种类，maskBits则是指定碰撞种类
     fixtureDef.filter.maskBits = 0;
     //fixtureDef.isSensor = YES;
     
@@ -1979,10 +1987,16 @@ HelloWorldLayer* instance;
 		CGPoint location = [touch locationInView: [touch view]];
 		
 		CGPoint location1 = [[CCDirector sharedDirector] convertToGL: location];
+        
+                
         if(!cutMode)
         {
-            //We can only shoot weapon
-            if(selSprite && (selSprite.tag == weaponTag))
+            if(isBloom)
+            {
+                CGPoint nodePosition = [self convertTouchToNodeSpace:touch];
+                Box2DUtils::PhysExplosion(world, b2Vec2(nodePosition.x / PTM_RATIO, nodePosition.y /PTM_RATIO), 5, 100);
+            }
+            else if(selSprite && (selSprite.tag == weaponTag))
             {
                 CCLOG(@"shoot");
                 b2Vec2 b = *new b2Vec2(-10*(location1.x-locationBegin.x),-10*(location1.y-locationBegin.y));
@@ -1993,7 +2007,11 @@ HelloWorldLayer* instance;
                 [self addNewSpriteAtPosition: location1];
             }
         }
+        
+
 	}
+    
+
 }
 
 - (void)ccTouchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
@@ -2046,7 +2064,7 @@ HelloWorldLayer* instance;
                                b2Vec2(_endPoint.x / PTM_RATIO, _endPoint.y / PTM_RATIO),
                                b2Vec2(_startPoint.x / PTM_RATIO, _startPoint.y / PTM_RATIO));
                 
-                _startPoint = _endPoint;
+//                _startPoint = _endPoint;
             }
             
         }
