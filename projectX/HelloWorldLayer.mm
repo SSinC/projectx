@@ -784,77 +784,80 @@ HelloWorldLayer* instance;
     dispatch_async(globalQueue, ^{
 //        __block CCNode *parent1 = [self getChildByTag:kTagParentNode];
         
-        __block std::vector<b2Body *>toDestroy;
-        __block std::vector<MyContact>::iterator pos;
-        __block std::vector<b2Body *>::iterator pos2;
-        
-        //*******************  handle contact  ***********************
-        for(pos = _contactListener->_contacts.begin(); pos != _contactListener->_contacts.end(); ++pos)
-        {
-            MyContact contact = *pos;
+        @autoreleasepool {
             
-            // Get the box2d bodies for each object
-            b2Body *bodyA = contact.fixtureA->GetBody();
-            b2Body *bodyB = contact.fixtureB->GetBody();
+            __block std::vector<b2Body *>toDestroy;
+            __block std::vector<MyContact>::iterator pos;
+            __block std::vector<b2Body *>::iterator pos2;
             
-            if (bodyA->GetUserData() != NULL && bodyB->GetUserData() != NULL)
+            //*******************  handle contact  ***********************
+            for(pos = _contactListener->_contacts.begin(); pos != _contactListener->_contacts.end(); ++pos)
             {
-                if(([(id)bodyA->GetUserData() isKindOfClass:[PolygonSprite class]]) &&([(id)bodyB->GetUserData() isKindOfClass:[PolygonSprite class]]))
+                MyContact contact = *pos;
+                
+                // Get the box2d bodies for each object
+                b2Body *bodyA = contact.fixtureA->GetBody();
+                b2Body *bodyB = contact.fixtureB->GetBody();
+                
+                if (bodyA->GetUserData() != NULL && bodyB->GetUserData() != NULL)
                 {
-                    PolygonSprite *spriteA = (PolygonSprite *) bodyA->GetUserData();
-                    PolygonSprite *spriteB = (PolygonSprite *) bodyB->GetUserData();
-                    
-                    //we can destroy the specific body we want.
-                    //Now i destroy the contacted watermelon for just testing
-                    if (((spriteA.tag >= 1000 && spriteB.tag >= 1000)|| (spriteA.tag >= 1000 && spriteB.tag >= 1000)))
+                    if(([(id)bodyA->GetUserData() isKindOfClass:[PolygonSprite class]]) &&([(id)bodyB->GetUserData() isKindOfClass:[PolygonSprite class]]))
                     {
-                        //[parent1 removeChild:spriteA];
-                        //[parent1 removeChild:spriteB];
-                        toDestroy.push_back(bodyA);
-                        toDestroy.push_back(bodyB);
-                    }
-                    
-                    //We can determine if the weapon is contacting the target 
-                    if((spriteA.tag == weaponTag && spriteB.tag == targetTag) || (spriteB.tag == weaponTag && spriteA.tag == targetTag))
-                    {
-                        targetHitted = true;
-                    }
-                    
-                    //Detect if the player is being hitted by AI-weapon
-                    if((spriteA.tag == playerTag && spriteB.tag == AIWeaponTag) || (spriteB.tag == AIWeaponTag && spriteA.tag == playerTag))
-                    {
-                        playerHitted = true;
+                        PolygonSprite *spriteA = (PolygonSprite *) bodyA->GetUserData();
+                        PolygonSprite *spriteB = (PolygonSprite *) bodyB->GetUserData();
+                        
+                        //we can destroy the specific body we want.
+                        //Now i destroy the contacted watermelon for just testing
+                        if (((spriteA.tag >= 1000 && spriteB.tag >= 1000)|| (spriteA.tag >= 1000 && spriteB.tag >= 1000)))
+                        {
+                            //[parent1 removeChild:spriteA];
+                            //[parent1 removeChild:spriteB];
+                            toDestroy.push_back(bodyA);
+                            toDestroy.push_back(bodyB);
+                        }
+                        
+                        //We can determine if the weapon is contacting the target
+                        if((spriteA.tag == weaponTag && spriteB.tag == targetTag) || (spriteB.tag == weaponTag && spriteA.tag == targetTag))
+                        {
+                            targetHitted = true;
+                        }
+                        
+                        //Detect if the player is being hitted by AI-weapon
+                        if((spriteA.tag == playerTag && spriteB.tag == AIWeaponTag) || (spriteB.tag == AIWeaponTag && spriteA.tag == playerTag))
+                        {
+                            playerHitted = true;
+                        }
                     }
                 }
-            }
-        } // end of for
-        
-        //***************   Use contacted-information to update graphic  ****************
-        dispatch_async(mainQueue, ^{
-            // Loop through all of the box2d bodies we wnat to destroy...
+            } // end of for
             
-            for(pos2 = toDestroy.begin(); pos2 != toDestroy.end(); ++pos2)
-            {
-                b2Body *body = *pos2;
+            //***************   Use contacted-information to update graphic  ****************
+            dispatch_async(mainQueue, ^{
+                // Loop through all of the box2d bodies we wnat to destroy...
                 
-                // See if there's any user data attached to the Box2D body
-                // There should be, since we set it in addBoxBodyForSprite
-                if (body->GetUserData() != NULL)
+                for(pos2 = toDestroy.begin(); pos2 != toDestroy.end(); ++pos2)
                 {
                     
-                    // We know that the user data is a sprite since we set
-                    // it that way, so cast it...
-                    PolygonSprite *sprite = (PolygonSprite *) body->GetUserData();
+                    b2Body *body = *pos2;
                     
-                    // Remove the sprite from the scene
-                    [self removeChild:sprite];
+                    // See if there's any user data attached to the Box2D body
+                    // There should be, since we set it in addBoxBodyForSprite
+                    if (body->GetUserData() != NULL)
+                    {
+                        
+                        // We know that the user data is a sprite since we set
+                        // it that way, so cast it...
+                        PolygonSprite *sprite = (PolygonSprite *) body->GetUserData();
+                        
+                        // Remove the sprite from the scene
+                        [self removeChild:sprite];
+                    }
+                    
+                    // Destroy the Box2D body as well
+                    world->DestroyBody(body);//
                 }
-                
-                // Destroy the Box2D body as well
-                world->DestroyBody(body);//
-            }
-            
-        });
+            });
+        }// end of @autoreleasepool
     });
 }
 
@@ -868,21 +871,23 @@ HelloWorldLayer* instance;
     if (magnetExist)
     {
         dispatch_async ( globalQueue, ^{
-            
-            float weaponX = weaponTest.body->GetWorldCenter().x * PTM_RATIO;
-            float weaponY = weaponTest.body->GetWorldCenter().y * PTM_RATIO;
-            float diffX   = winSize.width  - weaponX;
-            float diffY   = winSize.height - weaponY;
-            float criticalDistance = 50.0;
-            
-            if(sqrt(pow(diffX,2)+pow(diffY,2))< criticalDistance)
-            {
-                float forceX = (diffX < 0 ? -1:1)* abs(diffX) / sqrt(pow(diffX,2)+pow(diffY,2)) ;
-                float forceY = (diffY < 0 ? -1:1)* abs(diffY) / sqrt(pow(diffX,2)+pow(diffY,2)) ;
-                b2Vec2 force = * new b2Vec2(forceX,forceY);
+            @autoreleasepool{
                 
-                weaponTest.body->ApplyLinearImpulse(force, weaponTest.body->GetWorldCenter());
-            }
+                float weaponX = weaponTest.body->GetWorldCenter().x * PTM_RATIO;
+                float weaponY = weaponTest.body->GetWorldCenter().y * PTM_RATIO;
+                float diffX   = winSize.width  - weaponX;
+                float diffY   = winSize.height - weaponY;
+                float criticalDistance = 50.0;
+                
+                if(sqrt(pow(diffX,2)+pow(diffY,2))< criticalDistance)
+                {
+                    float forceX = (diffX < 0 ? -1:1)* abs(diffX) / sqrt(pow(diffX,2)+pow(diffY,2)) ;
+                    float forceY = (diffY < 0 ? -1:1)* abs(diffY) / sqrt(pow(diffX,2)+pow(diffY,2)) ;
+                    b2Vec2 force = * new b2Vec2(forceX,forceY);
+                    
+                    weaponTest.body->ApplyLinearImpulse(force, weaponTest.body->GetWorldCenter());
+                }
+            }// end of @autoreleasepool
         });
     }
     
@@ -891,24 +896,27 @@ HelloWorldLayer* instance;
     {
         dispatch_async ( globalQueue, ^{
             
-            float weaponX = weaponTest.body->GetWorldCenter().x   * PTM_RATIO;
-            float weaponY = weaponTest.body->GetWorldCenter().y   * PTM_RATIO;
-            float airfanX = airfanSprite.body->GetWorldCenter().x * PTM_RATIO;
-            float airfanY = airfanSprite.body->GetWorldCenter().y * PTM_RATIO;
-            float criticalMin = airfanY - 100;
-            float criticalMax = airfanY + 100;
-            float diffX       = weaponX - airfanX;
-            float diffY       = weaponY - airfanY;
-            float MAXforceX   = 300; //The max force
-            
-            if((criticalMin < weaponY < criticalMax) && (diffX < 300) )
-            {
-                float forceX = MAXforceX / sqrt(pow(diffX,2)+pow(diffY,2)) ;
-                float forceY = 0 ;
-                b2Vec2 force = * new b2Vec2(forceX,forceY);
+            @autoreleasepool{
                 
-                weaponTest.body->ApplyLinearImpulse(force, weaponTest.body->GetWorldCenter());
-            }
+                float weaponX = weaponTest.body->GetWorldCenter().x   * PTM_RATIO;
+                float weaponY = weaponTest.body->GetWorldCenter().y   * PTM_RATIO;
+                float airfanX = airfanSprite.body->GetWorldCenter().x * PTM_RATIO;
+                float airfanY = airfanSprite.body->GetWorldCenter().y * PTM_RATIO;
+                float criticalMin = airfanY - 100;
+                float criticalMax = airfanY + 100;
+                float diffX       = weaponX - airfanX;
+                float diffY       = weaponY - airfanY;
+                float MAXforceX   = 300; //The max force
+                
+                if((criticalMin < weaponY < criticalMax) && (diffX < 300) )
+                {
+                    float forceX = MAXforceX / sqrt(pow(diffX,2)+pow(diffY,2)) ;
+                    float forceY = 0 ;
+                    b2Vec2 force = * new b2Vec2(forceX,forceY);
+                    
+                    weaponTest.body->ApplyLinearImpulse(force, weaponTest.body->GetWorldCenter());
+                }
+            }// end of @autoreleasepool
         });
     }
     
@@ -918,80 +926,82 @@ HelloWorldLayer* instance;
         targetHitted = false;
         
         dispatch_async(globalQueue, ^{
-           
-            float weaponX       = weaponTest.body->GetWorldCenter().x   * PTM_RATIO;
-            float weaponY       = weaponTest.body->GetWorldCenter().y   * PTM_RATIO;
-            float targetSpriteX = targetSprite.body->GetWorldCenter().x * PTM_RATIO;
-            float targetSpriteY = targetSprite.body->GetWorldCenter().y * PTM_RATIO;
-            float diffX         = weaponX - targetSpriteX;
-            float diffY         = weaponY - targetSpriteY;
             
-            //************   Here is how the forceX and forceY are generated:
-            //       Fx / Fy             = diffX / diffY
-            //       distance            = sqrt( pow (diffX, 2) + pow (diffY, 2))
-            //       F (proportional to) = pow( ratio / distance, 2)
-            //       pow( F, 2 )         = pow(Fx,2)+pow(Fy,2)
-            //
-            //==>    Fx  = pow(ratio,2) * diffX / sqrt( pow( ( pow(diffX,2) + pow(diffY,2) ),3) )
-            //==>    Fy  = pow(ratio,2) * diffY / sqrt( pow( ( pow(diffX,2) + pow(diffY,2) ),3) )
-            
-            
-            //The ratio must be chosen very carefully.
-            //Here i use a random ratio so critical strike would happen sometimes
-            float ratio = frandom_range(100,400);
-            
-            float forceX = pow(ratio,2) * diffX / sqrt (pow ((pow(diffX,2) + pow(diffY,2)),3));
-            float forceY = pow(ratio,2) * diffY / sqrt (pow ((pow(diffX,2) + pow(diffY,2)),3));            
-            b2Vec2 force = * new b2Vec2(forceX,forceY);
-            
-            //target should be blown away by the shockWave
-            targetSprite.body->ApplyLinearImpulse(force, targetSprite.body->GetWorldCenter());
-            
-            //Now the weapon is exploded
-            weaponToTargetExploded = true;
-            
-            //**
-            //  ***************  handle damage   *******************
-            //**
-            float damage = sqrt((pow(force.x,2) + pow(force.y,2)));
-            CCLOG(@"damage is %f",damage);
-            // if the damage is bigger than a certain number,we consider the strike as a critical strike
-            // and the damage-sprite should be bigger than usual
-            if(damage >= 500)
-            {
-                criticalStrikeToTarget = true;
-            }
-            curTargetBlood = targetBlood - damage;
-            
-        
-            //We neet to generate a damage sprite based on the damage.
-            //For now, i just use a png to test anyway.
-            dispatch_async(mainQueue, ^{
+            @autoreleasepool{
                 
-                if(!criticalStrikeToTarget)
+                float weaponX       = weaponTest.body->GetWorldCenter().x   * PTM_RATIO;
+                float weaponY       = weaponTest.body->GetWorldCenter().y   * PTM_RATIO;
+                float targetSpriteX = targetSprite.body->GetWorldCenter().x * PTM_RATIO;
+                float targetSpriteY = targetSprite.body->GetWorldCenter().y * PTM_RATIO;
+                float diffX         = weaponX - targetSpriteX;
+                float diffY         = weaponY - targetSpriteY;
+                
+                //************   Here is how the forceX and forceY are generated:
+                //       Fx / Fy             = diffX / diffY
+                //       distance            = sqrt( pow (diffX, 2) + pow (diffY, 2))
+                //       F (proportional to) = pow( ratio / distance, 2)
+                //       pow( F, 2 )         = pow(Fx,2)+pow(Fy,2)
+                //
+                //==>    Fx  = pow(ratio,2) * diffX / sqrt( pow( ( pow(diffX,2) + pow(diffY,2) ),3) )
+                //==>    Fy  = pow(ratio,2) * diffY / sqrt( pow( ( pow(diffX,2) + pow(diffY,2) ),3) )
+                
+                
+                //The ratio must be chosen very carefully.
+                //Here i use a random ratio so critical strike would happen sometimes
+                float ratio = frandom_range(100,400);
+                
+                float forceX = pow(ratio,2) * diffX / sqrt (pow ((pow(diffX,2) + pow(diffY,2)),3));
+                float forceY = pow(ratio,2) * diffY / sqrt (pow ((pow(diffX,2) + pow(diffY,2)),3));
+                b2Vec2 force = * new b2Vec2(forceX,forceY);
+                
+                //target should be blown away by the shockWave
+                targetSprite.body->ApplyLinearImpulse(force, targetSprite.body->GetWorldCenter());
+                
+                //Now the weapon is exploded
+                weaponToTargetExploded = true;
+                
+                //**
+                //  ***************  handle damage   *******************
+                //**
+                float damage = sqrt((pow(force.x,2) + pow(force.y,2)));
+                CCLOG(@"damage is %f",damage);
+                // if the damage is bigger than a certain number,we consider the strike as a critical strike
+                // and the damage-sprite should be bigger than usual
+                if(damage >= 500)
                 {
-                    targetDamageSprite = [CCSprite spriteWithFile:@"blocks.png" rect:CGRectMake(32,32,32,32)];
+                    criticalStrikeToTarget = true;
                 }
-                else
-                {
-                    targetDamageSprite = [CCSprite spriteWithFile:@"blocks.png" rect:CGRectMake(32,32,32,32)];
+                curTargetBlood = targetBlood - damage;
+                
+                
+                //We neet to generate a damage sprite based on the damage.
+                //For now, i just use a png to test anyway.
+                dispatch_async(mainQueue, ^{
                     
-                }
-                [self addChild:targetDamageSprite];
-                [targetDamageSprite setPosition: ccp( targetSpriteX, targetSpriteY + 20)];
+                    if(!criticalStrikeToTarget)
+                    {
+                        targetDamageSprite = [CCSprite spriteWithFile:@"blocks.png" rect:CGRectMake(32,32,32,32)];
+                    }
+                    else
+                    {
+                        targetDamageSprite = [CCSprite spriteWithFile:@"blocks.png" rect:CGRectMake(32,32,32,32)];
+                        
+                    }
+                    [self addChild:targetDamageSprite];
+                    [targetDamageSprite setPosition: ccp( targetSpriteX, targetSpriteY + 20)];
+                    
+                    //now the target-damage-sprite is appeared
+                    targetDamageSpritePresented  = true;
+                    targetBloodNeedUpdate = true;
+                });
                 
-                //now the target-damage-sprite is appeared
-                targetDamageSpritePresented  = true;
-                targetBloodNeedUpdate = true;
-            });
-            
-            ///If the curTargetBlood is smaller than 0,the target should be exploded and than destroyed
-            if(curTargetBlood < 1.0)
-            {
-                [self targetDestroyed:targetSprite];
-            }
-            
-        });
+                ///If the curTargetBlood is smaller than 0,the target should be exploded and than destroyed
+                if(curTargetBlood < 1.0)
+                {
+                    [self targetDestroyed:targetSprite];
+                }
+         }// end of @autoreleasepool
+      });
     } // end of if(targetHitted)
     
     
@@ -1001,76 +1011,79 @@ HelloWorldLayer* instance;
         
         dispatch_async(globalQueue, ^{
             
-            float weaponX       = weaponAI.body->GetWorldCenter().x     * PTM_RATIO;
-            float weaponY       = weaponAI.body->GetWorldCenter().y     * PTM_RATIO;
-            float targetSpriteX = playerSprite.body->GetWorldCenter().x * PTM_RATIO;
-            float targetSpriteY = playerSprite.body->GetWorldCenter().y * PTM_RATIO;
-            float diffX         = weaponX - targetSpriteX;
-            float diffY         = weaponY - targetSpriteY;
-            
-            //************   Here is how the forceX and forceY are generated:
-            //       Fx / Fy             = diffX / diffY
-            //       distance            = sqrt( pow (diffX, 2) + pow (diffY, 2))
-            //       F (proportional to) = pow( ratio / distance, 2)
-            //       pow( F, 2 )         = pow(Fx,2)+pow(Fy,2)
-            //
-            //==>    Fx  = pow(ratio,2) * diffX / sqrt( pow( ( pow(diffX,2) + pow(diffY,2) ),3) )
-            //==>    Fy  = pow(ratio,2) * diffY / sqrt( pow( ( pow(diffX,2) + pow(diffY,2) ),3) )
-            
-            
-            //The ratio must be chosen very carefully.
-            //Here i use a random ratio so critical strike would happen sometimes
-            float ratio = frandom_range(100,400);
-            
-            float forceX = pow(ratio,2) * diffX / sqrt (pow ((pow(diffX,2) + pow(diffY,2)),3));
-            float forceY = pow(ratio,2) * diffY / sqrt (pow ((pow(diffX,2) + pow(diffY,2)),3));
-            b2Vec2 force = * new b2Vec2(forceX,forceY);
-            
-            //target should be blown away by the shockWave
-            playerSprite.body->ApplyLinearImpulse(force, playerSprite.body->GetWorldCenter());
-            
-            //Now the weapon is exploded
-            weaponToPlayerExploded = true;
-            
-            //**
-            //  ***************  handle damage   *******************
-            //**
-            float damage = sqrt((pow(force.x,2) + pow(force.y,2)));
-            CCLOG(@"damage is %f",damage);
-            // if the damage is bigger than a certain number,we consider the strike as a critical strike
-            // and the damage-sprite should be bigger than normal
-            if(damage >= 500)
-            {
-                criticalStrikeToPlayer = true;
-            }
-            curPlayerBlood = playerBlood - damage;
-            
-            //We neet to generate a damage sprite based on the damage.
-            //For now, i just use a png to test anyway.
-            dispatch_async(mainQueue, ^{
+            @autoreleasepool{
                 
-                if(!criticalStrikeToPlayer)
+                float weaponX       = weaponAI.body->GetWorldCenter().x     * PTM_RATIO;
+                float weaponY       = weaponAI.body->GetWorldCenter().y     * PTM_RATIO;
+                float targetSpriteX = playerSprite.body->GetWorldCenter().x * PTM_RATIO;
+                float targetSpriteY = playerSprite.body->GetWorldCenter().y * PTM_RATIO;
+                float diffX         = weaponX - targetSpriteX;
+                float diffY         = weaponY - targetSpriteY;
+                
+                //************   Here is how the forceX and forceY are generated:
+                //       Fx / Fy             = diffX / diffY
+                //       distance            = sqrt( pow (diffX, 2) + pow (diffY, 2))
+                //       F (proportional to) = pow( ratio / distance, 2)
+                //       pow( F, 2 )         = pow(Fx,2)+pow(Fy,2)
+                //
+                //==>    Fx  = pow(ratio,2) * diffX / sqrt( pow( ( pow(diffX,2) + pow(diffY,2) ),3) )
+                //==>    Fy  = pow(ratio,2) * diffY / sqrt( pow( ( pow(diffX,2) + pow(diffY,2) ),3) )
+                
+                
+                //The ratio must be chosen very carefully.
+                //Here i use a random ratio so critical strike would happen sometimes
+                float ratio = frandom_range(100,400);
+                
+                float forceX = pow(ratio,2) * diffX / sqrt (pow ((pow(diffX,2) + pow(diffY,2)),3));
+                float forceY = pow(ratio,2) * diffY / sqrt (pow ((pow(diffX,2) + pow(diffY,2)),3));
+                b2Vec2 force = * new b2Vec2(forceX,forceY);
+                
+                //target should be blown away by the shockWave
+                playerSprite.body->ApplyLinearImpulse(force, playerSprite.body->GetWorldCenter());
+                
+                //Now the weapon is exploded
+                weaponToPlayerExploded = true;
+                
+                //**
+                //  ***************  handle damage   *******************
+                //**
+                float damage = sqrt((pow(force.x,2) + pow(force.y,2)));
+                CCLOG(@"damage is %f",damage);
+                // if the damage is bigger than a certain number,we consider the strike as a critical strike
+                // and the damage-sprite should be bigger than normal
+                if(damage >= 500)
                 {
-                    playerDamageSprite = [CCSprite spriteWithFile:@"blocks.png" rect:CGRectMake(32,32,32,32)];
+                    criticalStrikeToPlayer = true;
                 }
-                else
-                {
-                    playerDamageSprite = [CCSprite spriteWithFile:@"blocks.png" rect:CGRectMake(32,32,32,32)];
+                curPlayerBlood = playerBlood - damage;
+                
+                //We neet to generate a damage sprite based on the damage.
+                //For now, i just use a png to test anyway.
+                dispatch_async(mainQueue, ^{
                     
-                }
-                [self addChild:playerDamageSprite];
-                [playerDamageSprite setPosition: ccp( targetSpriteX, targetSpriteY + 20)];
+                    if(!criticalStrikeToPlayer)
+                    {
+                        playerDamageSprite = [CCSprite spriteWithFile:@"blocks.png" rect:CGRectMake(32,32,32,32)];
+                    }
+                    else
+                    {
+                        playerDamageSprite = [CCSprite spriteWithFile:@"blocks.png" rect:CGRectMake(32,32,32,32)];
+                        
+                    }
+                    [self addChild:playerDamageSprite];
+                    [playerDamageSprite setPosition: ccp( targetSpriteX, targetSpriteY + 20)];
+                    
+                    //now the player-damage-sprite is presented
+                    playerDamageSpritePresented  = true;
+                    playerBloodNeedUpdate = true;
+                });
                 
-                //now the player-damage-sprite is presented
-                playerDamageSpritePresented  = true;
-                playerBloodNeedUpdate = true;
-            });
-            
-            ///If the curTargetBlood is smaller than 0,the player should be exploded and than destroyed
-            if(curPlayerBlood < 1.0)
-            {
-                [self targetDestroyed:playerSprite];
-            }
+                ///If the curTargetBlood is smaller than 0,the player should be exploded and than destroyed
+                if(curPlayerBlood < 1.0)
+                {
+                    [self targetDestroyed:playerSprite];
+                }
+            } // end of @autoreleasepool
         });
     }//end of if(playerHitted)
 
@@ -1254,68 +1267,74 @@ HelloWorldLayer* instance;
 -(void) simpleAI:(float)time
 {
     if(AICouldFire){
-    	AICouldFire = false;
-        dispatch_async(globalQueue, ^{
-            
-            /// Step 1
-            // get the position of the player
-            // Do we use the precise position or the approximately position ?
-            // Do we use the real-time traced position or a certain fixed position ?
-            float playerPosX ;
-            float playerPosY ;
-            attackWay attackWay;
-            
-            float Time = time;
-            
-            /// Step 2
-            // determine the attack way
-            (frandom_range(1,10) <= 5) ? (attackWay = parabolic) :(attackWay = straight);
-             
-             float weaponX       = weaponAI.body->GetWorldCenter().x     * PTM_RATIO;
-             float weaponY       = weaponAI.body->GetWorldCenter().y     * PTM_RATIO;
-             float targetSpriteX = playerSprite.body->GetWorldCenter().x * PTM_RATIO;
-             float targetSpriteY = playerSprite.body->GetWorldCenter().y * PTM_RATIO;
-             float diffX         = weaponX - targetSpriteX;
-             float diffY         = weaponY - targetSpriteY;
-              
-             float Vx,Vy;
- 
-            /// Step 3
-            // Compute the Velocity of the AI-weapon
-            if( attackWay == parabolic)
-            {
+        
+            AICouldFire = false;
+            dispatch_async(globalQueue, ^{
                 
-                ///  Time is a given certain argument
-                ///        Vx  * Time         = Dx
-                ///        0.5 * G * (t1 ^ 2) = Hmax           ~ 5 * (t1 ^ 2) = Hmax
-                ///        0.5 * G * (t2 ^ 2) = Hmax - Dy      ~ 5 * (t1 ^ 2) = Hmax - Dy
-                ///        t1  + t2           = Time
+                @autoreleasepool{
 
-                /// ==>    Vx = diffX / Time
-                /// ==>    t1 = 0.5 * ( Time + Dy / 0.5 * G * Time )
-                /// ==>    t2 = 0.5 * ( Time - Dy / 0.5 * G * Time )
-                /// ==>    Vy = G * t1 = 0.5 * G * Time + Dy / 0.5 * Time
+                /// Step 1
+                // get the position of the player
+                // Do we use the precise position or the approximately position ?
+                // Do we use the real-time traced position or a certain fixed position ?
+                float playerPosX ;
+                float playerPosY ;
+                attackWay attackWay;
                 
-                Vx =  diffX / Time / PTM_RATIO;
-                Vy =  (0.5 * G * Time + diffY / 0.5 * Time)/ PTM_RATIO;
-               
-            }
-            else
-            {
-                ///        Vy * T - 0.5 * G * T ^ 2 = Dy
-                /// ==>    Vy = (Dy + 0.5 * G * T ^ 2) / T 
+                float Time = time;
                 
-                Vx = diffX / Time / PTM_RATIO;
-                Vy = (diffY + 0.5 * G * pow( Time, 2 ) ) / Time / PTM_RATIO;
-
-            } 
-
-            /// Step 4
-            // Fire the AI-weapon
-             b2Vec2 Velocity = * new b2Vec2(Vx,Vy);
-             targetSprite.body->SetLinearVelocity(Velocity);
+                /// Step 2
+                // determine the attack way
+                (frandom_range(1,10) <= 5) ? (attackWay = parabolic) :(attackWay = straight);
+                
+                float weaponX       = weaponAI.body->GetWorldCenter().x     * PTM_RATIO;
+                float weaponY       = weaponAI.body->GetWorldCenter().y     * PTM_RATIO;
+                float targetSpriteX = playerSprite.body->GetWorldCenter().x * PTM_RATIO;
+                float targetSpriteY = playerSprite.body->GetWorldCenter().y * PTM_RATIO;
+                float diffX         = weaponX - targetSpriteX;
+                float diffY         = weaponY - targetSpriteY;
+                
+                float Vx,Vy;
+                
+                /// Step 3
+                // Compute the Velocity of the AI-weapon
+                if( attackWay == parabolic)
+                {
+                    
+                    ///  |Time| is a given certain argument
+                    ///        Vx  * Time         = Dx
+                    ///        0.5 * G * (t1 ^ 2) = Hmax           ~ 5 * (t1 ^ 2) = Hmax
+                    ///        0.5 * G * (t2 ^ 2) = Hmax - Dy      ~ 5 * (t1 ^ 2) = Hmax - Dy
+                    ///        t1  + t2           = Time
+                    
+                    /// ==>    Vx = diffX / Time
+                    /// ==>    t1 = 0.5 * ( Time + Dy / 0.5 * G * Time )
+                    /// ==>    t2 = 0.5 * ( Time - Dy / 0.5 * G * Time )
+                    /// ==>    Vy = G * t1 = 0.5 * G * Time + Dy / 0.5 * Time
+                    
+                    Vx =  diffX / Time / PTM_RATIO;
+                    Vy =  (0.5 * G * Time + diffY / 0.5 * Time)/ PTM_RATIO;
+                    
+                }
+                else
+                {
+                    ///        Vy * T - 0.5 * G * T ^ 2 = Dy
+                    
+                    /// ==>    Vy = (Dy + 0.5 * G * T ^ 2) / T
+                    
+                    Vx = diffX / Time / PTM_RATIO;
+                    Vy = (diffY + 0.5 * G * pow( Time, 2 ) ) / Time / PTM_RATIO;
+                    
+                } 
+                
+                /// Step 4
+                // Fire the AI-weapon
+                b2Vec2 Velocity = * new b2Vec2(Vx,Vy);
+                targetSprite.body->SetLinearVelocity(Velocity);
+                    
+            }// end of @autoreleasepool
         });
-    }
+    } // end of if(AICouldFire)
 }
 
 //**
