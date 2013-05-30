@@ -1268,11 +1268,12 @@ HelloWorldLayer* instance;
 {
     if(AICouldFire){
         
-            AICouldFire = false;
             dispatch_async(globalQueue, ^{
                 
                 @autoreleasepool{
 
+                AICouldFire = false;
+                    
                 /// Step 1
                 // get the position of the player
                 // Do we use the precise position or the approximately position ?
@@ -1452,38 +1453,46 @@ HelloWorldLayer* instance;
         // The priority is to be examined.
         //************************************************************************************************
 //        
-//        dispatch_group_t group = dispatch_group_create();
+        dispatch_group_t group = dispatch_group_create();
 //        globalQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
-//        
-//        dispatch_group_async(group, globalQueue, ^{
+        __block  b2Body *body1,*body2;
+        dispatch_group_async(group, globalQueue, ^{
         
             //create the first sprite's body
-            b2Body *body1 = [self createBodyWithPosition:sprite.body->GetPosition() rotation:sprite.body->GetAngle() vertices:sprite1VerticesSorted vertexCount:sprite1VertexCount density:originalFixture->GetDensity() friction:originalFixture->GetFriction() restitution:originalFixture->GetRestitution()];
+           body1 = [self createBodyWithPosition:sprite.body->GetPosition() rotation:sprite.body->GetAngle() vertices:sprite1VerticesSorted vertexCount:sprite1VertexCount density:originalFixture->GetDensity() friction:originalFixture->GetFriction() restitution:originalFixture->GetRestitution()];
+            
+            //create the first sprite
+//            newSprite1 = [PolygonSprite spriteWithTexture:sprite.texture body:body1 original:NO];
+//            
+//            [self addChild:newSprite1 z:1];
+            
+        });
+        
+        dispatch_group_async(group, globalQueue, ^{
+        
+            //create the second sprite's body
+            body2 = [self createBodyWithPosition:sprite.body->GetPosition() rotation:sprite.body->GetAngle() vertices:sprite2VerticesSorted vertexCount:sprite2VertexCount density:originalFixture->GetDensity() friction:originalFixture->GetFriction() restitution:originalFixture->GetRestitution()];
+            
+            //create the second sprite
+//            newSprite2 = [PolygonSprite spriteWithTexture:sprite.texture body:body2 original:NO];
+//            
+//            [self addChild:newSprite2 z:1];
+            
+        });
+        
+        //****************************      Notice    ************************************
+        // As we can only destroy sprite after 2 b2body are both created,we have to use dispatch_group_notify
+        // to wait for the dispatch_group_async
+        
+        dispatch_group_notify(group, mainQueue, ^{
             
             //create the first sprite
             newSprite1 = [PolygonSprite spriteWithTexture:sprite.texture body:body1 original:NO];
-            
-            [self addChild:newSprite1 z:1];
-            
-//        });
-//        
-//        dispatch_group_async(group, globalQueue, ^{
-        
-            //create the second sprite's body
-            b2Body *body2 = [self createBodyWithPosition:sprite.body->GetPosition() rotation:sprite.body->GetAngle() vertices:sprite2VerticesSorted vertexCount:sprite2VertexCount density:originalFixture->GetDensity() friction:originalFixture->GetFriction() restitution:originalFixture->GetRestitution()];
-            
-            //create the second sprite
             newSprite2 = [PolygonSprite spriteWithTexture:sprite.texture body:body2 original:NO];
             
+            [self addChild:newSprite1 z:1];
             [self addChild:newSprite2 z:1];
-//            
-//        });
-//        
-//        //****************************      Notice    ************************************
-//        // As we can only destroy sprite after 2 b2body are both created,we have to use dispatch_group_notify
-//        // to wait for the dispatch_group_async
-//        
-//        dispatch_group_notify(group, globalQueue, ^{
+            
             //we don't need the old shape & sprite anymore so we either destroy it or squirrel it away
             CCLOG(@"in Split-body setp 5 ,create sprite1,2");
             if (sprite.original)
@@ -1501,10 +1510,10 @@ HelloWorldLayer* instance;
                 [self removeChild:sprite cleanup:YES];
             }
             
-//        });
-//        
-//        // release the group
-//        dispatch_release(group);
+        });
+        
+        // release the group
+        dispatch_release(group);
     }
     else
     {
