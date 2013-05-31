@@ -1086,9 +1086,140 @@ HelloWorldLayer* instance;
             } // end of @autoreleasepool
         });
     }//end of if(playerHitted)
+    
+    
+    [self test:^(PolygonSprite *weapon ,
+                 PolygonSprite *sprite,
+                 BOOL hitted,
+                 BOOL criticalStrike,
+                 float curBlood,
+                 float blood,
+                 BOOL weaponExploded,
+                
+                 BOOL damageSpritePresented ,
+                 BOOL bloodNeedUpdate)
+    {
+        hitted = false;
+        
+//        dispatch_async(globalQueue, ^{
+            
+            @autoreleasepool{
+                
+                float weaponX       = weapon.body->GetWorldCenter().x * PTM_RATIO;
+                float weaponY       = weapon.body->GetWorldCenter().y * PTM_RATIO;
+                float targetSpriteX = sprite.body->GetWorldCenter().x * PTM_RATIO;
+                float targetSpriteY = sprite.body->GetWorldCenter().y * PTM_RATIO;
+                float diffX         = weaponX - targetSpriteX;
+                float diffY         = weaponY - targetSpriteY;
+                
+                //************   Here is how the forceX and forceY are generated:
+                //       Fx / Fy             = diffX / diffY
+                //       distance            = sqrt( pow (diffX, 2) + pow (diffY, 2))
+                //       F (proportional to) = pow( ratio / distance, 2)
+                //       pow( F, 2 )         = pow(Fx,2)+pow(Fy,2)
+                //
+                //==>    Fx  = pow(ratio,2) * diffX / sqrt( pow( ( pow(diffX,2) + pow(diffY,2) ),3) )
+                //==>    Fy  = pow(ratio,2) * diffY / sqrt( pow( ( pow(diffX,2) + pow(diffY,2) ),3) )
+                
+                
+                //The ratio must be chosen very carefully.
+                //Here i use a random ratio so critical strike would happen sometimes
+                float ratio = frandom_range(100,400);
+                
+                float forceX = pow(ratio,2) * diffX / sqrt (pow ((pow(diffX,2) + pow(diffY,2)),3));
+                float forceY = pow(ratio,2) * diffY / sqrt (pow ((pow(diffX,2) + pow(diffY,2)),3));
+                b2Vec2 force = * new b2Vec2(forceX,forceY);
+                
+                //target should be blown away by the shockWave
+                sprite.body->ApplyLinearImpulse(force, sprite.body->GetWorldCenter());
+                
+                //Now the weapon is exploded
+                weaponExploded = true;
+                
+                //**
+                //  ***************  handle damage   *******************
+                //**
+                float damage = sqrt((pow(force.x,2) + pow(force.y,2)));
+                CCLOG(@"damage is %f",damage);
+                // if the damage is bigger than a certain number,we consider the strike as a critical strike
+                // and the damage-sprite should be bigger than normal
+                if(damage >= 500)
+                {
+                    criticalStrike = true;
+                }
+                curBlood = blood - damage;
+                
+                //We neet to generate a damage sprite based on the damage.
+                //For now, i just use a png to test anyway.
+                dispatch_async(mainQueue, ^{
+                    PolygonSprite *damageSprite;
+                    if(!criticalStrikeToPlayer)
+                    {
+                        damageSprite = [CCSprite spriteWithFile:@"blocks.png" rect:CGRectMake(32,32,32,32)];
+                    }
+                    else
+                    {
+                        damageSprite = [CCSprite spriteWithFile:@"blocks.png" rect:CGRectMake(32,32,32,32)];
+                        
+                    }
+                    [self addChild:damageSprite];
+                    [damageSprite setPosition: ccp( targetSpriteX, targetSpriteY + 20)];
+                    
+                    
+                });
+                
+                //now the player-damage-sprite is presented
+                damageSpritePresented  = true;
+                bloodNeedUpdate = true;
+                
+                ///If the curTargetBlood is smaller than 0,the player should be exploded and than destroyed
+                if(curBlood < 1.0)
+                {
+                    [self targetDestroyed:sprite];
+                }
+            } // end of @autoreleasepool
+//        });
 
+    }];
 }
 
+-(void)test:(void (^)(PolygonSprite *weapon ,
+                      PolygonSprite *sprite,
+                      BOOL hitted,
+                      BOOL criticalStrike,
+                      float curBlood,
+                      float blood,
+                      BOOL weaponExploded,
+                      BOOL damageSpritePresented ,
+                      BOOL bloodNeedUpdate)) testBlock
+{
+    if(playerHitted){
+        dispatch_async(globalQueue, ^{
+            testBlock(weaponAI,
+                      playerSprite,
+                      playerHitted,
+                      criticalStrikeToPlayer,
+                      curPlayerBlood,
+                      playerBlood,
+                      weaponToPlayerExploded,
+                      playerDamageSpritePresented ,
+                      playerBloodNeedUpdate);
+        });
+    }
+    if(targetHitted){
+        dispatch_async(globalQueue, ^{
+            testBlock(weaponTest,
+                      targetSprite,
+                      targetHitted,
+                      criticalStrikeToTarget,
+                      curTargetBlood,
+                      targetBlood,
+                      weaponToTargetExploded,
+                      targetDamageSpritePresented ,
+                      targetBloodNeedUpdate);
+        });
+    }
+}
 
 //**
 //  ***************************  Animation  ********************************
@@ -1356,176 +1487,220 @@ HelloWorldLayer* instance;
 //**
 -(void)splitPolygonSprite:(PolygonSprite*)sprite
 {
-    //declare & initialize variables to be used for later
-    __block PolygonSprite *newSprite1, *newSprite2;
+    dispatch_queue_t splitQueue =  dispatch_queue_create("split", NULL);
     
-    //our original shape's attributes
-    b2Fixture *originalFixture = sprite.body->GetFixtureList();
-    b2PolygonShape *originalPolygon = (b2PolygonShape*)originalFixture->GetShape();
-    int vertexCount = originalPolygon->GetVertexCount();
-    
-//    for (int i = 0 ; i < vertexCount; i++)
-//    {
-//        b2Vec2 point = originalPolygon->GetVertex(i);
-//    }
-    
-    //our determinant(to be described later) and iterator
-    float determinant;
-    int i;
-    
-    //we store the vertices of our two new sprites here
-    b2Vec2 *sprite1Vertices = (b2Vec2*)calloc(24, sizeof(b2Vec2));
-    b2Vec2 *sprite2Vertices = (b2Vec2*)calloc(24, sizeof(b2Vec2));
-    b2Vec2 *sprite1VerticesSorted, *sprite2VerticesSorted;
-    
-    //we store how many vertices there are for each of the two new sprites here
-    int sprite1VertexCount = 0;
-    int sprite2VertexCount = 0;
-    
-    //step 1:
-    //the entry and exit point of our cut are considered vertices of our two new shapes, so we add these before anything else
-    sprite1Vertices[sprite1VertexCount++] = sprite.entryPoint;
-    sprite1Vertices[sprite1VertexCount++] = sprite.exitPoint;
-    sprite2Vertices[sprite2VertexCount++] = sprite.entryPoint;
-    sprite2Vertices[sprite2VertexCount++] = sprite.exitPoint;
-    CCLOG(@"Split-body setp 1 end");
-    //step 2:
-    //iterate through all the vertices and add them to each sprite's shape
-    for (i=0; i<vertexCount; i++)
-    {
-        //get our vertex from the polygon
-        b2Vec2 point = originalPolygon->GetVertex(i);
+    dispatch_async(splitQueue, ^{
         
-        //we check if our point is not the same as our entry or exit point first
-        b2Vec2 diffFromEntryPoint = point - sprite.entryPoint;
-        b2Vec2 diffFromExitPoint = point - sprite.exitPoint;
+        //declare & initialize variables to be used for later
+        __block PolygonSprite *newSprite1, *newSprite2;
         
-        if ((diffFromEntryPoint.x == 0 && diffFromEntryPoint.y == 0) || (diffFromExitPoint.x == 0 && diffFromExitPoint.y == 0))
+        //our original shape's attributes
+        b2Fixture *originalFixture = sprite.body->GetFixtureList();
+        b2PolygonShape *originalPolygon = (b2PolygonShape*)originalFixture->GetShape();
+        int vertexCount = originalPolygon->GetVertexCount();
+        
+        //    for (int i = 0 ; i < vertexCount; i++)
+        //    {
+        //        b2Vec2 point = originalPolygon->GetVertex(i);
+        //    }
+        
+        //our determinant(to be described later) and iterator
+        float determinant;
+        int i;
+        
+        //we store the vertices of our two new sprites here
+        b2Vec2 *sprite1Vertices = (b2Vec2*)calloc(24, sizeof(b2Vec2));
+        b2Vec2 *sprite2Vertices = (b2Vec2*)calloc(24, sizeof(b2Vec2));
+        __block b2Vec2 *sprite1VerticesSorted, *sprite2VerticesSorted;
+        
+        //we store how many vertices there are for each of the two new sprites here
+        int sprite1VertexCount = 0;
+        int sprite2VertexCount = 0;
+        
+        //step 1:
+        //the entry and exit point of our cut are considered vertices of our two new shapes, so we add these before anything else
+        sprite1Vertices[sprite1VertexCount++] = sprite.entryPoint;
+        sprite1Vertices[sprite1VertexCount++] = sprite.exitPoint;
+        sprite2Vertices[sprite2VertexCount++] = sprite.entryPoint;
+        sprite2Vertices[sprite2VertexCount++] = sprite.exitPoint;
+        CCLOG(@"Split-body setp 1 end");
+        //step 2:
+        //iterate through all the vertices and add them to each sprite's shape
+        for (i=0; i<vertexCount; i++)
         {
-        }
+            //get our vertex from the polygon
+            b2Vec2 point = originalPolygon->GetVertex(i);
+            
+            //we check if our point is not the same as our entry or exit point first
+            b2Vec2 diffFromEntryPoint = point - sprite.entryPoint;
+            b2Vec2 diffFromExitPoint = point - sprite.exitPoint;
+            
+            if ((diffFromEntryPoint.x == 0 && diffFromEntryPoint.y == 0) || (diffFromExitPoint.x == 0 && diffFromExitPoint.y == 0))
+            {
+            }
+            else
+            {
+                determinant = calculate_determinant_2x3(sprite.entryPoint.x, sprite.entryPoint.y, sprite.exitPoint.x, sprite.exitPoint.y, point.x, point.y);
+                
+                if (determinant > 0)
+                {
+                    //if the determinant is positive, then the three points are in clockwise order
+                    sprite1Vertices[sprite1VertexCount++] = point;
+                }
+                else
+                {
+                    //if the determinant is 0, the points are on the same line. if the determinant is negative, then they are in counter-clockwise order
+                    sprite2Vertices[sprite2VertexCount++] = point;
+                    
+                }//endif
+            }//endif
+        }//endfor
+        CCLOG(@"Split-body setp 2 end");
+        //step 3:
+        //Box2D needs vertices to be arranged in counter-clockwise order so we reorder our points using a custom function
+        //step 4:
+        //Box2D has some restrictions with defining shapes, so we have to consider these. We only cut the shape if both shapes pass certain requirements from our function
+        
+        
+        //***************************************  NOTICE ******************************************
+        //Note that if we want to use -(void)splitPolygonSprite:(PolygonSprite*)sprite to make some Explosion-effect
+        //The entry and exit point MUST be chosen carefully.If they are not appropriate enough,the Step 5 would not be invoked.
+        //****************************************   WK  *******************************************
+        __block dispatch_semaphore_t sem = dispatch_semaphore_create(0);
+        __block BOOL sprite1VerticesAcceptable,sprite2VerticesAcceptable;
+        
+        dispatch_async(globalQueue, ^{
+            
+            sprite1VerticesSorted = [self arrangeVertices:sprite1Vertices count:sprite1VertexCount];
+            sprite1VerticesAcceptable = [self areVerticesAcceptable:sprite1VerticesSorted count:sprite1VertexCount];
+            
+            if(!sprite1VerticesAcceptable ){
+                CCLOG(@"sprite1 is NOT VerticesAcceptable");
+            }
+        });
+        
+        dispatch_async(globalQueue, ^{
+            
+            sprite2VerticesSorted = [self arrangeVertices:sprite2Vertices count:sprite2VertexCount];
+            sprite2VerticesAcceptable = [self areVerticesAcceptable:sprite1VerticesSorted count:sprite2VertexCount];
+            
+            if(!sprite2VerticesAcceptable ){
+                CCLOG(@"sprite2 is NOT VerticesAcceptable");
+            }
+        });
+        
+        //use semaphore to wait until the step3 and step4 are done
+        dispatch_semaphore_wait(sem, DISPATCH_TIME_FOREVER);
+        dispatch_release(sem);
+        
+        CCLOG(@"Split-body setp3 and step4 are done");
+        
+        //        sprite1VerticesSorted = [self arrangeVertices:sprite1Vertices count:sprite1VertexCount];
+        //        sprite2VerticesSorted = [self arrangeVertices:sprite2Vertices count:sprite2VertexCount];
+        //step 4:
+        //Box2D has some restrictions with defining shapes, so we have to consider these. We only cut the shape if both shapes pass certain requirements from our function
+        
+        
+        //***************************************  NOTICE ******************************************
+        //Note that if we want to use -(void)splitPolygonSprite:(PolygonSprite*)sprite to make some Explosion-effect
+        //The entry and exit point MUST be chosen carefully.If they are not appropriate enough,the Step 5 would not be invoked.
+        //****************************************   WK  *******************************************
+        //        BOOL sprite1VerticesAcceptable = [self areVerticesAcceptable:sprite1VerticesSorted count:sprite1VertexCount];
+        //        BOOL sprite2VerticesAcceptable = [self areVerticesAcceptable:sprite2VerticesSorted count:sprite2VertexCount];
+        //        if(!sprite1VerticesAcceptable ){
+        //            CCLOG(@"sprite1 is NOT VerticesAcceptable");
+        //        }
+        //        
+        //        if(!sprite2VerticesAcceptable ){
+        //            CCLOG(@"sprite2 is NOT VerticesAcceptable");
+        //        }
+        
+        //step 5:
+        //we destroy the old shape and create the new shapes and sprites
+        if (sprite1VerticesAcceptable && sprite2VerticesAcceptable)
+        {
+            //************************************ use GCD to accelerate the game.*****************************
+            // Use dispatch_group_async and dispatch_group_notify to get the work done.
+            // The priority is to be examined.
+            //************************************************************************************************
+            //
+            dispatch_group_t group = dispatch_group_create();
+            //        globalQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+            __block  b2Body *body1,*body2;
+            dispatch_group_async(group, globalQueue, ^{
+                
+                //create the first sprite's body
+                body1 = [self createBodyWithPosition:sprite.body->GetPosition() rotation:sprite.body->GetAngle() vertices:sprite1VerticesSorted vertexCount:sprite1VertexCount density:originalFixture->GetDensity() friction:originalFixture->GetFriction() restitution:originalFixture->GetRestitution()];
+                
+                //create the first sprite
+                //            newSprite1 = [PolygonSprite spriteWithTexture:sprite.texture body:body1 original:NO];
+                //
+                //            [self addChild:newSprite1 z:1];
+                
+            });
+            
+            dispatch_group_async(group, globalQueue, ^{
+                
+                //create the second sprite's body
+                body2 = [self createBodyWithPosition:sprite.body->GetPosition() rotation:sprite.body->GetAngle() vertices:sprite2VerticesSorted vertexCount:sprite2VertexCount density:originalFixture->GetDensity() friction:originalFixture->GetFriction() restitution:originalFixture->GetRestitution()];
+                
+                //create the second sprite
+                //            newSprite2 = [PolygonSprite spriteWithTexture:sprite.texture body:body2 original:NO];
+                //
+                //            [self addChild:newSprite2 z:1];
+                
+            });
+            
+            //****************************      Notice    ************************************
+            // As we can only destroy sprite after 2 b2body are both created,we have to use dispatch_group_notify
+            // to wait for the dispatch_group_async
+            
+            dispatch_group_notify(group, mainQueue, ^{
+                
+                //create sprite and add them
+                newSprite1 = [PolygonSprite spriteWithTexture:sprite.texture body:body1 original:NO];
+                newSprite2 = [PolygonSprite spriteWithTexture:sprite.texture body:body2 original:NO];
+                
+                [self addChild:newSprite1 z:1];
+                [self addChild:newSprite2 z:1];
+                
+                //we don't need the old shape & sprite anymore so we either destroy it or squirrel it away
+                CCLOG(@"in Split-body setp 5 ,create sprite1,2");
+                if (sprite.original)
+                {
+                    [sprite deactivateCollisions];
+                    sprite.position = ccp(-256,-256);   //cast them faraway
+                    sprite.sliceEntered = NO;
+                    sprite.sliceExited = NO;
+                    sprite.entryPoint.SetZero();
+                    sprite.exitPoint.SetZero();
+                }
+                else
+                {
+                    world->DestroyBody(sprite.body);
+                    [self removeChild:sprite cleanup:YES];
+                }
+                
+            });
+            
+            // release the group
+            dispatch_release(group);
+            
+        }//end of  if (sprite1VerticesAcceptable && sprite2VerticesAcceptable)
+        
         else
         {
-            determinant = calculate_determinant_2x3(sprite.entryPoint.x, sprite.entryPoint.y, sprite.exitPoint.x, sprite.exitPoint.y, point.x, point.y);
-            
-            if (determinant > 0)
-            {
-                //if the determinant is positive, then the three points are in clockwise order
-                sprite1Vertices[sprite1VertexCount++] = point;
-            }
-            else
-            {
-                //if the determinant is 0, the points are on the same line. if the determinant is negative, then they are in counter-clockwise order
-                sprite2Vertices[sprite2VertexCount++] = point;
-                
-            }//endif
-        }//endif
-    }//endfor
-    CCLOG(@"Split-body setp 2 end");
-    //step 3:
-    //Box2D needs vertices to be arranged in counter-clockwise order so we reorder our points using a custom function
-    sprite1VerticesSorted = [self arrangeVertices:sprite1Vertices count:sprite1VertexCount];
-    sprite2VerticesSorted = [self arrangeVertices:sprite2Vertices count:sprite2VertexCount];
-    CCLOG(@"Split-body setp 3 end");
-    //step 4:
-    //Box2D has some restrictions with defining shapes, so we have to consider these. We only cut the shape if both shapes pass certain requirements from our function
-    
-    
-    //***************************************  NOTICE ******************************************
-    //Note that if we want to use -(void)splitPolygonSprite:(PolygonSprite*)sprite to make some Explosion-effect
-    //The entry and exit point MUST be chosen carefully.If they are not appropriate enough,the SETP 5 would not be invoked.
-    //****************************************   WK  *******************************************
-    BOOL sprite1VerticesAcceptable = [self areVerticesAcceptable:sprite1VerticesSorted count:sprite1VertexCount];
-    BOOL sprite2VerticesAcceptable = [self areVerticesAcceptable:sprite2VerticesSorted count:sprite2VertexCount];
-    if(!sprite1VerticesAcceptable ){
-        CCLOG(@"sprite1 is NOT VerticesAcceptable");
-    }
-    
-    if(!sprite2VerticesAcceptable ){
-        CCLOG(@"sprite2 is NOT VerticesAcceptable");
-    }
-    
-    //step 5:
-    //we destroy the old shape and create the new shapes and sprites
-    if (sprite1VerticesAcceptable && sprite2VerticesAcceptable)
-    {
-        //************************************ use GCD to accelerate the game.*****************************
-        // Use dispatch_group_async and dispatch_group_notify to get the work done.
-        // The priority is to be examined.
-        //************************************************************************************************
-//        
-        dispatch_group_t group = dispatch_group_create();
-//        globalQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
-        __block  b2Body *body1,*body2;
-        dispatch_group_async(group, globalQueue, ^{
+            sprite.sliceEntered = NO;
+            sprite.sliceExited = NO;
+        }
         
-            //create the first sprite's body
-           body1 = [self createBodyWithPosition:sprite.body->GetPosition() rotation:sprite.body->GetAngle() vertices:sprite1VerticesSorted vertexCount:sprite1VertexCount density:originalFixture->GetDensity() friction:originalFixture->GetFriction() restitution:originalFixture->GetRestitution()];
-            
-            //create the first sprite
-//            newSprite1 = [PolygonSprite spriteWithTexture:sprite.texture body:body1 original:NO];
-//            
-//            [self addChild:newSprite1 z:1];
-            
-        });
+        //free up our allocated vectors
+        free(sprite1VerticesSorted);
+        free(sprite2VerticesSorted);
+        free(sprite1Vertices);
+        free(sprite2Vertices);
         
-        dispatch_group_async(group, globalQueue, ^{
-        
-            //create the second sprite's body
-            body2 = [self createBodyWithPosition:sprite.body->GetPosition() rotation:sprite.body->GetAngle() vertices:sprite2VerticesSorted vertexCount:sprite2VertexCount density:originalFixture->GetDensity() friction:originalFixture->GetFriction() restitution:originalFixture->GetRestitution()];
-            
-            //create the second sprite
-//            newSprite2 = [PolygonSprite spriteWithTexture:sprite.texture body:body2 original:NO];
-//            
-//            [self addChild:newSprite2 z:1];
-            
-        });
-        
-        //****************************      Notice    ************************************
-        // As we can only destroy sprite after 2 b2body are both created,we have to use dispatch_group_notify
-        // to wait for the dispatch_group_async
-        
-        dispatch_group_notify(group, mainQueue, ^{
-            
-            //create the first sprite
-            newSprite1 = [PolygonSprite spriteWithTexture:sprite.texture body:body1 original:NO];
-            newSprite2 = [PolygonSprite spriteWithTexture:sprite.texture body:body2 original:NO];
-            
-            [self addChild:newSprite1 z:1];
-            [self addChild:newSprite2 z:1];
-            
-            //we don't need the old shape & sprite anymore so we either destroy it or squirrel it away
-            CCLOG(@"in Split-body setp 5 ,create sprite1,2");
-            if (sprite.original)
-            {
-                [sprite deactivateCollisions];
-                sprite.position = ccp(-256,-256);   //cast them faraway
-                sprite.sliceEntered = NO;
-                sprite.sliceExited = NO;
-                sprite.entryPoint.SetZero();
-                sprite.exitPoint.SetZero();
-            }
-            else
-            {
-                world->DestroyBody(sprite.body);
-                [self removeChild:sprite cleanup:YES];
-            }
-            
-        });
-        
-        // release the group
-        dispatch_release(group);
-    }
-    else
-    {
-        sprite.sliceEntered = NO;
-        sprite.sliceExited = NO;
-    }
-    
-    //free up our allocated vectors
-    free(sprite1VerticesSorted);
-    free(sprite2VerticesSorted);
-    free(sprite1Vertices);
-    free(sprite2Vertices);
+    });//end of  dispatch_async(splitQueue
 }
 
 
